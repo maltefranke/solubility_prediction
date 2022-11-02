@@ -1,10 +1,28 @@
 import os
 import numpy as np
-from rdkit import Chem, AllChem
+import pandas as pd
+# from rdkit import Chem, AllChem
 
 
-def load_data(path: str):
-    pass
+def load_train_data(train_path: str) -> tuple[list[str], list[str], list[int]]:
+
+    df = pd.read_csv(train_path)
+
+    ids = df["Id"].values.tolist()
+    smiles = df["smiles"].values.tolist()
+    targets = df["sol_category"].values.tolist()
+
+    return ids, smiles, targets
+
+
+def load_test_data(test_path: str) -> tuple[list[str], list[str]]:
+
+    df = pd.read_csv(test_path)
+
+    ids = df["Id"].values.tolist()
+    smiles = df["smiles"].values.tolist()
+
+    return ids, smiles
 
 
 # TODO test if this function works
@@ -56,3 +74,15 @@ def create_submission_file(ids: list[int], y_pred: np.array, path: str) -> None:
         None
     """
     pass
+
+
+if __name__ == "__main__":
+    this_dir = os.getcwd()
+
+    data_dir = os.path.join(this_dir, "data")
+    train_path = os.path.join(data_dir, "train.csv")
+    test_path = os.path.join(data_dir, "test.csv")
+
+    ids, smiles, targets = load_train_data(train_path)
+    ids, smiles = load_test_data(test_path)
+
