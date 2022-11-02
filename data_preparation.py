@@ -1,7 +1,9 @@
 import os
 import numpy as np
 import pandas as pd
-# from rdkit import Chem, AllChem
+import rdkit
+from rdkit import Chem as Chem
+from rdkit.Chem import AllChem as AllChem
 
 
 def load_train_data(train_path: str) -> tuple[list[str], list[str], list[int]]:
@@ -39,6 +41,7 @@ def smiles_to_3d(smiles: list[str]) -> tuple[list[np.array], list[np.array]]:
     all_atomic_nums = []
     all_positions = []
     for molecule in smiles:
+        molecule = Chem.MolFromSmiles(molecule)
         molecule = Chem.AddHs(molecule)
         AllChem.EmbedMolecule(molecule)
         AllChem.UFFOptimizeMolecule(molecule)
