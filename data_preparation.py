@@ -4,15 +4,20 @@ import pandas as pd
 import rdkit
 from rdkit import Chem as Chem
 from rdkit.Chem import AllChem as AllChem
+from rdkit.Chem import rdFingerprintGenerator
+from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
+
+from models.ANN import *
 
 
-def load_train_data(train_path: str) -> tuple[list[str], list[str], list[int]]:
+def load_train_data(train_path: str) -> tuple[list[str], list[str], np.array]:
 
     df = pd.read_csv(train_path)
 
     ids = df["Id"].values.tolist()
     smiles = df["smiles"].values.tolist()
     targets = df["sol_category"].values.tolist()
+    targets = np.array(targets)
 
     return ids, smiles, targets
 
@@ -25,6 +30,20 @@ def load_test_data(test_path: str) -> tuple[list[str], list[str]]:
     smiles = df["smiles"].values.tolist()
 
     return ids, smiles
+
+
+def smiles_to_morgan_fp(smiles: list[str]) -> np.array:
+    fp_generator = rdFingerprintGenerator.GetMorganGenerator()
+
+    all_fps = []
+    for molecule in smiles:
+        molecule = Chem.MolFromSmiles(molecule)
+        fp = fp_generator.GetFingerprintAsNumPy(molecule)
+
+        all_fps.append(fp)
+    all_fps = np.array(all_fps)
+
+    return all_fps
 
 
 # TODO test if this function works
@@ -87,5 +106,8 @@ if __name__ == "__main__":
     test_path = os.path.join(data_dir, "test.csv")
 
     ids, smiles, targets = load_train_data(train_path)
-    ids, smiles = load_test_data(test_path)
+    all_fps = smiles_to_morgan_fp(smiles)
+    model_checkpoints = ann_learning(all_fps, targets, ann_save_path=os.path.join(this_dir, "TestResults"))
+    
+    # ids, smiles = load_test_data(test_path)
 
