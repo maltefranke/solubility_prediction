@@ -6,7 +6,6 @@ Checklist:
 
 General:
 - [ ] Familiarize with literature
-- [ ] Write a short summary for Prof. Jaggi to ask for project approval
 
 - [ ] Create Kaggle accounts
 - [ ] Build a Kaggle group
@@ -15,12 +14,12 @@ General:
 <br/><br/>
 
 Code:
-- [ ] Write functionality to load the data
+- [x] Write functionality to load the data
 
 - [ ] Implement workflow for prediction on SMILES
-- - [ ] Convert SMILES to vector
-- - [ ] Implement ANN architecture
-- - [ ] Implement ANN training (regularization!)
+- - [x] Convert SMILES to vector
+- - [x] Implement ANN architecture
+- - [x] Implement ANN training (regularization!)
 - - [ ] Implement ANN ensemble model
 - - [ ] Create predictions on competition data
 - - [ ] Submit predictions
