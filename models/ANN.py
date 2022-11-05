@@ -1,4 +1,5 @@
 import os
+from typing import List
 import numpy as np
 import torch
 from sklearn.model_selection import KFold
@@ -19,6 +20,9 @@ class ClassificationNeuralNetwork(torch.nn.Module):
                         torch.nn.Linear(input_dim, hidden_dim),
                         torch.nn.ReLU(),
                         self.dropout,
+                        torch.nn.Linear(hidden_dim, hidden_dim),
+                        torch.nn.ReLU(),
+                        self.dropout,
                         torch.nn.Linear(hidden_dim, output_dim))
 
     def forward(self, x):
@@ -30,7 +34,7 @@ class ClassificationNeuralNetwork(torch.nn.Module):
     def predict_class(self, x):
 
         with torch.no_grad:
-            logits = self(x)
+            logits = self.forward(x)
             probabilities = torch.softmax(logits, dim=1)
             predicted_classes = probabilities.argmax(dim=1)
 
@@ -53,13 +57,18 @@ class FingerprintData(torch.utils.data.Dataset):
 
 
 # training epoch
-def train(model: torch.nn.Module, train_loader: torch.utils.data.DataLoader, optimizer, device: str) -> float:
+def train(model: torch.nn.Module, train_loader: torch.utils.data.DataLoader, optimizer, device: str,
+          label_weights: List[float]=None) -> float:
     model.train()
     model.to(device)
 
-    loss_fn = torch.nn.CrossEntropyLoss(reduction='mean')
+    if label_weights is not None:
+        label_weights = torch.tensor(label_weights).to(device)
+        loss_fn = torch.nn.CrossEntropyLoss(weight=label_weights, reduction='mean')
+    else:
+        loss_fn = torch.nn.CrossEntropyLoss(reduction='mean')
 
-    loss_all = torch.tensor(0).type(torch.float)
+    loss_all = torch.tensor(0).type(torch.float).to(device)
     num_batches = 0
 
     for data in train_loader:
@@ -89,7 +98,7 @@ def test(model: torch.nn.Module, test_loader: torch.utils.data.DataLoader, devic
 
     loss_fn = torch.nn.CrossEntropyLoss()
 
-    loss_all = torch.tensor(0).type(torch.float)
+    loss_all = torch.tensor(0).type(torch.float).to(device)
     num_batches = 0
 
     for data in test_loader:
@@ -161,7 +170,8 @@ class EarlyStopping:
 
 
 def train_ann(model: torch.nn.Module, train_loader: torch.utils.data.DataLoader, test_loader: torch.utils.data.DataLoader,
-              epochs: int, lr: float, es_patience: int, save_path: str, model_id: int = 0):
+              epochs: int, lr: float, es_patience: int, save_path: str, model_id: int = 0,
+              label_weights: List[float] = None):
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -177,7 +187,7 @@ def train_ann(model: torch.nn.Module, train_loader: torch.utils.data.DataLoader,
     for epoch in range(epochs):
 
         print(f"Start epoch {epoch}...")
-        train_loss = train(model, train_loader, optimizer, device)
+        train_loss = train(model, train_loader, optimizer, device, label_weights)
         print("Train loss: ", train_loss)
 
         test_loss = test(model, test_loader, device)
@@ -212,7 +222,7 @@ def plotting(train_losses, test_errors, es_epoch, save_path):
     plt.axvline(es_epoch, linestyle='--', color='r', label='Early Stopping Epoch')
 
     plt.xlabel('Epochs')
-    plt.ylabel('Mean absolute error')
+    plt.ylabel('Cross-Entropy loss')
     plt.grid(True)
     plt.legend(frameon=False)
     plt.tight_layout()
@@ -242,8 +252,8 @@ def get_checkpoints(ann_save_path: str, CV: int):
     return model_checkpoints
 
 
-def ann_learning(X, y, ann_save_path=None, CV=5, hidden_dim=300, dropout_rate=0.5, epochs=300, lr=1e-3, es_patience=50) \
-        -> list:
+def ann_learning(X, y, ann_save_path=None, CV=5, hidden_dim=300, dropout_rate=0.3, epochs=300, lr=1e-3, es_patience=50,
+                 label_weights: List[float] = None) -> list:
 
     assert ann_save_path is not None, "Please set a ann_save_path inside of your fit_fn_parameters! The ANN weights will" \
                                       "be saved under this path"
@@ -290,7 +300,8 @@ def ann_learning(X, y, ann_save_path=None, CV=5, hidden_dim=300, dropout_rate=0.
             os.mkdir(model_dir)
 
         train_loss, test_loss, best_epoch, best_test_loss = train_ann(ann_model, train_dataloader, test_dataloader,
-                                                                          epochs, lr, es_patience, model_dir, i)
+                                                                      epochs, lr, es_patience, model_dir, i,
+                                                                      label_weights)
 
         best_epochs.append(best_epoch)
         best_test_losses.append(best_test_loss)
@@ -325,4 +336,6 @@ def predict_ensemble(X, input_dim: int, model_checkpoints: list, output_dim: int
 
     final_predictions = torch.sum(predictions[:], dim=1)
 
-    final_predictions = final_predictions.argmax(dim=1)
+    final_predictions = final_predictions.argmax(dim=1).cpu().numpy()
+
+    return final_predictions

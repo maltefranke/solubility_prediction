@@ -1,4 +1,6 @@
 import os
+import csv
+from typing import Tuple, List
 import numpy as np
 import pandas as pd
 import rdkit
@@ -10,7 +12,7 @@ from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
 from models.ANN import *
 
 
-def load_train_data(train_path: str) -> tuple[list[str], list[str], np.array]:
+def load_train_data(train_path: str) -> Tuple[List[str], List[str], np.array]:
 
     df = pd.read_csv(train_path)
 
@@ -22,7 +24,7 @@ def load_train_data(train_path: str) -> tuple[list[str], list[str], np.array]:
     return ids, smiles, targets
 
 
-def load_test_data(test_path: str) -> tuple[list[str], list[str]]:
+def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
 
     df = pd.read_csv(test_path)
 
@@ -32,7 +34,7 @@ def load_test_data(test_path: str) -> tuple[list[str], list[str]]:
     return ids, smiles
 
 
-def smiles_to_morgan_fp(smiles: list[str]) -> np.array:
+def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     fp_generator = rdFingerprintGenerator.GetMorganGenerator()
 
     all_fps = []
@@ -47,7 +49,7 @@ def smiles_to_morgan_fp(smiles: list[str]) -> np.array:
 
 
 # TODO test if this function works
-def smiles_to_3d(smiles: list[str]) -> tuple[list[np.array], list[np.array]]:
+def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
     """
     Transform a list of SMILES into their 3D representation using rdkit functions
     Args:
@@ -80,11 +82,11 @@ def smiles_to_3d(smiles: list[str]) -> tuple[list[np.array], list[np.array]]:
     return all_atomic_nums, all_positions
 
 
-def smiles_to_graph(smiles: list[str]):
+def smiles_to_graph(smiles: List[str]):
     pass
 
 
-def create_submission_file(ids: list[int], y_pred: np.array, path: str) -> None:
+def create_submission_file(ids: List[int], y_pred: np.array, path: str) -> None:
     """
     Function to create the final submission file
     Args:
@@ -95,7 +97,11 @@ def create_submission_file(ids: list[int], y_pred: np.array, path: str) -> None:
     Returns:
         None
     """
-    pass
+    with open(path, "w") as submission_file:
+        writer = csv.writer(submission_file, delimiter=",")
+        writer.writerow(["Id", "Pred"])
+        for id, pred in zip(ids, y_pred):
+            writer.writerow([id, pred])
 
 
 if __name__ == "__main__":
@@ -107,10 +113,33 @@ if __name__ == "__main__":
 
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
-    model_checkpoints = ann_learning(all_fps, targets, ann_save_path=os.path.join(this_dir, "TestResults"))
+
+    # see how balanced the data is and get label
+    train_data_size = targets.shape[0]
+
+    num_low = np.count_nonzero(targets == 0)
+    num_medium = np.count_nonzero(targets == 1)
+    num_high = np.count_nonzero(targets == 2)
+
+    weights = [1 - num_low/train_data_size, 1 - num_medium/train_data_size, 1 - num_high/train_data_size]
+    print(weights)
+
+    seed = 13
+    np.random.seed(seed)
+
+    # we permutate/shuffle our data first
+    p = np.random.permutation(targets.shape[0])
+    all_fps = all_fps[p]
+    targets = targets[p]
+
+    model_checkpoints = ann_learning(all_fps, targets, ann_save_path=os.path.join(this_dir, "TestResults"),
+                                     label_weights=weights)
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)
     input_dim = X.shape[-1]
-    predict_ensemble(X, input_dim, model_checkpoints)
+    final_predictions = predict_ensemble(X, input_dim, model_checkpoints)
+
+    submission_file = os.path.join(this_dir, "predictions.csv")
+    create_submission_file(submission_ids, final_predictions, submission_file)
 
