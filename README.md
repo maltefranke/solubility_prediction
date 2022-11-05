@@ -7,9 +7,9 @@ Checklist:
 General:
 - [ ] Familiarize with literature
 
-- [ ] Create Kaggle accounts
-- [ ] Build a Kaggle group
-- [ ] Join the competition
+- [x] Create Kaggle accounts
+- [x] Build a Kaggle group
+- [x] Join the competition
 
 <br/><br/>
 
