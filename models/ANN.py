@@ -12,7 +12,7 @@ class ClassificationNeuralNetwork(torch.nn.Module):
     A standard ANN
     """
 
-    def __init__(self, input_dim: int, output_dim: int = 2, hidden_dim: int = 300, dropout_rate: float = 0.3):
+    def __init__(self, input_dim: int, output_dim: int = 2, hidden_dim: int = 300, dropout_rate: float = 0.5):
         super().__init__()
         self.dropout = torch.nn.Dropout(dropout_rate)
         self.net = torch.nn.Sequential(
@@ -57,31 +57,30 @@ def train(model: torch.nn.Module, train_loader: torch.utils.data.DataLoader, opt
     model.train()
     model.to(device)
 
-    loss_fn = torch.nn.CrossEntropyLoss()
+    loss_fn = torch.nn.CrossEntropyLoss(reduction='mean')
 
     loss_all = torch.tensor(0).type(torch.float)
-    count = 0
+    num_batches = 0
 
     for data in train_loader:
         fp = data.fps.to(device)
-        target = data.targets.to(device)
+        target = data.targets.type(torch.LongTensor).to(device)
 
         model.zero_grad()
 
-        temp_real_values = target.squeeze().type(torch.LongTensor)
+        temp_predictions = model(fp).reshape(target.shape[0], -1)
 
-        temp_predictions = model(fp)
-
-        # TODO which loss should we take?
-        loss = loss_fn(temp_predictions, temp_real_values)
-        loss.backward()
-        loss_all += loss
+        # calculates the mean loss of the batch
+        batch_loss = loss_fn(temp_predictions, target)
+        batch_loss.backward()
+        loss_all += batch_loss
 
         optimizer.step()
 
-        count += list(temp_real_values.size())[0]
+        num_batches += 1
 
-    return loss_all.item() / count
+    # loss = sum(batchlosses) / num_batches
+    return loss_all.item() / num_batches
 
 
 def test(model: torch.nn.Module, test_loader: torch.utils.data.DataLoader, device: str) -> float:
@@ -91,22 +90,20 @@ def test(model: torch.nn.Module, test_loader: torch.utils.data.DataLoader, devic
     loss_fn = torch.nn.CrossEntropyLoss()
 
     loss_all = torch.tensor(0).type(torch.float)
-    count = 0
+    num_batches = 0
 
     for data in test_loader:
         fp = data.fps.to(device)
-        target = data.targets.to(device)
+        target = data.targets.type(torch.LongTensor).to(device)
 
-        temp_real_values = target.squeeze().type(torch.LongTensor)
-        temp_predictions = model(fp)
+        temp_predictions = model(fp).reshape(target.shape[0], -1)
 
-        # TODO which loss should we take?
-        loss = loss_fn(temp_predictions, temp_real_values)
-        loss_all += loss
+        batch_loss = loss_fn(temp_predictions, target)
+        loss_all += batch_loss
 
-        count += list(temp_real_values.size())[0]
+        num_batches += 1
 
-    return loss_all.item() / count
+    return loss_all.item() / num_batches
 
 
 class EarlyStopping:
@@ -224,6 +221,14 @@ def plotting(train_losses, test_errors, es_epoch, save_path):
     plt.close()
 
 
+def checkpoints_exist(ann_save_path: str, CV: int) -> bool:
+    for model_id in range(CV):
+        model_path = os.path.join(ann_save_path, str(model_id), f"model{model_id}")
+        if not os.path.exists(model_path):
+            return False
+    return True
+
+
 def get_checkpoints(ann_save_path: str, CV: int):
     assert os.path.exists(ann_save_path), "Run training before calling this function"
 
@@ -245,8 +250,14 @@ def ann_learning(X, y, ann_save_path=None, CV=5, hidden_dim=300, dropout_rate=0.
     if not os.path.exists(ann_save_path):
         os.mkdir(ann_save_path)
 
+    # if checkpoints exist, load and return them
+    if checkpoints_exist(ann_save_path, CV):
+        model_checkpoints = get_checkpoints(ann_save_path, CV)
+        return model_checkpoints
+
     input_dim = X.shape[-1]
-    output_dim = 3  # y.shape[-1]
+    # TODO maybe flexibilize, not 100% necessary for the challenge though
+    output_dim = 3  # y.shape[-1] doesn't work because it's not one hot encoded
 
     best_epochs, best_test_losses = [], []
 
@@ -289,3 +300,29 @@ def ann_learning(X, y, ann_save_path=None, CV=5, hidden_dim=300, dropout_rate=0.
     model_checkpoints = get_checkpoints(ann_save_path, CV)
 
     return model_checkpoints
+
+
+def predict_ensemble(X, input_dim: int, model_checkpoints: list, output_dim: int = 3, hidden_dim: int = 300) -> np.array:
+    device = "cpu"
+    if torch.cuda.is_available():
+        device = "cuda"
+
+    X = torch.tensor(X).type(torch.FloatTensor).to(device)
+
+    predictions = []
+
+    for model_checkpoint in model_checkpoints:
+        net = ClassificationNeuralNetwork(input_dim=input_dim, output_dim=output_dim, hidden_dim=hidden_dim)
+        net.load_state_dict(model_checkpoint)
+        net = net.to(device)
+        net.eval()
+
+        # get logits
+        model_prediction = net(X)
+        predictions.append(model_prediction.reshape(-1, 1, output_dim))
+
+    predictions = torch.cat(predictions, dim=1)
+
+    final_predictions = torch.sum(predictions[:], dim=1)
+
+    final_predictions = final_predictions.argmax(dim=1)

@@ -108,6 +108,9 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
     model_checkpoints = ann_learning(all_fps, targets, ann_save_path=os.path.join(this_dir, "TestResults"))
-    
-    # ids, smiles = load_test_data(test_path)
+
+    submission_ids, submission_smiles = load_test_data(test_path)
+    X = smiles_to_morgan_fp(submission_smiles)
+    input_dim = X.shape[-1]
+    predict_ensemble(X, input_dim, model_checkpoints)
 
