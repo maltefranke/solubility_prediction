@@ -11,6 +11,8 @@ General:
 - [x] Build a Kaggle group
 - [x] Join the competition
 
+- [ ] The data is heavily imbalanced. How do we deal with that? 
+
 <br/><br/>
 
 Code:
@@ -20,9 +22,10 @@ Code:
 - - [x] Convert SMILES to vector
 - - [x] Implement ANN architecture
 - - [x] Implement ANN training (regularization!)
-- - [ ] Implement ANN ensemble model
-- - [ ] Create predictions on competition data
-- - [ ] Submit predictions
+- - [x] Implement ANN ensemble model
+- - [x] Create predictions on competition data
+- - [x] Submit predictions
+- - [ ] Try out RandomForestClassifier (Sklearn)
 
 <br/><br/>
 
