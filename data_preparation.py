@@ -82,11 +82,12 @@ def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
     return all_atomic_nums, all_positions
 
 
+# TODO maybe not even needed depending on the framework we use
 def smiles_to_graph(smiles: List[str]):
     pass
 
 
-def create_submission_file(ids: List[int], y_pred: np.array, path: str) -> None:
+def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
     """
     Function to create the final submission file
     Args:
@@ -105,16 +106,18 @@ def create_submission_file(ids: List[int], y_pred: np.array, path: str) -> None:
 
 
 if __name__ == "__main__":
+
     this_dir = os.getcwd()
 
     data_dir = os.path.join(this_dir, "data")
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
+    # get data and transform smiles -> morgan fingerprint
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
-    # see how balanced the data is and get label
+    # see how balanced the data is and assign weights
     train_data_size = targets.shape[0]
 
     num_low = np.count_nonzero(targets == 0)
@@ -132,6 +135,7 @@ if __name__ == "__main__":
     all_fps = all_fps[p]
     targets = targets[p]
 
+    # train an ensemble of ANNs, or load trained models if training was done previously
     model_checkpoints = ann_learning(all_fps, targets, ann_save_path=os.path.join(this_dir, "TestResults"),
                                      label_weights=weights)
 
