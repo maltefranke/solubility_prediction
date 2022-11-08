@@ -313,7 +313,7 @@ def ann_learning(X, y, ann_save_path=None, CV=5, hidden_dim=300, dropout_rate=0.
     return model_checkpoints
 
 
-def predict_ensemble(X, input_dim: int, model_checkpoints: list, output_dim: int = 3, hidden_dim: int = 300) -> np.array:
+def predict_ann_ensemble(X, input_dim: int, model_checkpoints: list, output_dim: int = 3, hidden_dim: int = 300) -> np.array:
     device = "cpu"
     if torch.cuda.is_available():
         device = "cuda"

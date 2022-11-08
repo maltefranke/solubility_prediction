@@ -142,7 +142,7 @@ if __name__ == "__main__":
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)
     input_dim = X.shape[-1]
-    final_predictions = predict_ensemble(X, input_dim, model_checkpoints)
+    final_predictions = predict_ann_ensemble(X, input_dim, model_checkpoints)
 
     submission_file = os.path.join(this_dir, "predictions.csv")
     create_submission_file(submission_ids, final_predictions, submission_file)
