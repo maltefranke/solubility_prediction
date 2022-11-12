@@ -8,6 +8,7 @@ from rdkit import Chem as Chem
 from rdkit.Chem import AllChem as AllChem
 from rdkit.Chem import rdFingerprintGenerator
 from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
+from sklearn.utils import resample
 
 from models.ANN import *
 
@@ -47,6 +48,25 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
 
     return all_fps
 
+def up_down_sampling(y, X):
+
+    # dividing the data in subsets depending on the class
+    X2 = X[np.where(y == 2)]
+    X1 = X[np.where(y == 1)]
+    X0 = X[np.where(y == 0)]
+
+    # up-sample minority classes
+    X0_up = resample(X0, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13)
+    X1_up = resample(X1, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13)
+
+    # down-sample majority class
+    X2_down = resample(X2, replace=False, n_samples=int(X.shape[0] * 0.5), random_state=13)
+
+    X_balanced = np.concatenate((X0_up, X1_up, X2_down))
+    y_balanced = np.concatenate((np.zeros(X0_up.shape[0], dtype=np.int8), np.ones(X1_up.shape[0], dtype=np.int8), 2*np.ones(X2_down.shape[0], dtype=np.int8)))
+    print(X_balanced.shape, y_balanced.shape)
+
+    return y_balanced, X_balanced
 
 # TODO test if this function works
 def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:

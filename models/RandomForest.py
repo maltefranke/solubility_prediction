@@ -72,6 +72,9 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
+    # try to fix the imbalanced classes problem
+    targets, all_fps = up_down_sampling(targets, all_fps)
+
     # see how balanced the data is and assign weights
     train_data_size = targets.shape[0]
 
@@ -84,12 +87,13 @@ if __name__ == "__main__":
         1 - num_medium / train_data_size,
         1 - num_high / train_data_size,
     ]
+    print('The weights should be balanced now!')
     print(weights)
 
     seed = 13
     np.random.seed(seed)
 
-    # we permutate/shuffle our data first
+    # we permute/shuffle our data first
     p = np.random.permutation(targets.shape[0])
     all_fps = all_fps[p]
     targets = targets[p]
