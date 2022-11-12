@@ -9,6 +9,7 @@ from rdkit.Chem import AllChem as AllChem
 from rdkit.Chem import rdFingerprintGenerator
 from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
 from sklearn.utils import resample
+# from imblearn.over_sampling import SMOTE
 
 from models.ANN import *
 
@@ -16,6 +17,7 @@ from models.ANN import *
 def load_train_data(train_path: str) -> Tuple[List[str], List[str], np.array]:
 
     df = pd.read_csv(train_path)
+    #df.pivot_table(index='sol_category', aggfunc='size').plot(kind='bar')
 
     ids = df["Id"].values.tolist()
     smiles = df["smiles"].values.tolist()
@@ -49,6 +51,16 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     return all_fps
 
 def up_down_sampling(y, X):
+    """
+    Add copies of the observations of the minority classes and remove observations from the majority class
+    Args:
+        y: classes values
+        X: observations
+
+    Returns:
+        y_balanced
+        X_balanced
+    """
 
     # dividing the data in subsets depending on the class
     X2 = X[np.where(y == 2)]
@@ -67,6 +79,22 @@ def up_down_sampling(y, X):
     print(X_balanced.shape, y_balanced.shape)
 
     return y_balanced, X_balanced
+
+# def smote_algorithm(y, X):
+    """
+    Up-sample the minority class
+    Args:
+        y: classes values
+        X: observations
+
+    Returns:
+        y_resampled
+        X_resampled
+    """
+    # X_resampled, y_resampled = SMOTE().fit_resample(X, y)
+
+    # return y_resampled, X_resampled
+
 
 # TODO test if this function works
 def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:

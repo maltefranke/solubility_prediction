@@ -3,18 +3,19 @@ import csv
 from typing import Tuple, List
 import math
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import SGDClassifier
 
 from utils import *
 from data_preparation import *
 
 
-def RFlearning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_weights: List[float] = None, seed: int = 13,
+def SVMlearning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_weights: List[float] = None, seed: int = 13,
                sample_weights: List[float] = None) \
-        -> List[RandomForestClassifier]:
+        -> List[SGDClassifier]:
+    #by default the SGDClassifier fits a linear support vector machine, with L2-norm penalization
     label_weights = {0: label_weights[0], 1: label_weights[1], 2: label_weights[2]}
 
-    rfs = []
+    svms = []
 
     kfold = KFold(n_splits=CV, shuffle=True)
 
@@ -27,25 +28,24 @@ def RFlearning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_wei
         if sample_weights is not None:
             sample_weights_i = np.array(sample_weights)[train_idx]
 
-        rf = RandomForestClassifier(n_estimators=10, max_depth=depth, criterion="entropy", random_state=seed,
-                                    class_weight=label_weights)
+        svm = SGDClassifier(class_weight=label_weights)
 
-        rf.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
+        svm.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
 
-        y_pred = rf.predict(X_test_i)
+        y_pred = svm.predict(X_test_i)
         kappa = quadratic_weighted_kappa(y_pred, y_test_i)
         print("Kappa = ", kappa)
 
-        rfs.append(rf)
+        svms.append(svm)
 
-    return rfs
+    return svms
 
 
-def predict_rf_ensemble(rfs: List[RandomForestClassifier], X) -> np.array:
+def predict_svm_ensemble(svms: List[SGDClassifier], X) -> np.array:
     predictions = []
 
-    for rf in rfs:
-        model_predictions = rf.predict(X)
+    for svm in svms:
+        model_predictions = svm.predict(X)
         predictions.append(model_predictions.reshape((-1, 1)))
 
     predictions = np.concatenate(predictions, axis=1)
@@ -75,9 +75,6 @@ if __name__ == "__main__":
     # GENERATE BALANCED CLASSES
     # Up/downsampling
     targets, all_fps = up_down_sampling(targets, all_fps)
-    # SMOTE algorithm
-    # TODO check if it works
-    # targets, all_fps = smote_algorithm(targets, all_fps)
 
     # see how balanced the data is and assign weights
     train_data_size = targets.shape[0]
@@ -91,26 +88,25 @@ if __name__ == "__main__":
         1 - num_medium / train_data_size,
         1 - num_high / train_data_size,
     ]
-    print('The weights should be balanced now!')
     print(weights)
 
     seed = 13
     np.random.seed(seed)
 
-    # we permute/shuffle our data first
+    # we permutate/shuffle our data first
     p = np.random.permutation(targets.shape[0])
     all_fps = all_fps[p]
     targets = targets[p]
 
     sample_weights = [weights[i] for i in targets]
 
-    rfs = RFlearning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
+    svms = SVMlearning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)
     input_dim = X.shape[-1]
 
-    final_predictions = predict_rf_ensemble(rfs, X)
+    predictions = predict_svm_ensemble(svms, X)
 
     submission_file = os.path.join(this_dir, "predictions.csv")
-    create_submission_file(submission_ids, final_predictions, submission_file)
+    # create_submission_file(submission_ids, final_predictions, submission_file)

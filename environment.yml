@@ -24,6 +24,7 @@ dependencies:
   - freetype=2.10.4
   - icu=64.2
   - idna=3.4
+  - imbalanced-learn=0.7.0=py_1
   - intel-openmp=2022.1.0
   - jpeg=9e
   - kiwisolver=1.4.4
