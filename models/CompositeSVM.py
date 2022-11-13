@@ -3,17 +3,34 @@ import csv
 from typing import Tuple, List
 import math
 import numpy as np
-from sklearn.svm import SVC
+from sklearn.svm import SVC, OneClassSVM
 
 from utils import *
 from data_preparation import *
 
 
-def SVMlearning(X: np.array, y: np.array, CV: int = 5, label_weights: List[float] = None, seed: int = 13,
-               sample_weights: List[float] = None) \
-        -> List[SVC]:
-    label_weights = {0: label_weights[0], 1: label_weights[1], 2: label_weights[2]}
+def composite_prediction(X, oc_svm: OneClassSVM, svm: SVC):
 
+    # first, the oc svm predicts if a data point is class 2
+    composite_predictions = oc_svm.predict(X)
+    composite_predictions = np.where(composite_predictions != 1, composite_predictions, 2)
+
+    # then let the svm predict if its class 0 or 1
+    not_class2_idx = np.argwhere(composite_predictions != 2).squeeze()
+
+    X_not_class2 = X[not_class2_idx]
+
+    svm_predictions = svm.predict(X_not_class2)
+
+    composite_predictions[not_class2_idx] = svm_predictions
+
+    return composite_predictions
+
+
+def composite_svm_learning(X: np.array, y: np.array, CV: int = 5, seed: int = 13) \
+        -> Tuple[List[OneClassSVM], List[SVC]]:
+
+    oc_svms = []
     svms = []
 
     kfold = KFold(n_splits=CV, shuffle=True)
@@ -23,28 +40,38 @@ def SVMlearning(X: np.array, y: np.array, CV: int = 5, label_weights: List[float
         X_train_i, X_test_i = X[train_idx], X[test_idx]
         y_train_i, y_test_i = y[train_idx], y[test_idx]
 
-        sample_weights_i = None
-        if sample_weights is not None:
-            sample_weights_i = np.array(sample_weights)[train_idx]
+        # Step 1: extract all datapoints with label 2 as this is the most prevalent class
+        class2_idx = np.argwhere(y_train_i == 2).squeeze()
+        X_class2 = X_train_i[class2_idx]
 
-        svm = SVC(class_weight=label_weights, random_state=seed)
+        # Step 2: train one-class SVM on this data
+        oc_svm = OneClassSVM()
+        oc_svm.fit(X_class2)
 
-        svm.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
+        oc_svms.append(oc_svm)
 
-        y_pred = svm.predict(X_test_i)
+        X_class01 = np.delete(X_train_i, class2_idx)
+        y_class01 = np.delete(y_train_i, class2_idx)
+
+        svm = SVC(random_state=seed)
+
+        svm.fit(X_class01, y_class01)
+
+        y_pred = composite_prediction(X_train_i, oc_svm, svm)
+
         kappa = quadratic_weighted_kappa(y_pred, y_test_i)
         print("Kappa = ", kappa)
 
         svms.append(svm)
 
-    return svms
+    return oc_svms, svms
 
 
-def predict_svm_ensemble(svms: List[SVC], X) -> np.array:
+def predict_composite_svm_ensemble(oc_svms: List[OneClassSVM], svms: List[SVC], X) -> np.array:
     predictions = []
 
-    for svm in svms:
-        model_predictions = svm.predict(X)
+    for oc_svm, svm in zip(oc_svms, svms):
+        model_predictions = composite_prediction(X, oc_svm, svm)
         predictions.append(model_predictions.reshape((-1, 1)))
 
     predictions = np.concatenate(predictions, axis=1)
@@ -71,7 +98,7 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
-    class0_idx = np.argwhere(targets == 0)
+    """class0_idx = np.argwhere(targets == 0)
     class1_idx = np.argwhere(targets == 1)
     class2_idx = np.argwhere(targets == 2)
 
@@ -80,7 +107,7 @@ if __name__ == "__main__":
     all_idx = np.concatenate([class0_idx, class1_idx, class2_idx])
 
     all_fps = all_fps[all_idx, :].squeeze()
-    targets = targets[all_idx].squeeze()
+    targets = targets[all_idx].squeeze()"""
 
     seed = 13
     np.random.seed(seed)
@@ -106,13 +133,13 @@ if __name__ == "__main__":
 
     sample_weights = [weights[i] for i in targets]
 
-    svms = SVMlearning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
+    oc_svms, svms = composite_svm_learning(all_fps, targets, CV=5, seed=seed)
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)
     input_dim = X.shape[-1]
 
-    predictions = predict_svm_ensemble(svms, X)
+    predictions = predict_composite_svm_ensemble(oc_svms, svms, X)
 
     submission_file = os.path.join(this_dir, "predictions.csv")
     create_submission_file(submission_ids, predictions, submission_file)

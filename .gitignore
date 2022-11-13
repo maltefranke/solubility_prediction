@@ -1,1 +1,3 @@
 run_main.sh
+__pychache__/
+models/__pycache__/

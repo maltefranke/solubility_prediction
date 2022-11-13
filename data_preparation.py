@@ -62,22 +62,28 @@ def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
     all_atomic_nums = []
     all_positions = []
     for molecule in smiles:
-        molecule = Chem.MolFromSmiles(molecule)
-        molecule = Chem.AddHs(molecule)
-        AllChem.EmbedMolecule(molecule)
-        AllChem.UFFOptimizeMolecule(molecule)
-        molecule.GetConformer()
+        try:
+            molecule = Chem.MolFromSmiles(molecule)
+            molecule = Chem.AddHs(molecule)
+            AllChem.EmbedMolecule(molecule)
+            AllChem.UFFOptimizeMolecule(molecule)
+            molecule.GetConformer()
 
-        atomic_nums = []
-        atom_positions = []
-        for i, atom in enumerate(molecule.GetAtoms()):
-            atomic_nums.append(np.array(atom.GetAtomicNum()))
+            atomic_nums = []
+            atom_positions = []
+            for i, atom in enumerate(molecule.GetAtoms()):
+                # atomic_nums.append(np.array(atom.GetAtomicNum()).item())
+                atomic_nums.append(int(atom.GetAtomicNum()))
 
-            positions = molecule.GetConformer().GetAtomPosition(i)
-            atom_positions.append(np.array([positions.x, positions.y, positions.z]))
+                positions = molecule.GetConformer().GetAtomPosition(i)
+                atom_positions.append(np.array([positions.x, positions.y, positions.z]).tolist())
 
-        all_atomic_nums.append(atomic_nums)
-        all_positions.append(atom_positions)
+            all_atomic_nums.append(atomic_nums)
+            all_positions.append(atom_positions)
+
+        except:
+            print("Molecule not processable")
+            continue
 
     return all_atomic_nums, all_positions
 

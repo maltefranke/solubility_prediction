@@ -9,7 +9,7 @@ from utils import *
 from data_preparation import *
 
 
-def RFlearning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_weights: List[float] = None, seed: int = 13,
+def rf_learning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_weights: List[float] = None, seed: int = 13,
                sample_weights: List[float] = None) \
         -> List[RandomForestClassifier]:
     label_weights = {0: label_weights[0], 1: label_weights[1], 2: label_weights[2]}
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     sample_weights = [weights[i] for i in targets]
 
-    rfs = RFlearning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
+    rfs = rf_learning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)
