@@ -8,13 +8,15 @@ from sklearn.svm import SVC
 from utils import *
 from data_preparation import *
 
+# This is definitely too slow!!! DO NOT USE THIS
 
-def SVMlearning(X: np.array, y: np.array, CV: int = 5, label_weights: List[float] = None, seed: int = 13,
+def svc_learning(X: np.array, y: np.array, CV: int = 5, label_weights: List[float] = None, seed: int = 13,
                sample_weights: List[float] = None) \
         -> List[SVC]:
+
     label_weights = {0: label_weights[0], 1: label_weights[1], 2: label_weights[2]}
 
-    svms = []
+    svcs = []
 
     kfold = KFold(n_splits=CV, shuffle=True)
 
@@ -27,24 +29,25 @@ def SVMlearning(X: np.array, y: np.array, CV: int = 5, label_weights: List[float
         if sample_weights is not None:
             sample_weights_i = np.array(sample_weights)[train_idx]
 
-        svm = SVC(class_weight=label_weights, random_state=seed)
+        svc = SVC(class_weight=label_weights, random_state=seed)
 
-        svm.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
+        svc.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
 
-        y_pred = svm.predict(X_test_i)
+        y_pred = svc.predict(X_test_i)
         kappa = quadratic_weighted_kappa(y_pred, y_test_i)
         print("Kappa = ", kappa)
 
-        svms.append(svm)
+        svcs.append(svc)
 
-    return svms
+    return svcs
 
 
-def predict_svm_ensemble(svms: List[SVC], X) -> np.array:
+def predict_svc_ensemble(svcs: List[SVC], X) -> np.array:
+
     predictions = []
 
-    for svm in svms:
-        model_predictions = svm.predict(X)
+    for svc in svcs:
+        model_predictions = svc.predict(X)
         predictions.append(model_predictions.reshape((-1, 1)))
 
     predictions = np.concatenate(predictions, axis=1)
@@ -71,24 +74,9 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
-    class0_idx = np.argwhere(targets == 0)
-    class1_idx = np.argwhere(targets == 1)
-    class2_idx = np.argwhere(targets == 2)
-
-    class2_idx = class2_idx[:class1_idx.shape[0]]
-
-    all_idx = np.concatenate([class0_idx, class1_idx, class2_idx])
-
-    all_fps = all_fps[all_idx, :].squeeze()
-    targets = targets[all_idx].squeeze()
-
-    seed = 13
-    np.random.seed(seed)
-
-    # we permutate/shuffle our data first
-    p = np.random.permutation(targets.shape[0])
-    all_fps = all_fps[p]
-    targets = targets[p]
+    # GENERATE BALANCED CLASSES
+    # Up/downsampling
+    targets, all_fps = up_down_sampling(targets, all_fps)
 
     # see how balanced the data is and assign weights
     train_data_size = targets.shape[0]
@@ -106,13 +94,13 @@ if __name__ == "__main__":
 
     sample_weights = [weights[i] for i in targets]
 
-    svms = SVMlearning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
+    svms = svc_learning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)
     input_dim = X.shape[-1]
 
-    predictions = predict_svm_ensemble(svms, X)
+    predictions = predict_svc_ensemble(svms, X)
 
     submission_file = os.path.join(this_dir, "predictions.csv")
     create_submission_file(submission_ids, predictions, submission_file)
