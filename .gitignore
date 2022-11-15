@@ -1,5 +1,5 @@
 run_main.sh
-__pychache__/
+__pycache__/
 models/__pycache__/
 models/SchNet models/SchNet_train.db
 models/splitting.lock
