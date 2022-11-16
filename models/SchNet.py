@@ -49,11 +49,11 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
 
     data = AtomsDataModule(
             dataset_path,
-            batch_size=10,
+            batch_size=256,
             num_train=0.8,
             num_val=0.1,
             num_test=0.1,
-            num_workers=1,
+            num_workers=8,
             split_file=os.path.join(working_dir, "split.npz"),
             pin_memory=False,  # set to false, when not using a GPU
             property_units={'solubility_class': ''},
@@ -104,7 +104,7 @@ def setup_schnet(class_weights: List[float]) -> spk.task.AtomisticTask:
         model=nn_solubility,
         outputs=[output_solubility],
         optimizer_cls=torch.optim.AdamW,
-        optimizer_args={"lr": 1e-4}
+        optimizer_args={"lr": 1e-4},
     )
 
     return task
@@ -125,6 +125,8 @@ def train_schnet(task: spk.task.AtomisticTask, data: AtomsDataModule, working_di
         logger=logger,
         default_root_dir=working_dir,
         max_epochs=epochs,  # for testing, we restrict the number of epochs
+        accelerator="auto",
+        devices="auto",
     )
     trainer.fit(task, datamodule=data)
 
@@ -183,7 +185,7 @@ def schnet_pipeline(data_dir: str, model_dir: str) -> None:
 
         task = setup_schnet(class_weights)
 
-        train_schnet(task, data, model_dir, epochs=3)
+        train_schnet(task, data, model_dir, epochs=20)
 
     else:
         print("Model has already been trained!")
