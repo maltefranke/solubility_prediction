@@ -28,7 +28,7 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
     Returns:
         None
     """
-    dataset_path = os.path.join(working_dir, f'./SchNet_{dataset}.db')
+    dataset_path = os.path.join(working_dir, f'./SchNet_{dataset}_for_testing.db')
 
     if not os.path.exists(dataset_path):
         numbers, positions = smiles_to_3d(smiles)
@@ -49,12 +49,12 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
 
     data = AtomsDataModule(
             dataset_path,
-            batch_size=128,
+            batch_size=10,
             num_train=0.8,
             num_val=0.1,
             num_test=0.1,
             num_workers=1,
-            split_file=os.path.join(working_dir, "split.npz"),
+            split_file=os.path.join(working_dir, "split_for_testing.npz"),
             pin_memory=False,  # set to false, when not using a GPU
             property_units={'solubility_class': ''},
             transforms=[trn.ASENeighborList(cutoff=5.)]
@@ -66,7 +66,7 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
     return data
 
 
-def setup_schnet() -> spk.task.AtomisticTask:
+def setup_schnet(class_weights: List[float]) -> spk.task.AtomisticTask:
 
     cutoff = 5.
     n_atom_basis = 30
@@ -88,9 +88,12 @@ def setup_schnet() -> spk.task.AtomisticTask:
         # postprocessors=[trn.CastTo64(), trn.AddOffsets('solubility_class', add_mean=False, add_atomrefs=True)]
     )
 
+    if class_weights is not None:
+        class_weights = torch.tensor(class_weights)
+
     output_solubility = spk.task.ModelOutput(
         name='solubility_class',
-        loss_fn=torch.nn.CrossEntropyLoss(),
+        loss_fn=torch.nn.CrossEntropyLoss(weight=class_weights),
         loss_weight=1.,
         metrics={
             "Kappa": torchmetrics.CohenKappa(num_classes=3, weights="quadratic")
@@ -126,6 +129,39 @@ def train_schnet(task: spk.task.AtomisticTask, data: AtomsDataModule, working_di
     trainer.fit(task, datamodule=data)
 
 
+def predict_schnet(smiles: List[str], working_dir: str) -> np.array:
+    """
+    Function to predict on a list of given SMILES, especially intended for prediction on the submission data
+    Args:
+        smiles: list of SMILES strings
+        working_dir: working directory path, where the model and data is saved
+
+    Returns:
+        np.array of predicted classes for the given SMILES strings
+    """
+    # load best model
+    best_model = torch.load(os.path.join(working_dir, 'best_inference_model'))
+
+    # get a converter that translates atom numbers and positions to an object that schnet can predict on
+    converter = spk.interfaces.AtomsConverter(neighbor_list=trn.ASENeighborList(cutoff=5.), dtype=torch.float32)
+    # get atom numbers and positions for every SMILES based on rdkit estimates
+    numbers, positions = smiles_to_3d(smiles)
+
+    all_preds = []
+    for atom_numbers, positions in zip(numbers, positions):
+        atoms = Atoms(numbers=np.array(atom_numbers, dtype=np.int), positions=np.array(positions, dtype=np.float))
+        X = converter(atoms)
+
+        y_pred = best_model(X)
+        y_pred = y_pred["solubility_class"]
+        probabilities = torch.softmax(y_pred, dim=1)
+        predicted_class = probabilities.argmax(dim=1).item()
+        all_preds.append(predicted_class)
+
+    all_preds = np.array(all_preds)
+    return all_preds
+
+
 if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
@@ -140,9 +176,13 @@ if __name__ == "__main__":
     # get data and transform smiles -> morgan fingerprint
     ids, smiles, targets = load_train_data(train_path)
 
-    data = prepare_schnet_data(smiles, targets, schnet_model_dir)
+    data = prepare_schnet_data(smiles[:100], targets[:100], schnet_model_dir)
 
-    task = setup_schnet()
+    class_weights = calculate_class_weights(targets)
 
-    train_schnet(task, data, schnet_model_dir)
+    task = setup_schnet(class_weights)
+
+    train_schnet(task, data, schnet_model_dir, epochs=3)
+
+    predict_schnet(smiles[100:150], schnet_model_dir)
 
