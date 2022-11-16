@@ -142,7 +142,7 @@ def predict_schnet(smiles: List[str], working_dir: str) -> np.array:
         np.array of predicted classes for the given SMILES strings
     """
     # load best model
-    best_model = torch.load(os.path.join(working_dir, 'best_inference_model'))
+    best_model = torch.load(os.path.join(working_dir, 'best_inference_model'), map_location=torch.device("cpu"))
 
     # get a converter that translates atom numbers and positions to an object that schnet can predict on
     converter = spk.interfaces.AtomsConverter(neighbor_list=trn.ASENeighborList(cutoff=5.), dtype=torch.float32)
