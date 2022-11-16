@@ -159,6 +159,16 @@ def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
             writer.writerow([id, pred])
 
 
+def calculate_class_weights(targets: np.array, num_classes: int = 3) -> List[float]:
+
+    # see how balanced the data is and assign weights
+    train_data_size = targets.shape[0]
+
+    weights = [1 - np.count_nonzero(targets == int(i)) / train_data_size for i in range(num_classes)]
+
+    return weights
+
+
 if __name__ == "__main__":
 
     this_dir = os.getcwd()
