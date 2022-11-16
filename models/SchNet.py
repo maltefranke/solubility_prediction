@@ -28,7 +28,7 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
     Returns:
         None
     """
-    dataset_path = os.path.join(working_dir, f'./SchNet_{dataset}_for_testing.db')
+    dataset_path = os.path.join(working_dir, f'./SchNet_{dataset}.db')
 
     if not os.path.exists(dataset_path):
         numbers, positions = smiles_to_3d(smiles)
@@ -54,7 +54,7 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
             num_val=0.1,
             num_test=0.1,
             num_workers=1,
-            split_file=os.path.join(working_dir, "split_for_testing.npz"),
+            split_file=os.path.join(working_dir, "split.npz"),
             pin_memory=False,  # set to false, when not using a GPU
             property_units={'solubility_class': ''},
             transforms=[trn.ASENeighborList(cutoff=5.)]
@@ -162,27 +162,48 @@ def predict_schnet(smiles: List[str], working_dir: str) -> np.array:
     return all_preds
 
 
+def schnet_pipeline(data_dir: str, model_dir: str) -> None:
+
+    train_path = os.path.join(data_dir, "train.csv")
+    test_path = os.path.join(data_dir, "test.csv")
+
+    submission_path = os.path.join(model_dir, "SchNet_submission.csv")
+    if os.path.exists(submission_path):
+        print("Prediction have already been made!")
+        return
+
+    best_model_path = os.path.join(model_dir, 'best_inference_model')
+    if not os.path.exists(best_model_path):
+
+        ids, smiles, targets = load_train_data(train_path)
+
+        data = prepare_schnet_data(smiles, targets, model_dir)
+
+        class_weights = calculate_class_weights(targets)
+
+        task = setup_schnet(class_weights)
+
+        train_schnet(task, data, model_dir, epochs=3)
+
+    else:
+        print("Model has already been trained!")
+
+    submission_ids, submission_smiles = load_test_data(test_path)
+
+    submission_preds = predict_schnet(submission_smiles, model_dir)
+
+    create_submission_file(submission_ids, submission_preds, submission_path)
+
+
 if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
     data_dir = os.path.join(this_dir, "data")
-    train_path = os.path.join(data_dir, "train.csv")
-    test_path = os.path.join(data_dir, "test.csv")
 
     schnet_model_dir = os.path.join(os.getcwd(), "SchNet models")
     if not os.path.exists(schnet_model_dir):
         os.mkdir(schnet_model_dir)
 
-    # get data and transform smiles -> morgan fingerprint
-    ids, smiles, targets = load_train_data(train_path)
+    schnet_pipeline(data_dir, schnet_model_dir)
 
-    data = prepare_schnet_data(smiles[:100], targets[:100], schnet_model_dir)
-
-    class_weights = calculate_class_weights(targets)
-
-    task = setup_schnet(class_weights)
-
-    train_schnet(task, data, schnet_model_dir, epochs=3)
-
-    predict_schnet(smiles[100:150], schnet_model_dir)
 
