@@ -35,9 +35,9 @@ if __name__ == "__main__":
 
     classifier = TabPFNClassifier(device=device, N_ensemble_configurations=32)
 
-    classifier.fit(all_fps_train, targets_train)
+    classifier.fit(all_fps_train[0:10], targets_train[0:10])
     targets_eval, p_eval = classifier.predict(
-        all_fps_test, return_winning_probability=True
+        all_fps_test[0:5], return_winning_probability=True
     )
 
-    print("Accuracy", accuracy_score(targets_test, targets_eval))
+    print("Accuracy", accuracy_score(targets_test[0:5], targets_eval))
