@@ -1,0 +1,3411 @@
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': '../data/train.csv',
+ 'data_weights_path': None,
+ 'dataset_type': 'classification',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.0,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 30,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'binary_cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'auc',
+ 'metrics': ['auc'],
+ 'minimize_score': False,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 1,
+ 'num_lrs': 1,
+ 'num_tasks': 2,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['Id'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': None,
+ 'target_weights': None,
+ 'task_names': ['smiles', 'sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': '../data/train.csv',
+ 'data_weights_path': None,
+ 'dataset_type': 'classification',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.0,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 30,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'binary_cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'auc',
+ 'metrics': ['auc'],
+ 'minimize_score': False,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 1,
+ 'num_lrs': 1,
+ 'num_tasks': 1,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['smiles'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': ['sol_category'],
+ 'target_weights': None,
+ 'task_names': ['sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': '../data/train.csv',
+ 'data_weights_path': None,
+ 'dataset_type': 'multiclass',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.0,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 30,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'cross_entropy',
+ 'metrics': ['cross_entropy'],
+ 'minimize_score': True,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 1,
+ 'num_lrs': 1,
+ 'num_tasks': 1,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['smiles'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': ['sol_category'],
+ 'target_weights': None,
+ 'task_names': ['sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Number of tasks = 1
+Fold 0
+Splitting data with seed 0
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.0, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.0, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.0, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': '../data/train.csv',
+ 'data_weights_path': None,
+ 'dataset_type': 'multiclass',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.0,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 30,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'cross_entropy',
+ 'metrics': ['cross_entropy'],
+ 'minimize_score': True,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 1,
+ 'num_lrs': 1,
+ 'num_tasks': 1,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['smiles'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': ['sol_category'],
+ 'target_weights': None,
+ 'task_names': ['sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Number of tasks = 1
+Fold 0
+Splitting data with seed 0
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.0, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.0, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.0, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': 'C:\\Users\\misme\\Documents\\EPFL\\MA3\\ML\\solubility_prediction\\data',
+ 'data_weights_path': None,
+ 'dataset_type': 'multiclass',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.05,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 300,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'cross_entropy',
+ 'metrics': ['cross_entropy'],
+ 'minimize_score': True,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 5,
+ 'num_lrs': 1,
+ 'num_tasks': 1,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['smiles'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': ['sol_category'],
+ 'target_weights': None,
+ 'task_names': ['sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': '../data/train.csv',
+ 'data_weights_path': None,
+ 'dataset_type': 'multiclass',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.05,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 300,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'cross_entropy',
+ 'metrics': ['cross_entropy'],
+ 'minimize_score': True,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 5,
+ 'num_lrs': 1,
+ 'num_tasks': 1,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['smiles'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': ['sol_category'],
+ 'target_weights': None,
+ 'task_names': ['sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Number of tasks = 1
+Fold 0
+Splitting data with seed 0
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.2897e-01, PNorm = 34.0560, GNorm = 1.3350, lr_0 = 1.0438e-04
+Loss = 3.0928e-01, PNorm = 34.0610, GNorm = 1.2324, lr_0 = 1.0836e-04
+Loss = 2.9541e-01, PNorm = 34.0611, GNorm = 0.2068, lr_0 = 1.1233e-04
+Loss = 3.0341e-01, PNorm = 34.0599, GNorm = 0.7713, lr_0 = 1.1631e-04
+Loss = 3.2922e-01, PNorm = 34.0591, GNorm = 0.6192, lr_0 = 1.2029e-04
+Loss = 3.5394e-01, PNorm = 34.0597, GNorm = 0.2892, lr_0 = 1.2427e-04
+Loss = 3.2114e-01, PNorm = 34.0604, GNorm = 0.6109, lr_0 = 1.2825e-04
+Loss = 2.4549e-01, PNorm = 34.0624, GNorm = 0.4141, lr_0 = 1.3223e-04
+Loss = 2.9261e-01, PNorm = 34.0629, GNorm = 0.4116, lr_0 = 1.3621e-04
+Loss = 3.4045e-01, PNorm = 34.0615, GNorm = 0.3714, lr_0 = 1.4019e-04
+Loss = 3.2366e-01, PNorm = 34.0615, GNorm = 0.5285, lr_0 = 1.4416e-04
+Loss = 3.3277e-01, PNorm = 34.0617, GNorm = 0.8278, lr_0 = 1.4814e-04
+Loss = 3.3629e-01, PNorm = 34.0618, GNorm = 0.4657, lr_0 = 1.5212e-04
+Loss = 2.3735e-01, PNorm = 34.0635, GNorm = 0.6381, lr_0 = 1.5610e-04
+Loss = 3.3802e-01, PNorm = 34.0638, GNorm = 0.3041, lr_0 = 1.6008e-04
+Loss = 2.9078e-01, PNorm = 34.0636, GNorm = 1.1538, lr_0 = 1.6406e-04
+Loss = 3.4018e-01, PNorm = 34.0646, GNorm = 0.9998, lr_0 = 1.6804e-04
+Loss = 2.7023e-01, PNorm = 34.0658, GNorm = 0.5833, lr_0 = 1.7202e-04
+Loss = 2.7975e-01, PNorm = 34.0671, GNorm = 0.3629, lr_0 = 1.7599e-04
+Loss = 2.8862e-01, PNorm = 34.0665, GNorm = 0.2355, lr_0 = 1.7997e-04
+Loss = 3.0324e-01, PNorm = 34.0675, GNorm = 0.5221, lr_0 = 1.8395e-04
+Loss = 3.3220e-01, PNorm = 34.0678, GNorm = 1.1370, lr_0 = 1.8793e-04
+Loss = 2.7476e-01, PNorm = 34.0721, GNorm = 0.8361, lr_0 = 1.9191e-04
+Loss = 3.0175e-01, PNorm = 34.0712, GNorm = 0.4402, lr_0 = 1.9589e-04
+Loss = 3.6494e-01, PNorm = 34.0694, GNorm = 1.1708, lr_0 = 1.9987e-04
+Loss = 2.9056e-01, PNorm = 34.0739, GNorm = 0.1970, lr_0 = 2.0385e-04
+Loss = 3.1629e-01, PNorm = 34.0723, GNorm = 0.6465, lr_0 = 2.0782e-04
+Loss = 3.1845e-01, PNorm = 34.0719, GNorm = 0.4077, lr_0 = 2.1180e-04
+Loss = 3.3216e-01, PNorm = 34.0728, GNorm = 0.3018, lr_0 = 2.1578e-04
+Loss = 2.9675e-01, PNorm = 34.0745, GNorm = 0.2773, lr_0 = 2.1976e-04
+Loss = 2.6358e-01, PNorm = 34.0776, GNorm = 0.1580, lr_0 = 2.2374e-04
+Loss = 2.6325e-01, PNorm = 34.0767, GNorm = 0.3220, lr_0 = 2.2772e-04
+Loss = 3.3862e-01, PNorm = 34.0770, GNorm = 1.2964, lr_0 = 2.3170e-04
+Loss = 2.9155e-01, PNorm = 34.0775, GNorm = 0.5382, lr_0 = 2.3568e-04
+Loss = 2.7050e-01, PNorm = 34.0788, GNorm = 0.4704, lr_0 = 2.3966e-04
+Loss = 2.8959e-01, PNorm = 34.0811, GNorm = 0.2959, lr_0 = 2.4363e-04
+Loss = 3.1577e-01, PNorm = 34.0803, GNorm = 0.3284, lr_0 = 2.4761e-04
+Loss = 3.1093e-01, PNorm = 34.0813, GNorm = 0.7882, lr_0 = 2.5159e-04
+Loss = 2.6958e-01, PNorm = 34.0837, GNorm = 0.5791, lr_0 = 2.5557e-04
+Loss = 2.8518e-01, PNorm = 34.0831, GNorm = 0.3476, lr_0 = 2.5955e-04
+Loss = 2.8559e-01, PNorm = 34.0857, GNorm = 0.3553, lr_0 = 2.6353e-04
+Loss = 3.3521e-01, PNorm = 34.0872, GNorm = 0.3680, lr_0 = 2.6751e-04
+Loss = 2.8721e-01, PNorm = 34.0881, GNorm = 0.4565, lr_0 = 2.7149e-04
+Loss = 3.6340e-01, PNorm = 34.0889, GNorm = 0.2912, lr_0 = 2.7546e-04
+Loss = 2.3773e-01, PNorm = 34.0941, GNorm = 0.2797, lr_0 = 2.7944e-04
+Loss = 3.1632e-01, PNorm = 34.0951, GNorm = 0.3291, lr_0 = 2.8342e-04
+Loss = 3.1463e-01, PNorm = 34.0940, GNorm = 0.5495, lr_0 = 2.8740e-04
+Loss = 2.3699e-01, PNorm = 34.1006, GNorm = 0.4625, lr_0 = 2.9138e-04
+Loss = 3.0242e-01, PNorm = 34.0979, GNorm = 0.1740, lr_0 = 2.9536e-04
+Loss = 2.6595e-01, PNorm = 34.1005, GNorm = 0.1984, lr_0 = 2.9934e-04
+Loss = 3.0045e-01, PNorm = 34.1003, GNorm = 0.2433, lr_0 = 3.0332e-04
+Loss = 2.4253e-01, PNorm = 34.1034, GNorm = 0.2394, lr_0 = 3.0729e-04
+Loss = 3.5340e-01, PNorm = 34.1007, GNorm = 0.6302, lr_0 = 3.1127e-04
+Loss = 3.6389e-01, PNorm = 34.1034, GNorm = 0.2702, lr_0 = 3.1525e-04
+Loss = 3.3534e-01, PNorm = 34.1063, GNorm = 0.3704, lr_0 = 3.1923e-04
+Loss = 2.9601e-01, PNorm = 34.1107, GNorm = 0.4101, lr_0 = 3.2321e-04
+Loss = 2.9665e-01, PNorm = 34.1112, GNorm = 0.2417, lr_0 = 3.2719e-04
+Loss = 2.9017e-01, PNorm = 34.1150, GNorm = 0.3122, lr_0 = 3.3117e-04
+Loss = 2.9873e-01, PNorm = 34.1177, GNorm = 0.5773, lr_0 = 3.3515e-04
+Loss = 3.1624e-01, PNorm = 34.1195, GNorm = 0.5615, lr_0 = 3.3912e-04
+Loss = 2.8663e-01, PNorm = 34.1244, GNorm = 0.3683, lr_0 = 3.4310e-04
+Loss = 3.0074e-01, PNorm = 34.1243, GNorm = 0.3379, lr_0 = 3.4708e-04
+Loss = 3.2242e-01, PNorm = 34.1260, GNorm = 0.2292, lr_0 = 3.5106e-04
+Loss = 3.3466e-01, PNorm = 34.1250, GNorm = 0.4880, lr_0 = 3.5504e-04
+Loss = 3.7473e-01, PNorm = 34.1266, GNorm = 0.7476, lr_0 = 3.5902e-04
+Loss = 2.6781e-01, PNorm = 34.1316, GNorm = 0.5338, lr_0 = 3.6300e-04
+Loss = 3.4765e-01, PNorm = 34.1293, GNorm = 0.5354, lr_0 = 3.6698e-04
+Loss = 2.8423e-01, PNorm = 34.1382, GNorm = 0.3683, lr_0 = 3.7095e-04
+Loss = 1.5685e-01, PNorm = 34.1459, GNorm = 0.1833, lr_0 = 3.7493e-04
+Loss = 3.4554e-01, PNorm = 34.1372, GNorm = 0.5499, lr_0 = 3.7891e-04
+Loss = 3.1509e-01, PNorm = 34.1447, GNorm = 0.5750, lr_0 = 3.8289e-04
+Loss = 2.4944e-01, PNorm = 34.1526, GNorm = 0.1860, lr_0 = 3.8687e-04
+Loss = 2.8048e-01, PNorm = 34.1495, GNorm = 0.4151, lr_0 = 3.9085e-04
+Loss = 2.7359e-01, PNorm = 34.1554, GNorm = 0.1781, lr_0 = 3.9483e-04
+Loss = 2.3521e-01, PNorm = 34.1573, GNorm = 0.4619, lr_0 = 3.9881e-04
+Loss = 3.1490e-01, PNorm = 34.1538, GNorm = 0.4286, lr_0 = 4.0279e-04
+Loss = 3.2132e-01, PNorm = 34.1546, GNorm = 0.3867, lr_0 = 4.0676e-04
+Loss = 2.5839e-01, PNorm = 34.1590, GNorm = 0.2637, lr_0 = 4.1074e-04
+Loss = 3.5116e-01, PNorm = 34.1555, GNorm = 0.2170, lr_0 = 4.1472e-04
+Loss = 2.6644e-01, PNorm = 34.1606, GNorm = 0.2908, lr_0 = 4.1870e-04
+Loss = 3.1558e-01, PNorm = 34.1645, GNorm = 0.4390, lr_0 = 4.2268e-04
+Loss = 2.8559e-01, PNorm = 34.1654, GNorm = 0.1935, lr_0 = 4.2666e-04
+Loss = 2.7773e-01, PNorm = 34.1681, GNorm = 0.2458, lr_0 = 4.3064e-04
+Loss = 3.2072e-01, PNorm = 34.1689, GNorm = 0.2483, lr_0 = 4.3462e-04
+Loss = 2.9339e-01, PNorm = 34.1723, GNorm = 0.3054, lr_0 = 4.3859e-04
+Loss = 3.3552e-01, PNorm = 34.1746, GNorm = 0.2881, lr_0 = 4.4257e-04
+Loss = 3.7651e-01, PNorm = 34.1791, GNorm = 0.2406, lr_0 = 4.4655e-04
+Loss = 2.5446e-01, PNorm = 34.1912, GNorm = 0.1768, lr_0 = 4.5053e-04
+Loss = 3.0338e-01, PNorm = 34.1865, GNorm = 0.5627, lr_0 = 4.5451e-04
+Loss = 3.7409e-01, PNorm = 34.1900, GNorm = 0.4166, lr_0 = 4.5849e-04
+Loss = 3.5290e-01, PNorm = 34.1939, GNorm = 0.1436, lr_0 = 4.6247e-04
+Loss = 2.9598e-01, PNorm = 34.1986, GNorm = 0.3165, lr_0 = 4.6645e-04
+Loss = 2.1072e-01, PNorm = 34.2082, GNorm = 0.2118, lr_0 = 4.7042e-04
+Loss = 2.5910e-01, PNorm = 34.2079, GNorm = 0.2095, lr_0 = 4.7440e-04
+Loss = 3.3072e-01, PNorm = 34.2034, GNorm = 0.4686, lr_0 = 4.7838e-04
+Loss = 2.9441e-01, PNorm = 34.2123, GNorm = 0.4355, lr_0 = 4.8236e-04
+Loss = 3.0093e-01, PNorm = 34.2121, GNorm = 0.3039, lr_0 = 4.8634e-04
+Loss = 2.3804e-01, PNorm = 34.2174, GNorm = 0.3149, lr_0 = 4.9032e-04
+Loss = 3.4611e-01, PNorm = 34.2166, GNorm = 0.2254, lr_0 = 4.9430e-04
+Loss = 3.6455e-01, PNorm = 34.2166, GNorm = 0.1439, lr_0 = 4.9828e-04
+Loss = 3.1452e-01, PNorm = 34.2255, GNorm = 0.1436, lr_0 = 5.0225e-04
+Loss = 2.8813e-01, PNorm = 34.2264, GNorm = 0.3243, lr_0 = 5.0623e-04
+Loss = 3.1265e-01, PNorm = 34.2255, GNorm = 0.2644, lr_0 = 5.1021e-04
+Loss = 2.7098e-01, PNorm = 34.2330, GNorm = 0.1118, lr_0 = 5.1419e-04
+Loss = 3.1999e-01, PNorm = 34.2342, GNorm = 0.7492, lr_0 = 5.1817e-04
+Loss = 3.2117e-01, PNorm = 34.2344, GNorm = 0.1811, lr_0 = 5.2215e-04
+Loss = 3.2433e-01, PNorm = 34.2436, GNorm = 0.7361, lr_0 = 5.2613e-04
+Loss = 3.2129e-01, PNorm = 34.2427, GNorm = 0.2910, lr_0 = 5.3011e-04
+Loss = 3.0790e-01, PNorm = 34.2497, GNorm = 0.3022, lr_0 = 5.3408e-04
+Loss = 3.5737e-01, PNorm = 34.2540, GNorm = 0.7935, lr_0 = 5.3806e-04
+Loss = 2.6488e-01, PNorm = 34.2572, GNorm = 0.1730, lr_0 = 5.4204e-04
+Loss = 2.6935e-01, PNorm = 34.2667, GNorm = 0.1653, lr_0 = 5.4602e-04
+Loss = 3.2695e-01, PNorm = 34.2643, GNorm = 0.1068, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.296402
+Epoch 1
+Loss = 2.6131e-01, PNorm = 34.2747, GNorm = 0.3457, lr_0 = 5.5438e-04
+Loss = 3.5586e-01, PNorm = 34.2740, GNorm = 0.1738, lr_0 = 5.5836e-04
+Loss = 3.5919e-01, PNorm = 34.2762, GNorm = 0.3392, lr_0 = 5.6233e-04
+Loss = 2.5838e-01, PNorm = 34.2917, GNorm = 0.4026, lr_0 = 5.6631e-04
+Loss = 3.1413e-01, PNorm = 34.2917, GNorm = 0.3623, lr_0 = 5.7029e-04
+Loss = 3.1220e-01, PNorm = 34.2926, GNorm = 0.2555, lr_0 = 5.7427e-04
+Loss = 2.9524e-01, PNorm = 34.3070, GNorm = 0.4172, lr_0 = 5.7825e-04
+Loss = 3.1347e-01, PNorm = 34.3027, GNorm = 0.1491, lr_0 = 5.8223e-04
+Loss = 2.9815e-01, PNorm = 34.3073, GNorm = 0.2767, lr_0 = 5.8621e-04
+Loss = 3.2659e-01, PNorm = 34.3096, GNorm = 0.3830, lr_0 = 5.9019e-04
+Loss = 3.0780e-01, PNorm = 34.3092, GNorm = 0.2026, lr_0 = 5.9416e-04
+Loss = 2.9361e-01, PNorm = 34.3169, GNorm = 0.2074, lr_0 = 5.9814e-04
+Loss = 3.3245e-01, PNorm = 34.3174, GNorm = 0.1910, lr_0 = 6.0212e-04
+Loss = 3.7903e-01, PNorm = 34.3198, GNorm = 0.2175, lr_0 = 6.0610e-04
+Loss = 2.7691e-01, PNorm = 34.3322, GNorm = 0.1123, lr_0 = 6.1008e-04
+Loss = 2.2854e-01, PNorm = 34.3381, GNorm = 0.2622, lr_0 = 6.1406e-04
+Loss = 2.7045e-01, PNorm = 34.3397, GNorm = 0.3598, lr_0 = 6.1804e-04
+Loss = 2.2440e-01, PNorm = 34.3523, GNorm = 0.1455, lr_0 = 6.2202e-04
+Loss = 2.7806e-01, PNorm = 34.3497, GNorm = 0.3370, lr_0 = 6.2599e-04
+Loss = 3.6468e-01, PNorm = 34.3468, GNorm = 0.2135, lr_0 = 6.2997e-04
+Loss = 3.0332e-01, PNorm = 34.3622, GNorm = 0.6156, lr_0 = 6.3395e-04
+Loss = 3.2935e-01, PNorm = 34.3586, GNorm = 0.2181, lr_0 = 6.3793e-04
+Loss = 3.2397e-01, PNorm = 34.3637, GNorm = 0.1665, lr_0 = 6.4191e-04
+Loss = 3.5259e-01, PNorm = 34.3640, GNorm = 0.1958, lr_0 = 6.4589e-04
+Loss = 3.0848e-01, PNorm = 34.3683, GNorm = 0.1445, lr_0 = 6.4987e-04
+Loss = 2.7737e-01, PNorm = 34.3772, GNorm = 0.1414, lr_0 = 6.5385e-04
+Loss = 3.0208e-01, PNorm = 34.3768, GNorm = 0.2047, lr_0 = 6.5782e-04
+Loss = 2.7881e-01, PNorm = 34.3864, GNorm = 0.3783, lr_0 = 6.6180e-04
+Loss = 2.7098e-01, PNorm = 34.3920, GNorm = 0.4994, lr_0 = 6.6578e-04
+Loss = 2.8275e-01, PNorm = 34.3992, GNorm = 0.1614, lr_0 = 6.6976e-04
+Loss = 3.8529e-01, PNorm = 34.4005, GNorm = 0.2550, lr_0 = 6.7374e-04
+Loss = 2.8234e-01, PNorm = 34.4249, GNorm = 0.2379, lr_0 = 6.7772e-04
+Loss = 3.5790e-01, PNorm = 34.4203, GNorm = 0.4964, lr_0 = 6.8170e-04
+Loss = 2.7907e-01, PNorm = 34.4358, GNorm = 0.3271, lr_0 = 6.8568e-04
+Loss = 2.5451e-01, PNorm = 34.4479, GNorm = 0.1348, lr_0 = 6.8966e-04
+Loss = 3.1355e-01, PNorm = 34.4421, GNorm = 0.1291, lr_0 = 6.9363e-04
+Loss = 2.6155e-01, PNorm = 34.4518, GNorm = 0.1503, lr_0 = 6.9761e-04
+Loss = 3.0350e-01, PNorm = 34.4577, GNorm = 0.0949, lr_0 = 7.0159e-04
+Loss = 3.2026e-01, PNorm = 34.4545, GNorm = 0.3636, lr_0 = 7.0557e-04
+Loss = 3.3475e-01, PNorm = 34.4644, GNorm = 0.3730, lr_0 = 7.0955e-04
+Loss = 2.6078e-01, PNorm = 34.4709, GNorm = 0.1300, lr_0 = 7.1353e-04
+Loss = 3.2414e-01, PNorm = 34.4677, GNorm = 0.3502, lr_0 = 7.1751e-04
+Loss = 3.1059e-01, PNorm = 34.4727, GNorm = 0.3250, lr_0 = 7.2149e-04
+Loss = 3.0152e-01, PNorm = 34.4867, GNorm = 0.1914, lr_0 = 7.2546e-04
+Loss = 3.4859e-01, PNorm = 34.4816, GNorm = 0.1636, lr_0 = 7.2944e-04
+Loss = 2.8807e-01, PNorm = 34.4902, GNorm = 0.2237, lr_0 = 7.3342e-04
+Loss = 2.5940e-01, PNorm = 34.5016, GNorm = 0.1463, lr_0 = 7.3740e-04
+Loss = 3.7252e-01, PNorm = 34.4968, GNorm = 0.3645, lr_0 = 7.4138e-04
+Loss = 2.9807e-01, PNorm = 34.5077, GNorm = 0.2161, lr_0 = 7.4536e-04
+Loss = 3.4177e-01, PNorm = 34.5125, GNorm = 0.2918, lr_0 = 7.4934e-04
+Loss = 3.0864e-01, PNorm = 34.5250, GNorm = 0.5777, lr_0 = 7.5332e-04
+Loss = 2.8426e-01, PNorm = 34.5312, GNorm = 0.2346, lr_0 = 7.5729e-04
+Loss = 2.8972e-01, PNorm = 34.5360, GNorm = 0.3896, lr_0 = 7.6127e-04
+Loss = 3.1113e-01, PNorm = 34.5396, GNorm = 0.3727, lr_0 = 7.6525e-04
+Loss = 3.2082e-01, PNorm = 34.5462, GNorm = 0.2301, lr_0 = 7.6923e-04
+Loss = 2.8047e-01, PNorm = 34.5528, GNorm = 0.1846, lr_0 = 7.7321e-04
+Loss = 3.0513e-01, PNorm = 34.5588, GNorm = 0.1074, lr_0 = 7.7719e-04
+Loss = 2.5196e-01, PNorm = 34.5693, GNorm = 0.4642, lr_0 = 7.8117e-04
+Loss = 2.5501e-01, PNorm = 34.5680, GNorm = 0.1763, lr_0 = 7.8515e-04
+Loss = 2.5444e-01, PNorm = 34.5697, GNorm = 0.1713, lr_0 = 7.8912e-04
+Loss = 2.8377e-01, PNorm = 34.5746, GNorm = 0.0799, lr_0 = 7.9310e-04
+Loss = 3.6162e-01, PNorm = 34.5690, GNorm = 0.1147, lr_0 = 7.9708e-04
+Loss = 3.4883e-01, PNorm = 34.5842, GNorm = 0.2068, lr_0 = 8.0106e-04
+Loss = 2.9346e-01, PNorm = 34.5995, GNorm = 0.2537, lr_0 = 8.0504e-04
+Loss = 2.4347e-01, PNorm = 34.6088, GNorm = 0.1479, lr_0 = 8.0902e-04
+Loss = 3.0538e-01, PNorm = 34.6056, GNorm = 0.2073, lr_0 = 8.1300e-04
+Loss = 3.0567e-01, PNorm = 34.6132, GNorm = 0.6516, lr_0 = 8.1698e-04
+Loss = 2.6005e-01, PNorm = 34.6191, GNorm = 0.1763, lr_0 = 8.2095e-04
+Loss = 2.5036e-01, PNorm = 34.6228, GNorm = 0.1418, lr_0 = 8.2493e-04
+Loss = 3.0593e-01, PNorm = 34.6244, GNorm = 0.4797, lr_0 = 8.2891e-04
+Loss = 2.8468e-01, PNorm = 34.6318, GNorm = 0.1941, lr_0 = 8.3289e-04
+Loss = 2.2359e-01, PNorm = 34.6472, GNorm = 0.1614, lr_0 = 8.3687e-04
+Loss = 2.6762e-01, PNorm = 34.6480, GNorm = 0.0902, lr_0 = 8.4085e-04
+Loss = 2.9554e-01, PNorm = 34.6498, GNorm = 0.1836, lr_0 = 8.4483e-04
+Loss = 2.7325e-01, PNorm = 34.6617, GNorm = 0.2139, lr_0 = 8.4881e-04
+Loss = 2.8310e-01, PNorm = 34.6590, GNorm = 0.1882, lr_0 = 8.5279e-04
+Loss = 3.2681e-01, PNorm = 34.6624, GNorm = 0.1711, lr_0 = 8.5676e-04
+Loss = 3.9537e-01, PNorm = 34.6645, GNorm = 0.4472, lr_0 = 8.6074e-04
+Loss = 2.9107e-01, PNorm = 34.6895, GNorm = 0.0735, lr_0 = 8.6472e-04
+Loss = 3.1332e-01, PNorm = 34.6854, GNorm = 0.1226, lr_0 = 8.6870e-04
+Loss = 3.2667e-01, PNorm = 34.6933, GNorm = 0.3562, lr_0 = 8.7268e-04
+Loss = 2.8572e-01, PNorm = 34.7115, GNorm = 0.0743, lr_0 = 8.7666e-04
+Loss = 3.4644e-01, PNorm = 34.7050, GNorm = 0.1313, lr_0 = 8.8064e-04
+Loss = 3.0131e-01, PNorm = 34.7199, GNorm = 0.2091, lr_0 = 8.8462e-04
+Loss = 3.1057e-01, PNorm = 34.7310, GNorm = 0.4564, lr_0 = 8.8859e-04
+Loss = 2.9628e-01, PNorm = 34.7302, GNorm = 0.2028, lr_0 = 8.9257e-04
+Loss = 2.6151e-01, PNorm = 34.7461, GNorm = 0.2253, lr_0 = 8.9655e-04
+Loss = 2.3721e-01, PNorm = 34.7492, GNorm = 0.2405, lr_0 = 9.0053e-04
+Loss = 3.3547e-01, PNorm = 34.7408, GNorm = 0.4486, lr_0 = 9.0451e-04
+Loss = 2.5202e-01, PNorm = 34.7604, GNorm = 0.1471, lr_0 = 9.0849e-04
+Loss = 3.1886e-01, PNorm = 34.7567, GNorm = 0.4266, lr_0 = 9.1247e-04
+Loss = 2.3431e-01, PNorm = 34.7623, GNorm = 0.3315, lr_0 = 9.1645e-04
+Loss = 2.9958e-01, PNorm = 34.7745, GNorm = 0.2877, lr_0 = 9.2042e-04
+Loss = 2.3132e-01, PNorm = 34.7818, GNorm = 0.2583, lr_0 = 9.2440e-04
+Loss = 2.7618e-01, PNorm = 34.7874, GNorm = 0.1598, lr_0 = 9.2838e-04
+Loss = 2.2956e-01, PNorm = 34.7861, GNorm = 0.3164, lr_0 = 9.3236e-04
+Loss = 3.0009e-01, PNorm = 34.7856, GNorm = 0.1999, lr_0 = 9.3634e-04
+Loss = 2.7112e-01, PNorm = 34.7909, GNorm = 0.1804, lr_0 = 9.4032e-04
+Loss = 3.0509e-01, PNorm = 34.7893, GNorm = 0.1828, lr_0 = 9.4430e-04
+Loss = 2.9880e-01, PNorm = 34.7943, GNorm = 0.1721, lr_0 = 9.4828e-04
+Loss = 3.6000e-01, PNorm = 34.7912, GNorm = 0.1007, lr_0 = 9.5225e-04
+Loss = 3.2359e-01, PNorm = 34.8007, GNorm = 0.2530, lr_0 = 9.5623e-04
+Loss = 3.4028e-01, PNorm = 34.8029, GNorm = 0.2007, lr_0 = 9.6021e-04
+Loss = 3.7955e-01, PNorm = 34.8139, GNorm = 0.1746, lr_0 = 9.6419e-04
+Loss = 3.0119e-01, PNorm = 34.8238, GNorm = 0.3447, lr_0 = 9.6817e-04
+Loss = 4.0005e-01, PNorm = 34.8196, GNorm = 0.2259, lr_0 = 9.7215e-04
+Loss = 3.1291e-01, PNorm = 34.8303, GNorm = 0.2770, lr_0 = 9.7613e-04
+Loss = 3.1613e-01, PNorm = 34.8390, GNorm = 0.6431, lr_0 = 9.8011e-04
+Loss = 3.1948e-01, PNorm = 34.8401, GNorm = 0.1493, lr_0 = 9.8408e-04
+Loss = 2.6662e-01, PNorm = 34.8599, GNorm = 0.1503, lr_0 = 9.8806e-04
+Loss = 2.6828e-01, PNorm = 34.8643, GNorm = 0.3902, lr_0 = 9.9204e-04
+Loss = 2.5561e-01, PNorm = 34.8769, GNorm = 0.2297, lr_0 = 9.9602e-04
+Loss = 2.7040e-01, PNorm = 34.8762, GNorm = 0.3260, lr_0 = 1.0000e-03
+Validation cross_entropy = 0.295394
+Epoch 2
+Loss = 2.5967e-01, PNorm = 34.8887, GNorm = 0.3753, lr_0 = 9.9992e-04
+Loss = 2.8821e-01, PNorm = 34.8873, GNorm = 0.2522, lr_0 = 9.9986e-04
+Loss = 2.8368e-01, PNorm = 34.8942, GNorm = 0.1960, lr_0 = 9.9979e-04
+Loss = 2.8787e-01, PNorm = 34.9010, GNorm = 0.5126, lr_0 = 9.9972e-04
+Loss = 3.2631e-01, PNorm = 34.8985, GNorm = 0.2552, lr_0 = 9.9965e-04
+Loss = 2.8716e-01, PNorm = 34.9154, GNorm = 0.2858, lr_0 = 9.9958e-04
+Loss = 3.1303e-01, PNorm = 34.9168, GNorm = 0.2825, lr_0 = 9.9952e-04
+Loss = 3.0162e-01, PNorm = 34.9239, GNorm = 0.2694, lr_0 = 9.9945e-04
+Loss = 2.6616e-01, PNorm = 34.9317, GNorm = 0.4380, lr_0 = 9.9938e-04
+Loss = 2.2222e-01, PNorm = 34.9499, GNorm = 0.1343, lr_0 = 9.9931e-04
+Loss = 3.7301e-01, PNorm = 34.9352, GNorm = 0.2552, lr_0 = 9.9924e-04
+Loss = 3.2394e-01, PNorm = 34.9541, GNorm = 0.1955, lr_0 = 9.9917e-04
+Loss = 3.4141e-01, PNorm = 34.9629, GNorm = 0.1336, lr_0 = 9.9911e-04
+Loss = 3.5952e-01, PNorm = 34.9624, GNorm = 0.1527, lr_0 = 9.9904e-04
+Loss = 2.9049e-01, PNorm = 34.9887, GNorm = 0.2397, lr_0 = 9.9897e-04
+Loss = 2.8900e-01, PNorm = 34.9919, GNorm = 0.3519, lr_0 = 9.9890e-04
+Loss = 2.6892e-01, PNorm = 35.0169, GNorm = 0.1646, lr_0 = 9.9883e-04
+Loss = 3.2834e-01, PNorm = 35.0241, GNorm = 0.2580, lr_0 = 9.9876e-04
+Loss = 2.8782e-01, PNorm = 35.0341, GNorm = 0.1898, lr_0 = 9.9870e-04
+Loss = 3.6778e-01, PNorm = 35.0412, GNorm = 0.1531, lr_0 = 9.9863e-04
+Loss = 3.2793e-01, PNorm = 35.0538, GNorm = 0.1091, lr_0 = 9.9856e-04
+Loss = 3.0071e-01, PNorm = 35.0755, GNorm = 0.1398, lr_0 = 9.9849e-04
+Loss = 3.7900e-01, PNorm = 35.0737, GNorm = 0.2854, lr_0 = 9.9842e-04
+Loss = 3.1263e-01, PNorm = 35.0971, GNorm = 0.2287, lr_0 = 9.9835e-04
+Loss = 3.2905e-01, PNorm = 35.1003, GNorm = 0.2372, lr_0 = 9.9829e-04
+Loss = 2.9204e-01, PNorm = 35.1054, GNorm = 0.4643, lr_0 = 9.9822e-04
+Loss = 3.5633e-01, PNorm = 35.1164, GNorm = 0.1047, lr_0 = 9.9815e-04
+Loss = 2.4565e-01, PNorm = 35.1319, GNorm = 0.1823, lr_0 = 9.9808e-04
+Loss = 3.2187e-01, PNorm = 35.1361, GNorm = 0.1862, lr_0 = 9.9801e-04
+Loss = 3.3204e-01, PNorm = 35.1476, GNorm = 0.5793, lr_0 = 9.9795e-04
+Loss = 2.7410e-01, PNorm = 35.1580, GNorm = 0.3386, lr_0 = 9.9788e-04
+Loss = 2.7607e-01, PNorm = 35.1729, GNorm = 0.3011, lr_0 = 9.9781e-04
+Loss = 2.7086e-01, PNorm = 35.1728, GNorm = 0.3126, lr_0 = 9.9774e-04
+Loss = 3.0530e-01, PNorm = 35.1830, GNorm = 0.2911, lr_0 = 9.9767e-04
+Loss = 2.9603e-01, PNorm = 35.1926, GNorm = 0.2076, lr_0 = 9.9760e-04
+Loss = 2.8077e-01, PNorm = 35.2065, GNorm = 0.6876, lr_0 = 9.9754e-04
+Loss = 2.9734e-01, PNorm = 35.2077, GNorm = 0.1699, lr_0 = 9.9747e-04
+Loss = 2.8999e-01, PNorm = 35.2271, GNorm = 0.1708, lr_0 = 9.9740e-04
+Loss = 3.4184e-01, PNorm = 35.2358, GNorm = 0.1885, lr_0 = 9.9733e-04
+Loss = 2.9886e-01, PNorm = 35.2582, GNorm = 0.2661, lr_0 = 9.9726e-04
+Loss = 2.9742e-01, PNorm = 35.2680, GNorm = 0.2302, lr_0 = 9.9720e-04
+Loss = 3.3704e-01, PNorm = 35.2747, GNorm = 0.1149, lr_0 = 9.9713e-04
+Loss = 2.9384e-01, PNorm = 35.2821, GNorm = 0.2842, lr_0 = 9.9706e-04
+Loss = 2.6136e-01, PNorm = 35.2930, GNorm = 0.1996, lr_0 = 9.9699e-04
+Loss = 3.2970e-01, PNorm = 35.2951, GNorm = 0.3372, lr_0 = 9.9692e-04
+Loss = 3.5794e-01, PNorm = 35.3120, GNorm = 0.1615, lr_0 = 9.9686e-04
+Loss = 3.3444e-01, PNorm = 35.3239, GNorm = 0.1654, lr_0 = 9.9679e-04
+Loss = 2.8923e-01, PNorm = 35.3387, GNorm = 0.1202, lr_0 = 9.9672e-04
+Loss = 3.2052e-01, PNorm = 35.3353, GNorm = 0.0848, lr_0 = 9.9665e-04
+Loss = 3.5718e-01, PNorm = 35.3394, GNorm = 0.4012, lr_0 = 9.9658e-04
+Loss = 3.1202e-01, PNorm = 35.3517, GNorm = 0.1859, lr_0 = 9.9652e-04
+Loss = 2.4113e-01, PNorm = 35.3766, GNorm = 0.1570, lr_0 = 9.9645e-04
+Loss = 3.5126e-01, PNorm = 35.3742, GNorm = 0.1383, lr_0 = 9.9638e-04
+Loss = 3.5649e-01, PNorm = 35.3913, GNorm = 0.1199, lr_0 = 9.9631e-04
+Loss = 3.5335e-01, PNorm = 35.3980, GNorm = 0.1306, lr_0 = 9.9624e-04
+Loss = 3.2013e-01, PNorm = 35.4122, GNorm = 0.1074, lr_0 = 9.9617e-04
+Loss = 2.3292e-01, PNorm = 35.4351, GNorm = 0.1221, lr_0 = 9.9611e-04
+Loss = 2.7126e-01, PNorm = 35.4411, GNorm = 0.1788, lr_0 = 9.9604e-04
+Loss = 3.9740e-01, PNorm = 35.4429, GNorm = 0.5326, lr_0 = 9.9597e-04
+Loss = 3.4616e-01, PNorm = 35.4645, GNorm = 0.2925, lr_0 = 9.9590e-04
+Loss = 2.6081e-01, PNorm = 35.4810, GNorm = 0.0837, lr_0 = 9.9583e-04
+Loss = 3.1346e-01, PNorm = 35.4816, GNorm = 0.0828, lr_0 = 9.9577e-04
+Loss = 3.0457e-01, PNorm = 35.4901, GNorm = 0.3394, lr_0 = 9.9570e-04
+Loss = 2.9393e-01, PNorm = 35.5122, GNorm = 0.3095, lr_0 = 9.9563e-04
+Loss = 3.1866e-01, PNorm = 35.5290, GNorm = 0.3728, lr_0 = 9.9556e-04
+Loss = 3.3746e-01, PNorm = 35.5453, GNorm = 0.4755, lr_0 = 9.9549e-04
+Loss = 1.6917e-01, PNorm = 35.5838, GNorm = 0.0863, lr_0 = 9.9543e-04
+Loss = 3.1463e-01, PNorm = 35.5816, GNorm = 0.1601, lr_0 = 9.9536e-04
+Loss = 3.1491e-01, PNorm = 35.5821, GNorm = 0.2670, lr_0 = 9.9529e-04
+Loss = 2.5314e-01, PNorm = 35.6076, GNorm = 0.1661, lr_0 = 9.9522e-04
+Loss = 2.8147e-01, PNorm = 35.6018, GNorm = 0.2147, lr_0 = 9.9515e-04
+Loss = 2.6789e-01, PNorm = 35.6184, GNorm = 0.0720, lr_0 = 9.9509e-04
+Loss = 2.7702e-01, PNorm = 35.6251, GNorm = 0.1761, lr_0 = 9.9502e-04
+Loss = 2.4951e-01, PNorm = 35.6327, GNorm = 0.2490, lr_0 = 9.9495e-04
+Loss = 3.0887e-01, PNorm = 35.6400, GNorm = 0.1083, lr_0 = 9.9488e-04
+Loss = 3.3805e-01, PNorm = 35.6358, GNorm = 0.3590, lr_0 = 9.9481e-04
+Loss = 3.9064e-01, PNorm = 35.6426, GNorm = 0.1410, lr_0 = 9.9475e-04
+Loss = 2.6668e-01, PNorm = 35.6598, GNorm = 0.1224, lr_0 = 9.9468e-04
+Loss = 3.3689e-01, PNorm = 35.6540, GNorm = 0.1710, lr_0 = 9.9461e-04
+Loss = 3.4584e-01, PNorm = 35.6557, GNorm = 0.2198, lr_0 = 9.9454e-04
+Loss = 2.6835e-01, PNorm = 35.6669, GNorm = 0.1441, lr_0 = 9.9447e-04
+Loss = 3.5786e-01, PNorm = 35.6580, GNorm = 0.1989, lr_0 = 9.9441e-04
+Loss = 3.7198e-01, PNorm = 35.6590, GNorm = 0.1627, lr_0 = 9.9434e-04
+Loss = 3.0564e-01, PNorm = 35.6713, GNorm = 0.1802, lr_0 = 9.9427e-04
+Loss = 3.1389e-01, PNorm = 35.6790, GNorm = 0.1775, lr_0 = 9.9420e-04
+Loss = 2.9528e-01, PNorm = 35.6900, GNorm = 0.3590, lr_0 = 9.9414e-04
+Loss = 2.3408e-01, PNorm = 35.7143, GNorm = 0.2788, lr_0 = 9.9407e-04
+Loss = 2.7810e-01, PNorm = 35.7216, GNorm = 0.4610, lr_0 = 9.9400e-04
+Loss = 2.6924e-01, PNorm = 35.7248, GNorm = 0.2420, lr_0 = 9.9393e-04
+Loss = 2.6526e-01, PNorm = 35.7337, GNorm = 0.2087, lr_0 = 9.9386e-04
+Loss = 3.1716e-01, PNorm = 35.7397, GNorm = 0.1046, lr_0 = 9.9380e-04
+Loss = 2.6808e-01, PNorm = 35.7602, GNorm = 0.2757, lr_0 = 9.9373e-04
+Loss = 2.4509e-01, PNorm = 35.7751, GNorm = 0.3726, lr_0 = 9.9366e-04
+Loss = 2.8574e-01, PNorm = 35.7725, GNorm = 0.2125, lr_0 = 9.9359e-04
+Loss = 3.2063e-01, PNorm = 35.7743, GNorm = 0.1177, lr_0 = 9.9352e-04
+Loss = 2.8556e-01, PNorm = 35.7899, GNorm = 0.1280, lr_0 = 9.9346e-04
+Loss = 3.2402e-01, PNorm = 35.7915, GNorm = 0.1001, lr_0 = 9.9339e-04
+Loss = 3.0250e-01, PNorm = 35.8029, GNorm = 0.1365, lr_0 = 9.9332e-04
+Loss = 2.5619e-01, PNorm = 35.8216, GNorm = 0.3347, lr_0 = 9.9325e-04
+Loss = 2.9637e-01, PNorm = 35.8387, GNorm = 0.2188, lr_0 = 9.9318e-04
+Loss = 3.0162e-01, PNorm = 35.8430, GNorm = 0.1709, lr_0 = 9.9312e-04
+Loss = 3.1391e-01, PNorm = 35.8523, GNorm = 0.3272, lr_0 = 9.9305e-04
+Loss = 2.6837e-01, PNorm = 35.8691, GNorm = 0.1519, lr_0 = 9.9298e-04
+Loss = 3.0546e-01, PNorm = 35.8884, GNorm = 0.1666, lr_0 = 9.9291e-04
+Loss = 2.7685e-01, PNorm = 35.9095, GNorm = 0.4132, lr_0 = 9.9285e-04
+Loss = 2.4573e-01, PNorm = 35.9224, GNorm = 0.1659, lr_0 = 9.9278e-04
+Loss = 2.2220e-01, PNorm = 35.9319, GNorm = 0.2409, lr_0 = 9.9271e-04
+Loss = 2.1966e-01, PNorm = 35.9283, GNorm = 0.2609, lr_0 = 9.9264e-04
+Loss = 3.0136e-01, PNorm = 35.9214, GNorm = 0.1424, lr_0 = 9.9257e-04
+Loss = 2.6264e-01, PNorm = 35.9330, GNorm = 0.2483, lr_0 = 9.9251e-04
+Loss = 2.6279e-01, PNorm = 35.9419, GNorm = 0.3190, lr_0 = 9.9244e-04
+Loss = 1.9856e-01, PNorm = 35.9524, GNorm = 0.2204, lr_0 = 9.9237e-04
+Loss = 2.4768e-01, PNorm = 35.9481, GNorm = 0.1044, lr_0 = 9.9230e-04
+Validation cross_entropy = 0.292542
+Epoch 3
+Loss = 2.7702e-01, PNorm = 35.9339, GNorm = 0.3391, lr_0 = 9.9224e-04
+Loss = 3.3576e-01, PNorm = 35.9537, GNorm = 0.1691, lr_0 = 9.9217e-04
+Loss = 2.4636e-01, PNorm = 35.9729, GNorm = 0.2442, lr_0 = 9.9210e-04
+Loss = 3.3611e-01, PNorm = 35.9606, GNorm = 0.2138, lr_0 = 9.9203e-04
+Loss = 2.3713e-01, PNorm = 35.9735, GNorm = 0.2725, lr_0 = 9.9196e-04
+Loss = 3.4012e-01, PNorm = 35.9728, GNorm = 0.3661, lr_0 = 9.9190e-04
+Loss = 3.0609e-01, PNorm = 35.9794, GNorm = 0.5000, lr_0 = 9.9183e-04
+Loss = 3.1946e-01, PNorm = 35.9956, GNorm = 0.1029, lr_0 = 9.9176e-04
+Loss = 2.9214e-01, PNorm = 36.0201, GNorm = 0.1497, lr_0 = 9.9169e-04
+Loss = 2.9075e-01, PNorm = 36.0379, GNorm = 0.1594, lr_0 = 9.9163e-04
+Loss = 2.7489e-01, PNorm = 36.0591, GNorm = 0.0965, lr_0 = 9.9156e-04
+Loss = 3.4360e-01, PNorm = 36.0790, GNorm = 0.1263, lr_0 = 9.9149e-04
+Loss = 2.2937e-01, PNorm = 36.1169, GNorm = 0.0857, lr_0 = 9.9142e-04
+Loss = 3.0006e-01, PNorm = 36.1468, GNorm = 0.0723, lr_0 = 9.9135e-04
+Loss = 2.7086e-01, PNorm = 36.1713, GNorm = 0.3076, lr_0 = 9.9129e-04
+Loss = 3.4975e-01, PNorm = 36.1763, GNorm = 0.1991, lr_0 = 9.9122e-04
+Loss = 3.1755e-01, PNorm = 36.2017, GNorm = 0.2638, lr_0 = 9.9115e-04
+Loss = 3.1091e-01, PNorm = 36.2204, GNorm = 0.1738, lr_0 = 9.9108e-04
+Loss = 3.5187e-01, PNorm = 36.2331, GNorm = 0.1817, lr_0 = 9.9102e-04
+Loss = 2.5104e-01, PNorm = 36.2632, GNorm = 0.1323, lr_0 = 9.9095e-04
+Loss = 3.1660e-01, PNorm = 36.2603, GNorm = 0.2783, lr_0 = 9.9088e-04
+Loss = 3.8514e-01, PNorm = 36.2539, GNorm = 0.0783, lr_0 = 9.9081e-04
+Loss = 3.0466e-01, PNorm = 36.2704, GNorm = 0.0850, lr_0 = 9.9074e-04
+Loss = 3.3357e-01, PNorm = 36.2708, GNorm = 0.1071, lr_0 = 9.9068e-04
+Loss = 2.8606e-01, PNorm = 36.2744, GNorm = 0.1416, lr_0 = 9.9061e-04
+Loss = 3.1530e-01, PNorm = 36.2804, GNorm = 0.1774, lr_0 = 9.9054e-04
+Loss = 2.3220e-01, PNorm = 36.2877, GNorm = 0.1529, lr_0 = 9.9047e-04
+Loss = 2.8416e-01, PNorm = 36.2855, GNorm = 0.1693, lr_0 = 9.9041e-04
+Loss = 3.0844e-01, PNorm = 36.2807, GNorm = 0.1397, lr_0 = 9.9034e-04
+Loss = 2.9611e-01, PNorm = 36.2937, GNorm = 0.1630, lr_0 = 9.9027e-04
+Loss = 2.6500e-01, PNorm = 36.3019, GNorm = 0.2119, lr_0 = 9.9020e-04
+Loss = 2.8546e-01, PNorm = 36.3033, GNorm = 0.1325, lr_0 = 9.9014e-04
+Loss = 2.7019e-01, PNorm = 36.3073, GNorm = 0.3620, lr_0 = 9.9007e-04
+Loss = 2.7924e-01, PNorm = 36.3041, GNorm = 0.3117, lr_0 = 9.9000e-04
+Loss = 2.7192e-01, PNorm = 36.3159, GNorm = 0.3542, lr_0 = 9.8993e-04
+Loss = 2.8797e-01, PNorm = 36.3285, GNorm = 0.2778, lr_0 = 9.8987e-04
+Loss = 3.0321e-01, PNorm = 36.3455, GNorm = 0.3378, lr_0 = 9.8980e-04
+Loss = 2.9836e-01, PNorm = 36.3547, GNorm = 0.3406, lr_0 = 9.8973e-04
+Loss = 3.1317e-01, PNorm = 36.3773, GNorm = 0.1913, lr_0 = 9.8966e-04
+Loss = 3.1237e-01, PNorm = 36.3880, GNorm = 0.2629, lr_0 = 9.8959e-04
+Loss = 3.0826e-01, PNorm = 36.4057, GNorm = 0.1786, lr_0 = 9.8953e-04
+Loss = 2.9935e-01, PNorm = 36.4218, GNorm = 0.2394, lr_0 = 9.8946e-04
+Loss = 2.4885e-01, PNorm = 36.4373, GNorm = 0.1900, lr_0 = 9.8939e-04
+Loss = 3.0758e-01, PNorm = 36.4440, GNorm = 0.2693, lr_0 = 9.8932e-04
+Loss = 2.9543e-01, PNorm = 36.4606, GNorm = 0.4474, lr_0 = 9.8926e-04
+Loss = 3.1709e-01, PNorm = 36.4763, GNorm = 0.1861, lr_0 = 9.8919e-04
+Loss = 3.0701e-01, PNorm = 36.5014, GNorm = 0.2875, lr_0 = 9.8912e-04
+Loss = 2.8517e-01, PNorm = 36.5161, GNorm = 0.1562, lr_0 = 9.8905e-04
+Loss = 3.0257e-01, PNorm = 36.5137, GNorm = 0.1935, lr_0 = 9.8899e-04
+Loss = 2.8446e-01, PNorm = 36.5264, GNorm = 0.1317, lr_0 = 9.8892e-04
+Loss = 3.2518e-01, PNorm = 36.5366, GNorm = 0.2219, lr_0 = 9.8885e-04
+Loss = 2.6131e-01, PNorm = 36.5490, GNorm = 0.2254, lr_0 = 9.8878e-04
+Loss = 2.7100e-01, PNorm = 36.5641, GNorm = 0.1887, lr_0 = 9.8872e-04
+Loss = 3.0418e-01, PNorm = 36.5684, GNorm = 0.1099, lr_0 = 9.8865e-04
+Loss = 3.1143e-01, PNorm = 36.5866, GNorm = 0.1587, lr_0 = 9.8858e-04
+Loss = 3.0125e-01, PNorm = 36.5897, GNorm = 0.2210, lr_0 = 9.8851e-04
+Loss = 3.5185e-01, PNorm = 36.5986, GNorm = 0.1977, lr_0 = 9.8845e-04
+Loss = 3.4978e-01, PNorm = 36.6089, GNorm = 0.1000, lr_0 = 9.8838e-04
+Loss = 2.4866e-01, PNorm = 36.6335, GNorm = 0.1599, lr_0 = 9.8831e-04
+Loss = 2.6045e-01, PNorm = 36.6398, GNorm = 0.2359, lr_0 = 9.8824e-04
+Loss = 3.0219e-01, PNorm = 36.6397, GNorm = 0.3935, lr_0 = 9.8818e-04
+Loss = 3.3062e-01, PNorm = 36.6521, GNorm = 0.4999, lr_0 = 9.8811e-04
+Loss = 3.1809e-01, PNorm = 36.6652, GNorm = 0.2628, lr_0 = 9.8804e-04
+Loss = 3.2633e-01, PNorm = 36.6725, GNorm = 0.1684, lr_0 = 9.8797e-04
+Loss = 3.3664e-01, PNorm = 36.6852, GNorm = 0.2405, lr_0 = 9.8791e-04
+Loss = 3.3172e-01, PNorm = 36.7006, GNorm = 0.1946, lr_0 = 9.8784e-04
+Loss = 3.0694e-01, PNorm = 36.7136, GNorm = 0.1305, lr_0 = 9.8777e-04
+Loss = 2.8052e-01, PNorm = 36.7327, GNorm = 0.4364, lr_0 = 9.8770e-04
+Loss = 3.3098e-01, PNorm = 36.7479, GNorm = 0.1634, lr_0 = 9.8764e-04
+Loss = 3.1087e-01, PNorm = 36.7767, GNorm = 0.5450, lr_0 = 9.8757e-04
+Loss = 3.6268e-01, PNorm = 36.7783, GNorm = 0.1897, lr_0 = 9.8750e-04
+Loss = 2.9347e-01, PNorm = 36.8103, GNorm = 0.2466, lr_0 = 9.8743e-04
+Loss = 3.1745e-01, PNorm = 36.8208, GNorm = 0.0811, lr_0 = 9.8737e-04
+Loss = 2.9084e-01, PNorm = 36.8361, GNorm = 0.1813, lr_0 = 9.8730e-04
+Loss = 2.6261e-01, PNorm = 36.8722, GNorm = 0.1352, lr_0 = 9.8723e-04
+Loss = 3.3507e-01, PNorm = 36.8739, GNorm = 0.3500, lr_0 = 9.8716e-04
+Loss = 3.2295e-01, PNorm = 36.8886, GNorm = 0.1694, lr_0 = 9.8710e-04
+Loss = 3.1127e-01, PNorm = 36.9021, GNorm = 0.2831, lr_0 = 9.8703e-04
+Loss = 3.3092e-01, PNorm = 36.9097, GNorm = 0.2195, lr_0 = 9.8696e-04
+Loss = 2.6197e-01, PNorm = 36.9132, GNorm = 0.3922, lr_0 = 9.8689e-04
+Loss = 3.2254e-01, PNorm = 36.9192, GNorm = 0.1729, lr_0 = 9.8683e-04
+Loss = 3.2399e-01, PNorm = 36.9308, GNorm = 0.2503, lr_0 = 9.8676e-04
+Loss = 3.0452e-01, PNorm = 36.9760, GNorm = 0.3184, lr_0 = 9.8669e-04
+Loss = 2.6802e-01, PNorm = 37.0236, GNorm = 0.1345, lr_0 = 9.8662e-04
+Loss = 2.9101e-01, PNorm = 37.0437, GNorm = 0.0928, lr_0 = 9.8656e-04
+Loss = 2.9664e-01, PNorm = 37.0574, GNorm = 0.3346, lr_0 = 9.8649e-04
+Loss = 2.4421e-01, PNorm = 37.0753, GNorm = 0.3397, lr_0 = 9.8642e-04
+Loss = 2.8063e-01, PNorm = 37.0876, GNorm = 0.2207, lr_0 = 9.8636e-04
+Loss = 2.6006e-01, PNorm = 37.0734, GNorm = 0.1979, lr_0 = 9.8629e-04
+Loss = 2.7108e-01, PNorm = 37.0978, GNorm = 0.3153, lr_0 = 9.8622e-04
+Loss = 1.9211e-01, PNorm = 37.1155, GNorm = 0.1524, lr_0 = 9.8615e-04
+Loss = 2.9369e-01, PNorm = 37.1190, GNorm = 0.1788, lr_0 = 9.8609e-04
+Loss = 3.0431e-01, PNorm = 37.1342, GNorm = 0.4871, lr_0 = 9.8602e-04
+Loss = 3.0149e-01, PNorm = 37.1447, GNorm = 0.2555, lr_0 = 9.8595e-04
+Loss = 2.4527e-01, PNorm = 37.1712, GNorm = 0.2345, lr_0 = 9.8588e-04
+Loss = 3.0570e-01, PNorm = 37.1739, GNorm = 0.1228, lr_0 = 9.8582e-04
+Loss = 3.7793e-01, PNorm = 37.1819, GNorm = 0.2026, lr_0 = 9.8575e-04
+Loss = 3.4015e-01, PNorm = 37.1933, GNorm = 0.1140, lr_0 = 9.8568e-04
+Loss = 3.3435e-01, PNorm = 37.2058, GNorm = 0.2085, lr_0 = 9.8561e-04
+Loss = 3.2394e-01, PNorm = 37.2168, GNorm = 0.3561, lr_0 = 9.8555e-04
+Loss = 2.7661e-01, PNorm = 37.2349, GNorm = 0.1585, lr_0 = 9.8548e-04
+Loss = 3.2168e-01, PNorm = 37.2394, GNorm = 0.3284, lr_0 = 9.8541e-04
+Loss = 2.9298e-01, PNorm = 37.2514, GNorm = 0.1466, lr_0 = 9.8534e-04
+Loss = 2.5933e-01, PNorm = 37.2752, GNorm = 0.0955, lr_0 = 9.8528e-04
+Loss = 3.6919e-01, PNorm = 37.2838, GNorm = 0.1994, lr_0 = 9.8521e-04
+Loss = 3.2047e-01, PNorm = 37.3086, GNorm = 0.6026, lr_0 = 9.8514e-04
+Loss = 2.2975e-01, PNorm = 37.3307, GNorm = 0.2173, lr_0 = 9.8508e-04
+Loss = 3.0753e-01, PNorm = 37.3482, GNorm = 0.1341, lr_0 = 9.8501e-04
+Loss = 2.5228e-01, PNorm = 37.3667, GNorm = 0.1005, lr_0 = 9.8494e-04
+Loss = 2.5414e-01, PNorm = 37.3765, GNorm = 0.3365, lr_0 = 9.8487e-04
+Loss = 2.3523e-01, PNorm = 37.3946, GNorm = 0.4258, lr_0 = 9.8481e-04
+Loss = 2.7110e-01, PNorm = 37.4019, GNorm = 0.1360, lr_0 = 9.8474e-04
+Loss = 2.8991e-01, PNorm = 37.4106, GNorm = 0.1326, lr_0 = 9.8467e-04
+Validation cross_entropy = 0.293333
+Epoch 4
+Loss = 3.5003e-01, PNorm = 37.4286, GNorm = 0.3328, lr_0 = 9.8460e-04
+Loss = 2.8286e-01, PNorm = 37.4401, GNorm = 0.2881, lr_0 = 9.8453e-04
+Loss = 2.3498e-01, PNorm = 37.4583, GNorm = 0.1936, lr_0 = 9.8446e-04
+Loss = 3.1176e-01, PNorm = 37.4593, GNorm = 0.2482, lr_0 = 9.8440e-04
+Loss = 3.8254e-01, PNorm = 37.4624, GNorm = 0.1384, lr_0 = 9.8433e-04
+Loss = 3.3553e-01, PNorm = 37.5021, GNorm = 0.2573, lr_0 = 9.8426e-04
+Loss = 2.8172e-01, PNorm = 37.5288, GNorm = 0.1977, lr_0 = 9.8419e-04
+Loss = 2.5485e-01, PNorm = 37.5373, GNorm = 0.0666, lr_0 = 9.8413e-04
+Loss = 2.5451e-01, PNorm = 37.5611, GNorm = 0.0896, lr_0 = 9.8406e-04
+Loss = 3.0773e-01, PNorm = 37.5803, GNorm = 0.0780, lr_0 = 9.8399e-04
+Loss = 3.4984e-01, PNorm = 37.5869, GNorm = 0.2369, lr_0 = 9.8393e-04
+Loss = 3.6344e-01, PNorm = 37.5862, GNorm = 0.4358, lr_0 = 9.8386e-04
+Loss = 3.0609e-01, PNorm = 37.6196, GNorm = 0.2332, lr_0 = 9.8379e-04
+Loss = 3.1569e-01, PNorm = 37.6363, GNorm = 0.0923, lr_0 = 9.8372e-04
+Loss = 2.7378e-01, PNorm = 37.6621, GNorm = 0.1941, lr_0 = 9.8366e-04
+Loss = 3.0525e-01, PNorm = 37.6896, GNorm = 0.1431, lr_0 = 9.8359e-04
+Loss = 3.2203e-01, PNorm = 37.7101, GNorm = 0.1573, lr_0 = 9.8352e-04
+Loss = 2.6312e-01, PNorm = 37.7452, GNorm = 0.2129, lr_0 = 9.8346e-04
+Loss = 2.5933e-01, PNorm = 37.7617, GNorm = 0.1504, lr_0 = 9.8339e-04
+Loss = 2.8455e-01, PNorm = 37.7834, GNorm = 0.1072, lr_0 = 9.8332e-04
+Loss = 2.2637e-01, PNorm = 37.8146, GNorm = 0.2162, lr_0 = 9.8325e-04
+Loss = 3.0305e-01, PNorm = 37.8284, GNorm = 0.2422, lr_0 = 9.8319e-04
+Loss = 3.4625e-01, PNorm = 37.8392, GNorm = 0.2011, lr_0 = 9.8312e-04
+Loss = 2.5016e-01, PNorm = 37.8794, GNorm = 0.2966, lr_0 = 9.8305e-04
+Loss = 3.1433e-01, PNorm = 37.8925, GNorm = 0.1325, lr_0 = 9.8298e-04
+Loss = 3.2932e-01, PNorm = 37.8911, GNorm = 0.2100, lr_0 = 9.8292e-04
+Loss = 3.0754e-01, PNorm = 37.9133, GNorm = 0.1613, lr_0 = 9.8285e-04
+Loss = 3.1113e-01, PNorm = 37.9197, GNorm = 0.1157, lr_0 = 9.8278e-04
+Loss = 2.8444e-01, PNorm = 37.9319, GNorm = 0.1083, lr_0 = 9.8272e-04
+Loss = 2.6804e-01, PNorm = 37.9494, GNorm = 0.1061, lr_0 = 9.8265e-04
+Loss = 3.3381e-01, PNorm = 37.9609, GNorm = 0.2596, lr_0 = 9.8258e-04
+Loss = 2.9502e-01, PNorm = 37.9855, GNorm = 0.1473, lr_0 = 9.8251e-04
+Loss = 3.3204e-01, PNorm = 38.0000, GNorm = 0.1487, lr_0 = 9.8245e-04
+Loss = 3.3697e-01, PNorm = 38.0232, GNorm = 0.4043, lr_0 = 9.8238e-04
+Loss = 3.1165e-01, PNorm = 38.0561, GNorm = 0.2153, lr_0 = 9.8231e-04
+Loss = 2.7478e-01, PNorm = 38.0962, GNorm = 0.5773, lr_0 = 9.8225e-04
+Loss = 4.1087e-01, PNorm = 38.1055, GNorm = 0.2043, lr_0 = 9.8218e-04
+Loss = 3.1587e-01, PNorm = 38.1528, GNorm = 0.2498, lr_0 = 9.8211e-04
+Loss = 2.4332e-01, PNorm = 38.1928, GNorm = 0.1667, lr_0 = 9.8205e-04
+Loss = 3.5739e-01, PNorm = 38.1781, GNorm = 0.2361, lr_0 = 9.8198e-04
+Loss = 2.9269e-01, PNorm = 38.1984, GNorm = 0.1367, lr_0 = 9.8191e-04
+Loss = 2.4822e-01, PNorm = 38.2116, GNorm = 0.0547, lr_0 = 9.8184e-04
+Loss = 2.8595e-01, PNorm = 38.2038, GNorm = 0.1078, lr_0 = 9.8178e-04
+Loss = 3.4890e-01, PNorm = 38.1986, GNorm = 0.2481, lr_0 = 9.8171e-04
+Loss = 3.2876e-01, PNorm = 38.2098, GNorm = 0.1290, lr_0 = 9.8164e-04
+Loss = 2.9425e-01, PNorm = 38.2232, GNorm = 0.1361, lr_0 = 9.8158e-04
+Loss = 3.6032e-01, PNorm = 38.2250, GNorm = 0.1465, lr_0 = 9.8151e-04
+Loss = 2.6417e-01, PNorm = 38.2484, GNorm = 0.1282, lr_0 = 9.8144e-04
+Loss = 3.0449e-01, PNorm = 38.2674, GNorm = 0.3762, lr_0 = 9.8137e-04
+Loss = 2.4627e-01, PNorm = 38.2714, GNorm = 0.2296, lr_0 = 9.8131e-04
+Loss = 2.2569e-01, PNorm = 38.2925, GNorm = 0.1123, lr_0 = 9.8124e-04
+Loss = 2.7756e-01, PNorm = 38.3056, GNorm = 0.1262, lr_0 = 9.8117e-04
+Loss = 2.7431e-01, PNorm = 38.3211, GNorm = 0.1822, lr_0 = 9.8111e-04
+Loss = 3.5255e-01, PNorm = 38.3309, GNorm = 0.1628, lr_0 = 9.8104e-04
+Loss = 2.9287e-01, PNorm = 38.3522, GNorm = 0.2703, lr_0 = 9.8097e-04
+Loss = 2.4442e-01, PNorm = 38.3741, GNorm = 0.1867, lr_0 = 9.8091e-04
+Loss = 3.4373e-01, PNorm = 38.3815, GNorm = 0.7671, lr_0 = 9.8084e-04
+Loss = 3.2276e-01, PNorm = 38.3821, GNorm = 0.1673, lr_0 = 9.8077e-04
+Loss = 2.3256e-01, PNorm = 38.4035, GNorm = 0.2063, lr_0 = 9.8070e-04
+Loss = 2.6174e-01, PNorm = 38.4094, GNorm = 0.1943, lr_0 = 9.8064e-04
+Loss = 2.5395e-01, PNorm = 38.3941, GNorm = 0.1877, lr_0 = 9.8057e-04
+Loss = 2.5000e-01, PNorm = 38.3893, GNorm = 0.0791, lr_0 = 9.8050e-04
+Loss = 3.1064e-01, PNorm = 38.3873, GNorm = 0.1516, lr_0 = 9.8044e-04
+Loss = 3.2838e-01, PNorm = 38.3900, GNorm = 0.5515, lr_0 = 9.8037e-04
+Loss = 3.3388e-01, PNorm = 38.4062, GNorm = 0.0887, lr_0 = 9.8030e-04
+Loss = 2.8583e-01, PNorm = 38.4364, GNorm = 0.1731, lr_0 = 9.8024e-04
+Loss = 2.0456e-01, PNorm = 38.4547, GNorm = 0.0928, lr_0 = 9.8017e-04
+Loss = 3.4812e-01, PNorm = 38.4387, GNorm = 0.1279, lr_0 = 9.8010e-04
+Loss = 3.1008e-01, PNorm = 38.4348, GNorm = 0.4523, lr_0 = 9.8003e-04
+Loss = 3.1695e-01, PNorm = 38.4607, GNorm = 0.5037, lr_0 = 9.7997e-04
+Loss = 2.8240e-01, PNorm = 38.4628, GNorm = 0.1929, lr_0 = 9.7990e-04
+Loss = 2.7519e-01, PNorm = 38.4693, GNorm = 0.1037, lr_0 = 9.7983e-04
+Loss = 3.0873e-01, PNorm = 38.4834, GNorm = 0.5337, lr_0 = 9.7977e-04
+Loss = 2.8033e-01, PNorm = 38.4998, GNorm = 0.1609, lr_0 = 9.7970e-04
+Loss = 2.4253e-01, PNorm = 38.5162, GNorm = 0.1777, lr_0 = 9.7963e-04
+Loss = 3.6541e-01, PNorm = 38.5144, GNorm = 0.3070, lr_0 = 9.7957e-04
+Loss = 2.7221e-01, PNorm = 38.5386, GNorm = 0.1835, lr_0 = 9.7950e-04
+Loss = 3.0114e-01, PNorm = 38.5510, GNorm = 0.1777, lr_0 = 9.7943e-04
+Loss = 3.2887e-01, PNorm = 38.5639, GNorm = 0.6848, lr_0 = 9.7937e-04
+Loss = 3.4063e-01, PNorm = 38.5613, GNorm = 0.1752, lr_0 = 9.7930e-04
+Loss = 3.2348e-01, PNorm = 38.5796, GNorm = 0.0818, lr_0 = 9.7923e-04
+Loss = 3.4370e-01, PNorm = 38.5943, GNorm = 0.3429, lr_0 = 9.7916e-04
+Loss = 3.4930e-01, PNorm = 38.5912, GNorm = 0.1762, lr_0 = 9.7910e-04
+Loss = 3.1152e-01, PNorm = 38.5827, GNorm = 0.2175, lr_0 = 9.7903e-04
+Loss = 3.3776e-01, PNorm = 38.5922, GNorm = 0.7575, lr_0 = 9.7896e-04
+Loss = 2.9267e-01, PNorm = 38.5986, GNorm = 0.1398, lr_0 = 9.7890e-04
+Loss = 2.8502e-01, PNorm = 38.6248, GNorm = 0.4212, lr_0 = 9.7883e-04
+Loss = 3.8090e-01, PNorm = 38.6192, GNorm = 0.3178, lr_0 = 9.7876e-04
+Loss = 2.6796e-01, PNorm = 38.6438, GNorm = 0.3558, lr_0 = 9.7870e-04
+Loss = 2.8906e-01, PNorm = 38.6695, GNorm = 0.2296, lr_0 = 9.7863e-04
+Loss = 2.6823e-01, PNorm = 38.6731, GNorm = 0.0767, lr_0 = 9.7856e-04
+Loss = 2.6971e-01, PNorm = 38.6791, GNorm = 0.0993, lr_0 = 9.7850e-04
+Loss = 2.9378e-01, PNorm = 38.6846, GNorm = 0.1606, lr_0 = 9.7843e-04
+Loss = 2.4603e-01, PNorm = 38.6948, GNorm = 0.2284, lr_0 = 9.7836e-04
+Loss = 2.4261e-01, PNorm = 38.7149, GNorm = 0.0919, lr_0 = 9.7830e-04
+Loss = 2.6350e-01, PNorm = 38.7254, GNorm = 0.1683, lr_0 = 9.7823e-04
+Loss = 3.2192e-01, PNorm = 38.7332, GNorm = 0.1070, lr_0 = 9.7816e-04
+Loss = 3.0142e-01, PNorm = 38.7437, GNorm = 0.2914, lr_0 = 9.7809e-04
+Loss = 2.7017e-01, PNorm = 38.7570, GNorm = 0.2227, lr_0 = 9.7803e-04
+Loss = 2.7850e-01, PNorm = 38.7736, GNorm = 0.1504, lr_0 = 9.7796e-04
+Loss = 2.5461e-01, PNorm = 38.7842, GNorm = 0.3596, lr_0 = 9.7789e-04
+Loss = 3.2652e-01, PNorm = 38.8031, GNorm = 0.2290, lr_0 = 9.7783e-04
+Loss = 2.2002e-01, PNorm = 38.8194, GNorm = 0.1975, lr_0 = 9.7776e-04
+Loss = 3.1498e-01, PNorm = 38.8246, GNorm = 0.1893, lr_0 = 9.7769e-04
+Loss = 2.9918e-01, PNorm = 38.8350, GNorm = 0.0880, lr_0 = 9.7763e-04
+Loss = 3.1919e-01, PNorm = 38.8474, GNorm = 0.1674, lr_0 = 9.7756e-04
+Loss = 3.4496e-01, PNorm = 38.8548, GNorm = 0.1190, lr_0 = 9.7749e-04
+Loss = 2.7936e-01, PNorm = 38.8633, GNorm = 0.1928, lr_0 = 9.7743e-04
+Loss = 3.6330e-01, PNorm = 38.8714, GNorm = 0.1060, lr_0 = 9.7736e-04
+Loss = 3.7444e-01, PNorm = 38.8815, GNorm = 0.1941, lr_0 = 9.7729e-04
+Loss = 2.5302e-01, PNorm = 38.9173, GNorm = 0.1126, lr_0 = 9.7723e-04
+Loss = 2.8763e-01, PNorm = 38.9273, GNorm = 0.2189, lr_0 = 9.7716e-04
+Loss = 2.0946e-01, PNorm = 38.9361, GNorm = 0.0994, lr_0 = 9.7709e-04
+Validation cross_entropy = 0.294884
+Epoch 5
+Loss = 3.3054e-01, PNorm = 38.9425, GNorm = 0.4479, lr_0 = 9.7702e-04
+Loss = 2.6477e-01, PNorm = 38.9472, GNorm = 0.0887, lr_0 = 9.7695e-04
+Loss = 2.6119e-01, PNorm = 38.9600, GNorm = 0.2136, lr_0 = 9.7689e-04
+Loss = 3.2348e-01, PNorm = 38.9690, GNorm = 0.1973, lr_0 = 9.7682e-04
+Loss = 2.4590e-01, PNorm = 38.9859, GNorm = 0.0758, lr_0 = 9.7675e-04
+Loss = 3.8543e-01, PNorm = 38.9918, GNorm = 0.1166, lr_0 = 9.7669e-04
+Loss = 2.7159e-01, PNorm = 39.0108, GNorm = 0.1552, lr_0 = 9.7662e-04
+Loss = 2.8539e-01, PNorm = 39.0350, GNorm = 0.2298, lr_0 = 9.7655e-04
+Loss = 2.6416e-01, PNorm = 39.0643, GNorm = 0.1670, lr_0 = 9.7649e-04
+Loss = 2.4986e-01, PNorm = 39.0838, GNorm = 0.1477, lr_0 = 9.7642e-04
+Loss = 2.5140e-01, PNorm = 39.1002, GNorm = 0.2158, lr_0 = 9.7635e-04
+Loss = 3.0467e-01, PNorm = 39.1205, GNorm = 0.2067, lr_0 = 9.7629e-04
+Loss = 2.3624e-01, PNorm = 39.1507, GNorm = 0.2212, lr_0 = 9.7622e-04
+Loss = 3.0677e-01, PNorm = 39.1559, GNorm = 0.1578, lr_0 = 9.7615e-04
+Loss = 2.8799e-01, PNorm = 39.1808, GNorm = 0.1454, lr_0 = 9.7609e-04
+Loss = 2.2722e-01, PNorm = 39.2092, GNorm = 0.0905, lr_0 = 9.7602e-04
+Loss = 2.9278e-01, PNorm = 39.2035, GNorm = 0.0874, lr_0 = 9.7595e-04
+Loss = 2.1786e-01, PNorm = 39.2250, GNorm = 0.1379, lr_0 = 9.7589e-04
+Loss = 3.1204e-01, PNorm = 39.2305, GNorm = 0.2548, lr_0 = 9.7582e-04
+Loss = 3.6924e-01, PNorm = 39.2382, GNorm = 0.4756, lr_0 = 9.7575e-04
+Loss = 2.8968e-01, PNorm = 39.2647, GNorm = 0.0854, lr_0 = 9.7569e-04
+Loss = 3.1878e-01, PNorm = 39.2786, GNorm = 0.2299, lr_0 = 9.7562e-04
+Loss = 3.5149e-01, PNorm = 39.2850, GNorm = 0.1175, lr_0 = 9.7555e-04
+Loss = 3.3774e-01, PNorm = 39.3038, GNorm = 0.2089, lr_0 = 9.7549e-04
+Loss = 2.3569e-01, PNorm = 39.3362, GNorm = 0.1952, lr_0 = 9.7542e-04
+Loss = 3.4353e-01, PNorm = 39.3321, GNorm = 0.1312, lr_0 = 9.7535e-04
+Loss = 3.0347e-01, PNorm = 39.3424, GNorm = 0.1540, lr_0 = 9.7529e-04
+Loss = 2.7596e-01, PNorm = 39.3679, GNorm = 0.3571, lr_0 = 9.7522e-04
+Loss = 3.5006e-01, PNorm = 39.3687, GNorm = 0.1811, lr_0 = 9.7515e-04
+Loss = 3.2930e-01, PNorm = 39.3840, GNorm = 0.0820, lr_0 = 9.7509e-04
+Loss = 3.1806e-01, PNorm = 39.3989, GNorm = 0.1776, lr_0 = 9.7502e-04
+Loss = 3.1599e-01, PNorm = 39.4175, GNorm = 0.2351, lr_0 = 9.7495e-04
+Loss = 3.3309e-01, PNorm = 39.4340, GNorm = 0.0837, lr_0 = 9.7489e-04
+Loss = 3.1799e-01, PNorm = 39.4445, GNorm = 0.3370, lr_0 = 9.7482e-04
+Loss = 2.8130e-01, PNorm = 39.4719, GNorm = 0.1041, lr_0 = 9.7475e-04
+Loss = 2.9170e-01, PNorm = 39.4925, GNorm = 0.1077, lr_0 = 9.7469e-04
+Loss = 3.5758e-01, PNorm = 39.5008, GNorm = 0.3395, lr_0 = 9.7462e-04
+Loss = 2.9645e-01, PNorm = 39.5212, GNorm = 0.2009, lr_0 = 9.7455e-04
+Loss = 3.3944e-01, PNorm = 39.5439, GNorm = 0.1676, lr_0 = 9.7449e-04
+Loss = 2.9475e-01, PNorm = 39.5634, GNorm = 0.1197, lr_0 = 9.7442e-04
+Loss = 2.8758e-01, PNorm = 39.5797, GNorm = 0.2550, lr_0 = 9.7435e-04
+Loss = 2.8088e-01, PNorm = 39.5901, GNorm = 0.1693, lr_0 = 9.7429e-04
+Loss = 2.6695e-01, PNorm = 39.6028, GNorm = 0.1838, lr_0 = 9.7422e-04
+Loss = 2.9914e-01, PNorm = 39.6099, GNorm = 0.1151, lr_0 = 9.7415e-04
+Loss = 3.1938e-01, PNorm = 39.6170, GNorm = 0.1099, lr_0 = 9.7409e-04
+Loss = 1.5754e-01, PNorm = 39.6547, GNorm = 0.1297, lr_0 = 9.7402e-04
+Loss = 3.1347e-01, PNorm = 39.6657, GNorm = 0.0999, lr_0 = 9.7395e-04
+Loss = 3.1552e-01, PNorm = 39.6613, GNorm = 0.1343, lr_0 = 9.7389e-04
+Loss = 3.1245e-01, PNorm = 39.6845, GNorm = 0.1534, lr_0 = 9.7382e-04
+Loss = 2.6922e-01, PNorm = 39.7101, GNorm = 0.1280, lr_0 = 9.7375e-04
+Loss = 3.5886e-01, PNorm = 39.7298, GNorm = 0.2024, lr_0 = 9.7369e-04
+Loss = 2.5728e-01, PNorm = 39.7577, GNorm = 0.1552, lr_0 = 9.7362e-04
+Loss = 2.7205e-01, PNorm = 39.7864, GNorm = 0.1703, lr_0 = 9.7355e-04
+Loss = 3.2911e-01, PNorm = 39.7900, GNorm = 0.4306, lr_0 = 9.7349e-04
+Loss = 3.0822e-01, PNorm = 39.8062, GNorm = 0.1207, lr_0 = 9.7342e-04
+Loss = 2.8104e-01, PNorm = 39.8343, GNorm = 0.2051, lr_0 = 9.7336e-04
+Loss = 3.2873e-01, PNorm = 39.8568, GNorm = 0.1838, lr_0 = 9.7329e-04
+Loss = 3.2597e-01, PNorm = 39.8698, GNorm = 0.1337, lr_0 = 9.7322e-04
+Loss = 2.8106e-01, PNorm = 39.8719, GNorm = 0.3063, lr_0 = 9.7316e-04
+Loss = 3.2026e-01, PNorm = 39.8827, GNorm = 0.1062, lr_0 = 9.7309e-04
+Loss = 3.5071e-01, PNorm = 39.8860, GNorm = 0.1302, lr_0 = 9.7302e-04
+Loss = 2.7624e-01, PNorm = 39.9033, GNorm = 0.1504, lr_0 = 9.7296e-04
+Loss = 2.7121e-01, PNorm = 39.9286, GNorm = 0.3015, lr_0 = 9.7289e-04
+Loss = 2.7714e-01, PNorm = 39.9296, GNorm = 0.5504, lr_0 = 9.7282e-04
+Loss = 2.3679e-01, PNorm = 39.9321, GNorm = 0.1359, lr_0 = 9.7276e-04
+Loss = 3.1839e-01, PNorm = 39.9373, GNorm = 0.3578, lr_0 = 9.7269e-04
+Loss = 2.7720e-01, PNorm = 39.9558, GNorm = 0.4079, lr_0 = 9.7262e-04
+Loss = 3.2252e-01, PNorm = 39.9570, GNorm = 0.2105, lr_0 = 9.7256e-04
+Loss = 2.6603e-01, PNorm = 39.9728, GNorm = 0.1351, lr_0 = 9.7249e-04
+Loss = 2.1575e-01, PNorm = 39.9934, GNorm = 0.1062, lr_0 = 9.7242e-04
+Loss = 3.1164e-01, PNorm = 39.9935, GNorm = 0.2903, lr_0 = 9.7236e-04
+Loss = 3.3474e-01, PNorm = 40.0001, GNorm = 0.2536, lr_0 = 9.7229e-04
+Loss = 3.0090e-01, PNorm = 40.0276, GNorm = 0.1884, lr_0 = 9.7223e-04
+Loss = 3.1488e-01, PNorm = 40.0362, GNorm = 0.1774, lr_0 = 9.7216e-04
+Loss = 2.7912e-01, PNorm = 40.0448, GNorm = 0.0933, lr_0 = 9.7209e-04
+Loss = 2.0697e-01, PNorm = 40.0688, GNorm = 0.1066, lr_0 = 9.7203e-04
+Loss = 3.2733e-01, PNorm = 40.0556, GNorm = 0.1320, lr_0 = 9.7196e-04
+Loss = 2.7838e-01, PNorm = 40.0610, GNorm = 0.1428, lr_0 = 9.7189e-04
+Loss = 3.6889e-01, PNorm = 40.0685, GNorm = 0.1916, lr_0 = 9.7183e-04
+Loss = 2.9750e-01, PNorm = 40.0814, GNorm = 0.1524, lr_0 = 9.7176e-04
+Loss = 2.3403e-01, PNorm = 40.1046, GNorm = 0.0796, lr_0 = 9.7169e-04
+Loss = 2.9670e-01, PNorm = 40.1117, GNorm = 0.3876, lr_0 = 9.7163e-04
+Loss = 2.5687e-01, PNorm = 40.1144, GNorm = 0.2639, lr_0 = 9.7156e-04
+Loss = 3.2072e-01, PNorm = 40.1197, GNorm = 0.1673, lr_0 = 9.7150e-04
+Loss = 2.7805e-01, PNorm = 40.1314, GNorm = 0.0808, lr_0 = 9.7143e-04
+Loss = 3.1573e-01, PNorm = 40.1471, GNorm = 0.2187, lr_0 = 9.7136e-04
+Loss = 2.9280e-01, PNorm = 40.1486, GNorm = 0.2763, lr_0 = 9.7130e-04
+Loss = 3.1813e-01, PNorm = 40.1578, GNorm = 0.1366, lr_0 = 9.7123e-04
+Loss = 2.9082e-01, PNorm = 40.1631, GNorm = 0.2240, lr_0 = 9.7116e-04
+Loss = 3.1821e-01, PNorm = 40.1683, GNorm = 0.2732, lr_0 = 9.7110e-04
+Loss = 3.6840e-01, PNorm = 40.1825, GNorm = 0.1723, lr_0 = 9.7103e-04
+Loss = 2.8502e-01, PNorm = 40.2197, GNorm = 0.0810, lr_0 = 9.7096e-04
+Loss = 3.4104e-01, PNorm = 40.2531, GNorm = 0.2227, lr_0 = 9.7090e-04
+Loss = 3.0769e-01, PNorm = 40.2761, GNorm = 0.3618, lr_0 = 9.7083e-04
+Loss = 2.7930e-01, PNorm = 40.3280, GNorm = 0.1613, lr_0 = 9.7077e-04
+Loss = 3.2230e-01, PNorm = 40.3691, GNorm = 0.2789, lr_0 = 9.7070e-04
+Loss = 3.3277e-01, PNorm = 40.3862, GNorm = 0.1914, lr_0 = 9.7063e-04
+Loss = 2.9414e-01, PNorm = 40.4136, GNorm = 0.1513, lr_0 = 9.7057e-04
+Loss = 3.2456e-01, PNorm = 40.4271, GNorm = 0.0988, lr_0 = 9.7050e-04
+Loss = 2.9173e-01, PNorm = 40.4382, GNorm = 0.2506, lr_0 = 9.7043e-04
+Loss = 2.7834e-01, PNorm = 40.4549, GNorm = 0.2128, lr_0 = 9.7037e-04
+Loss = 2.4759e-01, PNorm = 40.4692, GNorm = 0.1073, lr_0 = 9.7030e-04
+Loss = 3.3014e-01, PNorm = 40.4727, GNorm = 0.3133, lr_0 = 9.7023e-04
+Loss = 2.7468e-01, PNorm = 40.4927, GNorm = 0.1694, lr_0 = 9.7017e-04
+Loss = 2.3023e-01, PNorm = 40.5052, GNorm = 0.1642, lr_0 = 9.7010e-04
+Loss = 3.4259e-01, PNorm = 40.4988, GNorm = 0.3060, lr_0 = 9.7004e-04
+Loss = 3.3366e-01, PNorm = 40.5123, GNorm = 0.2746, lr_0 = 9.6997e-04
+Loss = 3.0943e-01, PNorm = 40.5331, GNorm = 0.1208, lr_0 = 9.6990e-04
+Loss = 2.3723e-01, PNorm = 40.5431, GNorm = 0.1783, lr_0 = 9.6984e-04
+Loss = 3.3699e-01, PNorm = 40.5406, GNorm = 0.2474, lr_0 = 9.6977e-04
+Loss = 3.0584e-01, PNorm = 40.5497, GNorm = 0.2405, lr_0 = 9.6970e-04
+Loss = 2.6203e-01, PNorm = 40.5637, GNorm = 0.1436, lr_0 = 9.6964e-04
+Loss = 2.6726e-01, PNorm = 40.5815, GNorm = 0.2009, lr_0 = 9.6957e-04
+Validation cross_entropy = 0.292023
+Epoch 6
+Loss = 2.5013e-01, PNorm = 40.5949, GNorm = 0.1171, lr_0 = 9.6951e-04
+Loss = 3.2278e-01, PNorm = 40.6001, GNorm = 0.1272, lr_0 = 9.6944e-04
+Loss = 2.9817e-01, PNorm = 40.6207, GNorm = 0.1006, lr_0 = 9.6937e-04
+Loss = 3.1970e-01, PNorm = 40.6261, GNorm = 0.1576, lr_0 = 9.6931e-04
+Loss = 3.0981e-01, PNorm = 40.6360, GNorm = 0.0897, lr_0 = 9.6924e-04
+Loss = 2.3157e-01, PNorm = 40.6619, GNorm = 0.0860, lr_0 = 9.6917e-04
+Loss = 3.9771e-01, PNorm = 40.6640, GNorm = 0.4445, lr_0 = 9.6911e-04
+Loss = 3.0513e-01, PNorm = 40.6667, GNorm = 0.2435, lr_0 = 9.6904e-04
+Loss = 2.6340e-01, PNorm = 40.6964, GNorm = 0.2242, lr_0 = 9.6898e-04
+Loss = 2.8984e-01, PNorm = 40.7198, GNorm = 0.2732, lr_0 = 9.6891e-04
+Loss = 2.3873e-01, PNorm = 40.7290, GNorm = 0.1977, lr_0 = 9.6884e-04
+Loss = 2.7199e-01, PNorm = 40.7416, GNorm = 0.0663, lr_0 = 9.6878e-04
+Loss = 2.5490e-01, PNorm = 40.7631, GNorm = 0.1092, lr_0 = 9.6871e-04
+Loss = 2.7451e-01, PNorm = 40.7855, GNorm = 0.2305, lr_0 = 9.6865e-04
+Loss = 3.1964e-01, PNorm = 40.7980, GNorm = 0.1420, lr_0 = 9.6858e-04
+Loss = 1.9145e-01, PNorm = 40.8339, GNorm = 0.2639, lr_0 = 9.6851e-04
+Loss = 2.6282e-01, PNorm = 40.8677, GNorm = 0.0945, lr_0 = 9.6845e-04
+Loss = 3.3190e-01, PNorm = 40.8648, GNorm = 0.0875, lr_0 = 9.6838e-04
+Loss = 3.5969e-01, PNorm = 40.8786, GNorm = 0.1187, lr_0 = 9.6831e-04
+Loss = 2.8136e-01, PNorm = 40.9032, GNorm = 0.1803, lr_0 = 9.6825e-04
+Loss = 2.8588e-01, PNorm = 40.9221, GNorm = 0.2083, lr_0 = 9.6818e-04
+Loss = 3.0943e-01, PNorm = 40.9372, GNorm = 0.1940, lr_0 = 9.6812e-04
+Loss = 3.3432e-01, PNorm = 40.9492, GNorm = 0.0917, lr_0 = 9.6805e-04
+Loss = 2.7910e-01, PNorm = 40.9630, GNorm = 0.2234, lr_0 = 9.6798e-04
+Loss = 2.3296e-01, PNorm = 40.9824, GNorm = 0.1014, lr_0 = 9.6792e-04
+Loss = 2.3542e-01, PNorm = 41.0008, GNorm = 0.1460, lr_0 = 9.6785e-04
+Loss = 2.9638e-01, PNorm = 40.9999, GNorm = 0.2428, lr_0 = 9.6779e-04
+Loss = 2.7520e-01, PNorm = 41.0197, GNorm = 0.4266, lr_0 = 9.6772e-04
+Loss = 3.8610e-01, PNorm = 41.0191, GNorm = 0.2495, lr_0 = 9.6765e-04
+Loss = 2.5296e-01, PNorm = 41.0330, GNorm = 0.2804, lr_0 = 9.6759e-04
+Loss = 2.6559e-01, PNorm = 41.0589, GNorm = 0.1165, lr_0 = 9.6752e-04
+Loss = 2.8126e-01, PNorm = 41.0696, GNorm = 0.0959, lr_0 = 9.6745e-04
+Loss = 2.4148e-01, PNorm = 41.0855, GNorm = 0.1889, lr_0 = 9.6739e-04
+Loss = 2.9386e-01, PNorm = 41.1117, GNorm = 0.4184, lr_0 = 9.6732e-04
+Loss = 2.9795e-01, PNorm = 41.1274, GNorm = 0.1738, lr_0 = 9.6726e-04
+Loss = 2.7422e-01, PNorm = 41.1477, GNorm = 0.2450, lr_0 = 9.6719e-04
+Loss = 2.7366e-01, PNorm = 41.1622, GNorm = 0.1896, lr_0 = 9.6712e-04
+Loss = 3.2176e-01, PNorm = 41.1721, GNorm = 0.1640, lr_0 = 9.6706e-04
+Loss = 3.5149e-01, PNorm = 41.1817, GNorm = 0.1087, lr_0 = 9.6699e-04
+Loss = 2.3665e-01, PNorm = 41.2061, GNorm = 0.1872, lr_0 = 9.6693e-04
+Loss = 2.7045e-01, PNorm = 41.2241, GNorm = 0.0977, lr_0 = 9.6686e-04
+Loss = 2.3665e-01, PNorm = 41.2327, GNorm = 0.1791, lr_0 = 9.6679e-04
+Loss = 3.7959e-01, PNorm = 41.2314, GNorm = 0.2119, lr_0 = 9.6673e-04
+Loss = 3.3004e-01, PNorm = 41.2483, GNorm = 0.3268, lr_0 = 9.6666e-04
+Loss = 2.7940e-01, PNorm = 41.2867, GNorm = 0.2761, lr_0 = 9.6660e-04
+Loss = 3.3576e-01, PNorm = 41.2995, GNorm = 0.4736, lr_0 = 9.6653e-04
+Loss = 3.5045e-01, PNorm = 41.3038, GNorm = 0.2654, lr_0 = 9.6646e-04
+Loss = 3.1140e-01, PNorm = 41.3313, GNorm = 0.2469, lr_0 = 9.6640e-04
+Loss = 3.2735e-01, PNorm = 41.3514, GNorm = 0.1726, lr_0 = 9.6633e-04
+Loss = 2.4725e-01, PNorm = 41.3591, GNorm = 0.0920, lr_0 = 9.6627e-04
+Loss = 3.2505e-01, PNorm = 41.3653, GNorm = 0.2599, lr_0 = 9.6620e-04
+Loss = 3.2091e-01, PNorm = 41.3661, GNorm = 0.2181, lr_0 = 9.6613e-04
+Loss = 2.7829e-01, PNorm = 41.3758, GNorm = 0.1269, lr_0 = 9.6607e-04
+Loss = 2.9333e-01, PNorm = 41.3907, GNorm = 0.0940, lr_0 = 9.6600e-04
+Loss = 3.3063e-01, PNorm = 41.4000, GNorm = 0.1469, lr_0 = 9.6594e-04
+Loss = 2.9381e-01, PNorm = 41.4327, GNorm = 0.4244, lr_0 = 9.6587e-04
+Loss = 2.8740e-01, PNorm = 41.4558, GNorm = 0.2892, lr_0 = 9.6580e-04
+Loss = 2.9939e-01, PNorm = 41.4658, GNorm = 0.1890, lr_0 = 9.6574e-04
+Loss = 3.0933e-01, PNorm = 41.4744, GNorm = 0.1463, lr_0 = 9.6567e-04
+Loss = 2.5956e-01, PNorm = 41.4985, GNorm = 0.1800, lr_0 = 9.6561e-04
+Loss = 2.6812e-01, PNorm = 41.5263, GNorm = 0.1245, lr_0 = 9.6554e-04
+Loss = 3.2350e-01, PNorm = 41.5384, GNorm = 0.2567, lr_0 = 9.6547e-04
+Loss = 3.4246e-01, PNorm = 41.5502, GNorm = 0.1798, lr_0 = 9.6541e-04
+Loss = 2.9926e-01, PNorm = 41.5671, GNorm = 0.3188, lr_0 = 9.6534e-04
+Loss = 3.5222e-01, PNorm = 41.5651, GNorm = 0.1476, lr_0 = 9.6528e-04
+Loss = 2.8744e-01, PNorm = 41.5791, GNorm = 0.1272, lr_0 = 9.6521e-04
+Loss = 3.3604e-01, PNorm = 41.5886, GNorm = 0.1505, lr_0 = 9.6514e-04
+Loss = 3.3353e-01, PNorm = 41.5945, GNorm = 0.1073, lr_0 = 9.6508e-04
+Loss = 2.7615e-01, PNorm = 41.6055, GNorm = 0.1311, lr_0 = 9.6501e-04
+Loss = 3.0119e-01, PNorm = 41.6123, GNorm = 0.1022, lr_0 = 9.6495e-04
+Loss = 3.0014e-01, PNorm = 41.6204, GNorm = 0.3054, lr_0 = 9.6488e-04
+Loss = 3.6540e-01, PNorm = 41.6258, GNorm = 0.1616, lr_0 = 9.6481e-04
+Loss = 3.4014e-01, PNorm = 41.6383, GNorm = 0.1909, lr_0 = 9.6475e-04
+Loss = 2.5367e-01, PNorm = 41.6586, GNorm = 0.0742, lr_0 = 9.6468e-04
+Loss = 2.9811e-01, PNorm = 41.6787, GNorm = 0.3040, lr_0 = 9.6462e-04
+Loss = 3.1094e-01, PNorm = 41.6952, GNorm = 0.0902, lr_0 = 9.6455e-04
+Loss = 2.9583e-01, PNorm = 41.7172, GNorm = 0.2456, lr_0 = 9.6449e-04
+Loss = 3.3200e-01, PNorm = 41.7361, GNorm = 0.0857, lr_0 = 9.6442e-04
+Loss = 2.7236e-01, PNorm = 41.7555, GNorm = 0.1013, lr_0 = 9.6435e-04
+Loss = 2.6915e-01, PNorm = 41.7701, GNorm = 0.1217, lr_0 = 9.6429e-04
+Loss = 2.5760e-01, PNorm = 41.7787, GNorm = 0.2235, lr_0 = 9.6422e-04
+Loss = 3.0168e-01, PNorm = 41.7755, GNorm = 0.2509, lr_0 = 9.6416e-04
+Loss = 3.1313e-01, PNorm = 41.7793, GNorm = 0.1621, lr_0 = 9.6409e-04
+Loss = 2.9680e-01, PNorm = 41.7828, GNorm = 0.2228, lr_0 = 9.6402e-04
+Loss = 2.2496e-01, PNorm = 41.8026, GNorm = 0.1525, lr_0 = 9.6396e-04
+Loss = 3.0653e-01, PNorm = 41.8201, GNorm = 0.1054, lr_0 = 9.6389e-04
+Loss = 3.3534e-01, PNorm = 41.8344, GNorm = 0.2132, lr_0 = 9.6383e-04
+Loss = 3.0103e-01, PNorm = 41.8695, GNorm = 0.1481, lr_0 = 9.6376e-04
+Loss = 2.8877e-01, PNorm = 41.8907, GNorm = 0.2887, lr_0 = 9.6369e-04
+Loss = 3.3476e-01, PNorm = 41.9062, GNorm = 0.2021, lr_0 = 9.6363e-04
+Loss = 3.3850e-01, PNorm = 41.9049, GNorm = 0.3267, lr_0 = 9.6356e-04
+Loss = 2.7532e-01, PNorm = 41.9113, GNorm = 0.1813, lr_0 = 9.6350e-04
+Loss = 2.8673e-01, PNorm = 41.9300, GNorm = 0.1134, lr_0 = 9.6343e-04
+Loss = 2.1924e-01, PNorm = 41.9461, GNorm = 0.1768, lr_0 = 9.6337e-04
+Loss = 3.4552e-01, PNorm = 41.9629, GNorm = 0.1345, lr_0 = 9.6330e-04
+Loss = 2.6913e-01, PNorm = 41.9877, GNorm = 0.2316, lr_0 = 9.6323e-04
+Loss = 3.3647e-01, PNorm = 42.0051, GNorm = 0.3401, lr_0 = 9.6317e-04
+Loss = 2.2713e-01, PNorm = 42.0300, GNorm = 0.1646, lr_0 = 9.6310e-04
+Loss = 2.9385e-01, PNorm = 42.0486, GNorm = 0.2773, lr_0 = 9.6304e-04
+Loss = 2.6341e-01, PNorm = 42.0620, GNorm = 0.2093, lr_0 = 9.6297e-04
+Loss = 2.8134e-01, PNorm = 42.0802, GNorm = 0.2213, lr_0 = 9.6291e-04
+Loss = 3.0319e-01, PNorm = 42.0935, GNorm = 0.0957, lr_0 = 9.6284e-04
+Loss = 3.6292e-01, PNorm = 42.1057, GNorm = 0.1693, lr_0 = 9.6277e-04
+Loss = 3.0655e-01, PNorm = 42.1271, GNorm = 0.1926, lr_0 = 9.6271e-04
+Loss = 3.0132e-01, PNorm = 42.1471, GNorm = 0.1321, lr_0 = 9.6264e-04
+Loss = 3.2778e-01, PNorm = 42.1574, GNorm = 0.1661, lr_0 = 9.6258e-04
+Loss = 2.5974e-01, PNorm = 42.1730, GNorm = 0.1080, lr_0 = 9.6251e-04
+Loss = 2.7215e-01, PNorm = 42.1889, GNorm = 0.1810, lr_0 = 9.6244e-04
+Loss = 2.5740e-01, PNorm = 42.2044, GNorm = 0.1331, lr_0 = 9.6238e-04
+Loss = 2.6046e-01, PNorm = 42.2231, GNorm = 0.2058, lr_0 = 9.6231e-04
+Loss = 3.3505e-01, PNorm = 42.2255, GNorm = 0.1140, lr_0 = 9.6225e-04
+Loss = 3.0118e-01, PNorm = 42.2524, GNorm = 0.1008, lr_0 = 9.6218e-04
+Loss = 2.8635e-01, PNorm = 42.2789, GNorm = 0.2259, lr_0 = 9.6212e-04
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': '../data/train.csv',
+ 'data_weights_path': None,
+ 'dataset_type': 'multiclass',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.05,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 1,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'cross_entropy',
+ 'metrics': ['cross_entropy'],
+ 'minimize_score': True,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 5,
+ 'num_lrs': 1,
+ 'num_tasks': 1,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['smiles'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': ['sol_category'],
+ 'target_weights': None,
+ 'task_names': ['sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Number of tasks = 1
+Fold 0
+Splitting data with seed 0
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.2897e-01, PNorm = 34.0560, GNorm = 1.3350, lr_0 = 1.0438e-04
+Loss = 3.0928e-01, PNorm = 34.0610, GNorm = 1.2324, lr_0 = 1.0836e-04
+Loss = 2.9541e-01, PNorm = 34.0611, GNorm = 0.2068, lr_0 = 1.1233e-04
+Loss = 3.0341e-01, PNorm = 34.0599, GNorm = 0.7713, lr_0 = 1.1631e-04
+Loss = 3.2922e-01, PNorm = 34.0591, GNorm = 0.6192, lr_0 = 1.2029e-04
+Loss = 3.5394e-01, PNorm = 34.0597, GNorm = 0.2892, lr_0 = 1.2427e-04
+Loss = 3.2114e-01, PNorm = 34.0604, GNorm = 0.6109, lr_0 = 1.2825e-04
+Loss = 2.4549e-01, PNorm = 34.0624, GNorm = 0.4141, lr_0 = 1.3223e-04
+Loss = 2.9261e-01, PNorm = 34.0629, GNorm = 0.4116, lr_0 = 1.3621e-04
+Loss = 3.4045e-01, PNorm = 34.0615, GNorm = 0.3714, lr_0 = 1.4019e-04
+Loss = 3.2366e-01, PNorm = 34.0615, GNorm = 0.5285, lr_0 = 1.4416e-04
+Loss = 3.3277e-01, PNorm = 34.0617, GNorm = 0.8278, lr_0 = 1.4814e-04
+Loss = 3.3629e-01, PNorm = 34.0618, GNorm = 0.4657, lr_0 = 1.5212e-04
+Loss = 2.3735e-01, PNorm = 34.0635, GNorm = 0.6381, lr_0 = 1.5610e-04
+Loss = 3.3802e-01, PNorm = 34.0638, GNorm = 0.3041, lr_0 = 1.6008e-04
+Loss = 2.9078e-01, PNorm = 34.0636, GNorm = 1.1538, lr_0 = 1.6406e-04
+Loss = 3.4018e-01, PNorm = 34.0646, GNorm = 0.9998, lr_0 = 1.6804e-04
+Loss = 2.7023e-01, PNorm = 34.0658, GNorm = 0.5833, lr_0 = 1.7202e-04
+Loss = 2.7975e-01, PNorm = 34.0671, GNorm = 0.3629, lr_0 = 1.7599e-04
+Loss = 2.8862e-01, PNorm = 34.0665, GNorm = 0.2355, lr_0 = 1.7997e-04
+Loss = 3.0324e-01, PNorm = 34.0675, GNorm = 0.5221, lr_0 = 1.8395e-04
+Loss = 3.3220e-01, PNorm = 34.0678, GNorm = 1.1370, lr_0 = 1.8793e-04
+Loss = 2.7476e-01, PNorm = 34.0721, GNorm = 0.8361, lr_0 = 1.9191e-04
+Loss = 3.0175e-01, PNorm = 34.0712, GNorm = 0.4402, lr_0 = 1.9589e-04
+Loss = 3.6494e-01, PNorm = 34.0694, GNorm = 1.1708, lr_0 = 1.9987e-04
+Loss = 2.9056e-01, PNorm = 34.0739, GNorm = 0.1970, lr_0 = 2.0385e-04
+Loss = 3.1629e-01, PNorm = 34.0723, GNorm = 0.6465, lr_0 = 2.0782e-04
+Loss = 3.1845e-01, PNorm = 34.0719, GNorm = 0.4077, lr_0 = 2.1180e-04
+Loss = 3.3216e-01, PNorm = 34.0728, GNorm = 0.3018, lr_0 = 2.1578e-04
+Loss = 2.9675e-01, PNorm = 34.0745, GNorm = 0.2773, lr_0 = 2.1976e-04
+Loss = 2.6358e-01, PNorm = 34.0776, GNorm = 0.1580, lr_0 = 2.2374e-04
+Loss = 2.6325e-01, PNorm = 34.0767, GNorm = 0.3220, lr_0 = 2.2772e-04
+Loss = 3.3862e-01, PNorm = 34.0770, GNorm = 1.2964, lr_0 = 2.3170e-04
+Loss = 2.9155e-01, PNorm = 34.0775, GNorm = 0.5382, lr_0 = 2.3568e-04
+Loss = 2.7050e-01, PNorm = 34.0788, GNorm = 0.4704, lr_0 = 2.3966e-04
+Loss = 2.8959e-01, PNorm = 34.0811, GNorm = 0.2959, lr_0 = 2.4363e-04
+Loss = 3.1577e-01, PNorm = 34.0803, GNorm = 0.3284, lr_0 = 2.4761e-04
+Loss = 3.1093e-01, PNorm = 34.0813, GNorm = 0.7882, lr_0 = 2.5159e-04
+Loss = 2.6958e-01, PNorm = 34.0837, GNorm = 0.5791, lr_0 = 2.5557e-04
+Loss = 2.8518e-01, PNorm = 34.0831, GNorm = 0.3476, lr_0 = 2.5955e-04
+Loss = 2.8559e-01, PNorm = 34.0857, GNorm = 0.3553, lr_0 = 2.6353e-04
+Loss = 3.3521e-01, PNorm = 34.0872, GNorm = 0.3680, lr_0 = 2.6751e-04
+Loss = 2.8721e-01, PNorm = 34.0881, GNorm = 0.4565, lr_0 = 2.7149e-04
+Loss = 3.6340e-01, PNorm = 34.0889, GNorm = 0.2912, lr_0 = 2.7546e-04
+Loss = 2.3773e-01, PNorm = 34.0941, GNorm = 0.2797, lr_0 = 2.7944e-04
+Loss = 3.1632e-01, PNorm = 34.0951, GNorm = 0.3291, lr_0 = 2.8342e-04
+Loss = 3.1463e-01, PNorm = 34.0940, GNorm = 0.5495, lr_0 = 2.8740e-04
+Loss = 2.3699e-01, PNorm = 34.1006, GNorm = 0.4625, lr_0 = 2.9138e-04
+Loss = 3.0242e-01, PNorm = 34.0979, GNorm = 0.1740, lr_0 = 2.9536e-04
+Loss = 2.6595e-01, PNorm = 34.1005, GNorm = 0.1984, lr_0 = 2.9934e-04
+Loss = 3.0045e-01, PNorm = 34.1003, GNorm = 0.2433, lr_0 = 3.0332e-04
+Loss = 2.4253e-01, PNorm = 34.1034, GNorm = 0.2394, lr_0 = 3.0729e-04
+Loss = 3.5340e-01, PNorm = 34.1007, GNorm = 0.6303, lr_0 = 3.1127e-04
+Loss = 3.6387e-01, PNorm = 34.1035, GNorm = 0.2712, lr_0 = 3.1525e-04
+Loss = 3.3530e-01, PNorm = 34.1063, GNorm = 0.3697, lr_0 = 3.1923e-04
+Loss = 2.9600e-01, PNorm = 34.1106, GNorm = 0.4076, lr_0 = 3.2321e-04
+Loss = 2.9660e-01, PNorm = 34.1113, GNorm = 0.2409, lr_0 = 3.2719e-04
+Loss = 2.9015e-01, PNorm = 34.1151, GNorm = 0.3122, lr_0 = 3.3117e-04
+Loss = 2.9872e-01, PNorm = 34.1178, GNorm = 0.5785, lr_0 = 3.3515e-04
+Loss = 3.1613e-01, PNorm = 34.1194, GNorm = 0.5576, lr_0 = 3.3912e-04
+Loss = 2.8616e-01, PNorm = 34.1248, GNorm = 0.3663, lr_0 = 3.4310e-04
+Loss = 3.0075e-01, PNorm = 34.1249, GNorm = 0.3329, lr_0 = 3.4708e-04
+Loss = 3.2247e-01, PNorm = 34.1265, GNorm = 0.2320, lr_0 = 3.5106e-04
+Loss = 3.3463e-01, PNorm = 34.1252, GNorm = 0.4866, lr_0 = 3.5504e-04
+Loss = 3.7512e-01, PNorm = 34.1266, GNorm = 0.7301, lr_0 = 3.5902e-04
+Loss = 2.6754e-01, PNorm = 34.1318, GNorm = 0.5290, lr_0 = 3.6300e-04
+Loss = 3.4742e-01, PNorm = 34.1290, GNorm = 0.5237, lr_0 = 3.6698e-04
+Loss = 2.8403e-01, PNorm = 34.1374, GNorm = 0.3562, lr_0 = 3.7095e-04
+Loss = 1.5710e-01, PNorm = 34.1451, GNorm = 0.1839, lr_0 = 3.7493e-04
+Loss = 3.4611e-01, PNorm = 34.1363, GNorm = 0.5423, lr_0 = 3.7891e-04
+Loss = 3.1612e-01, PNorm = 34.1435, GNorm = 0.5910, lr_0 = 3.8289e-04
+Loss = 2.4944e-01, PNorm = 34.1520, GNorm = 0.1850, lr_0 = 3.8687e-04
+Loss = 2.8027e-01, PNorm = 34.1490, GNorm = 0.4044, lr_0 = 3.9085e-04
+Loss = 2.7426e-01, PNorm = 34.1546, GNorm = 0.1936, lr_0 = 3.9483e-04
+Loss = 2.3480e-01, PNorm = 34.1571, GNorm = 0.4581, lr_0 = 3.9881e-04
+Loss = 3.1524e-01, PNorm = 34.1535, GNorm = 0.4244, lr_0 = 4.0279e-04
+Loss = 3.2121e-01, PNorm = 34.1542, GNorm = 0.3888, lr_0 = 4.0676e-04
+Loss = 2.5870e-01, PNorm = 34.1588, GNorm = 0.2618, lr_0 = 4.1074e-04
+Loss = 3.5133e-01, PNorm = 34.1558, GNorm = 0.2270, lr_0 = 4.1472e-04
+Loss = 2.6608e-01, PNorm = 34.1606, GNorm = 0.2757, lr_0 = 4.1870e-04
+Loss = 3.1548e-01, PNorm = 34.1649, GNorm = 0.4374, lr_0 = 4.2268e-04
+Loss = 2.8615e-01, PNorm = 34.1657, GNorm = 0.1966, lr_0 = 4.2666e-04
+Loss = 2.7829e-01, PNorm = 34.1677, GNorm = 0.2351, lr_0 = 4.3064e-04
+Loss = 3.2037e-01, PNorm = 34.1690, GNorm = 0.2516, lr_0 = 4.3462e-04
+Loss = 2.9313e-01, PNorm = 34.1725, GNorm = 0.2984, lr_0 = 4.3859e-04
+Loss = 3.3508e-01, PNorm = 34.1750, GNorm = 0.2737, lr_0 = 4.4257e-04
+Loss = 3.7615e-01, PNorm = 34.1797, GNorm = 0.2525, lr_0 = 4.4655e-04
+Loss = 2.5455e-01, PNorm = 34.1922, GNorm = 0.1803, lr_0 = 4.5053e-04
+Loss = 3.0331e-01, PNorm = 34.1872, GNorm = 0.5501, lr_0 = 4.5451e-04
+Loss = 3.7451e-01, PNorm = 34.1906, GNorm = 0.4308, lr_0 = 4.5849e-04
+Loss = 3.5271e-01, PNorm = 34.1948, GNorm = 0.1423, lr_0 = 4.6247e-04
+Loss = 2.9584e-01, PNorm = 34.1994, GNorm = 0.3147, lr_0 = 4.6645e-04
+Loss = 2.1131e-01, PNorm = 34.2095, GNorm = 0.2122, lr_0 = 4.7042e-04
+Loss = 2.5876e-01, PNorm = 34.2091, GNorm = 0.2068, lr_0 = 4.7440e-04
+Loss = 3.3034e-01, PNorm = 34.2046, GNorm = 0.4643, lr_0 = 4.7838e-04
+Loss = 2.9463e-01, PNorm = 34.2146, GNorm = 0.4319, lr_0 = 4.8236e-04
+Loss = 3.0055e-01, PNorm = 34.2141, GNorm = 0.3004, lr_0 = 4.8634e-04
+Loss = 2.3833e-01, PNorm = 34.2193, GNorm = 0.3141, lr_0 = 4.9032e-04
+Loss = 3.4612e-01, PNorm = 34.2179, GNorm = 0.2271, lr_0 = 4.9430e-04
+Loss = 3.6390e-01, PNorm = 34.2170, GNorm = 0.1432, lr_0 = 4.9828e-04
+Loss = 3.1426e-01, PNorm = 34.2258, GNorm = 0.1419, lr_0 = 5.0225e-04
+Loss = 2.8798e-01, PNorm = 34.2261, GNorm = 0.3331, lr_0 = 5.0623e-04
+Loss = 3.1309e-01, PNorm = 34.2256, GNorm = 0.2640, lr_0 = 5.1021e-04
+Loss = 2.7098e-01, PNorm = 34.2335, GNorm = 0.1129, lr_0 = 5.1419e-04
+Loss = 3.2072e-01, PNorm = 34.2349, GNorm = 0.7413, lr_0 = 5.1817e-04
+Loss = 3.2093e-01, PNorm = 34.2348, GNorm = 0.1738, lr_0 = 5.2215e-04
+Loss = 3.2428e-01, PNorm = 34.2438, GNorm = 0.7249, lr_0 = 5.2613e-04
+Loss = 3.2176e-01, PNorm = 34.2432, GNorm = 0.2948, lr_0 = 5.3011e-04
+Loss = 3.0780e-01, PNorm = 34.2510, GNorm = 0.2981, lr_0 = 5.3408e-04
+Loss = 3.5709e-01, PNorm = 34.2554, GNorm = 0.7883, lr_0 = 5.3806e-04
+Loss = 2.6467e-01, PNorm = 34.2589, GNorm = 0.1757, lr_0 = 5.4204e-04
+Loss = 2.6953e-01, PNorm = 34.2685, GNorm = 0.1666, lr_0 = 5.4602e-04
+Loss = 3.2663e-01, PNorm = 34.2665, GNorm = 0.1034, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.296533
+Model 0 best validation cross_entropy = 0.296533 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.303858
+Ensemble test cross_entropy = 0.303858
+Fold 1
+Splitting data with seed 1
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.3459e-01, PNorm = 34.0559, GNorm = 0.6673, lr_0 = 1.0438e-04
+Loss = 3.9818e-01, PNorm = 34.0600, GNorm = 1.6900, lr_0 = 1.0836e-04
+Loss = 3.0965e-01, PNorm = 34.0599, GNorm = 0.8815, lr_0 = 1.1233e-04
+Loss = 2.5579e-01, PNorm = 34.0597, GNorm = 0.7630, lr_0 = 1.1631e-04
+Loss = 3.5306e-01, PNorm = 34.0589, GNorm = 0.3903, lr_0 = 1.2029e-04
+Loss = 2.4874e-01, PNorm = 34.0595, GNorm = 0.7341, lr_0 = 1.2427e-04
+Loss = 3.1354e-01, PNorm = 34.0609, GNorm = 0.2588, lr_0 = 1.2825e-04
+Loss = 3.0318e-01, PNorm = 34.0598, GNorm = 0.4235, lr_0 = 1.3223e-04
+Loss = 2.6827e-01, PNorm = 34.0602, GNorm = 0.5386, lr_0 = 1.3621e-04
+Loss = 3.1750e-01, PNorm = 34.0607, GNorm = 0.4050, lr_0 = 1.4019e-04
+Loss = 2.7310e-01, PNorm = 34.0618, GNorm = 0.2296, lr_0 = 1.4416e-04
+Loss = 3.0460e-01, PNorm = 34.0616, GNorm = 0.7605, lr_0 = 1.4814e-04
+Loss = 2.5509e-01, PNorm = 34.0612, GNorm = 0.7483, lr_0 = 1.5212e-04
+Loss = 3.0088e-01, PNorm = 34.0622, GNorm = 0.2821, lr_0 = 1.5610e-04
+Loss = 3.3432e-01, PNorm = 34.0616, GNorm = 0.8635, lr_0 = 1.6008e-04
+Loss = 2.4752e-01, PNorm = 34.0643, GNorm = 0.3175, lr_0 = 1.6406e-04
+Loss = 3.5516e-01, PNorm = 34.0630, GNorm = 0.3577, lr_0 = 1.6804e-04
+Loss = 2.8642e-01, PNorm = 34.0631, GNorm = 0.4507, lr_0 = 1.7202e-04
+Loss = 3.4141e-01, PNorm = 34.0634, GNorm = 0.4129, lr_0 = 1.7599e-04
+Loss = 3.2158e-01, PNorm = 34.0640, GNorm = 0.8552, lr_0 = 1.7997e-04
+Loss = 2.8771e-01, PNorm = 34.0651, GNorm = 0.6480, lr_0 = 1.8395e-04
+Loss = 3.4499e-01, PNorm = 34.0652, GNorm = 0.7161, lr_0 = 1.8793e-04
+Loss = 3.6289e-01, PNorm = 34.0650, GNorm = 0.9070, lr_0 = 1.9191e-04
+Loss = 2.8755e-01, PNorm = 34.0686, GNorm = 0.3567, lr_0 = 1.9589e-04
+Loss = 2.3098e-01, PNorm = 34.0694, GNorm = 0.3350, lr_0 = 1.9987e-04
+Loss = 2.6435e-01, PNorm = 34.0686, GNorm = 0.8428, lr_0 = 2.0385e-04
+Loss = 3.0065e-01, PNorm = 34.0684, GNorm = 0.4911, lr_0 = 2.0782e-04
+Loss = 3.6287e-01, PNorm = 34.0688, GNorm = 0.3524, lr_0 = 2.1180e-04
+Loss = 2.7681e-01, PNorm = 34.0709, GNorm = 0.6531, lr_0 = 2.1578e-04
+Loss = 3.3363e-01, PNorm = 34.0702, GNorm = 0.6014, lr_0 = 2.1976e-04
+Loss = 3.0213e-01, PNorm = 34.0719, GNorm = 0.3714, lr_0 = 2.2374e-04
+Loss = 2.7386e-01, PNorm = 34.0743, GNorm = 0.4050, lr_0 = 2.2772e-04
+Loss = 2.4786e-01, PNorm = 34.0754, GNorm = 0.1890, lr_0 = 2.3170e-04
+Loss = 3.8355e-01, PNorm = 34.0725, GNorm = 0.5282, lr_0 = 2.3568e-04
+Loss = 2.9091e-01, PNorm = 34.0772, GNorm = 0.7844, lr_0 = 2.3966e-04
+Loss = 3.6613e-01, PNorm = 34.0750, GNorm = 0.6003, lr_0 = 2.4363e-04
+Loss = 2.8121e-01, PNorm = 34.0807, GNorm = 0.3662, lr_0 = 2.4761e-04
+Loss = 2.6864e-01, PNorm = 34.0800, GNorm = 0.2705, lr_0 = 2.5159e-04
+Loss = 3.0775e-01, PNorm = 34.0787, GNorm = 0.4307, lr_0 = 2.5557e-04
+Loss = 3.1942e-01, PNorm = 34.0807, GNorm = 0.4350, lr_0 = 2.5955e-04
+Loss = 3.1491e-01, PNorm = 34.0801, GNorm = 0.3697, lr_0 = 2.6353e-04
+Loss = 3.5807e-01, PNorm = 34.0809, GNorm = 1.3331, lr_0 = 2.6751e-04
+Loss = 3.9338e-01, PNorm = 34.0793, GNorm = 0.9299, lr_0 = 2.7149e-04
+Loss = 3.5446e-01, PNorm = 34.0839, GNorm = 0.9624, lr_0 = 2.7546e-04
+Loss = 2.8870e-01, PNorm = 34.0842, GNorm = 0.4793, lr_0 = 2.7944e-04
+Loss = 3.1327e-01, PNorm = 34.0869, GNorm = 0.1907, lr_0 = 2.8342e-04
+Loss = 2.8715e-01, PNorm = 34.0864, GNorm = 0.6497, lr_0 = 2.8740e-04
+Loss = 2.8547e-01, PNorm = 34.0882, GNorm = 0.3632, lr_0 = 2.9138e-04
+Loss = 2.7754e-01, PNorm = 34.0903, GNorm = 0.4552, lr_0 = 2.9536e-04
+Loss = 2.4096e-01, PNorm = 34.0919, GNorm = 0.2058, lr_0 = 2.9934e-04
+Loss = 2.5905e-01, PNorm = 34.0924, GNorm = 0.3936, lr_0 = 3.0332e-04
+Loss = 3.4250e-01, PNorm = 34.0921, GNorm = 0.3372, lr_0 = 3.0729e-04
+Loss = 2.5201e-01, PNorm = 34.0961, GNorm = 0.1795, lr_0 = 3.1127e-04
+Loss = 3.5124e-01, PNorm = 34.0937, GNorm = 0.3221, lr_0 = 3.1525e-04
+Loss = 3.0078e-01, PNorm = 34.0984, GNorm = 0.2022, lr_0 = 3.1923e-04
+Loss = 2.4195e-01, PNorm = 34.1024, GNorm = 0.3271, lr_0 = 3.2321e-04
+Loss = 2.5201e-01, PNorm = 34.1010, GNorm = 0.2641, lr_0 = 3.2719e-04
+Loss = 2.2309e-01, PNorm = 34.1042, GNorm = 0.3909, lr_0 = 3.3117e-04
+Loss = 3.0984e-01, PNorm = 34.1022, GNorm = 0.2998, lr_0 = 3.3515e-04
+Loss = 3.2703e-01, PNorm = 34.1038, GNorm = 0.2810, lr_0 = 3.3912e-04
+Loss = 2.7523e-01, PNorm = 34.1067, GNorm = 0.2312, lr_0 = 3.4310e-04
+Loss = 3.0032e-01, PNorm = 34.1072, GNorm = 0.2159, lr_0 = 3.4708e-04
+Loss = 3.1335e-01, PNorm = 34.1094, GNorm = 0.3213, lr_0 = 3.5106e-04
+Loss = 3.1964e-01, PNorm = 34.1117, GNorm = 0.7387, lr_0 = 3.5504e-04
+Loss = 3.0822e-01, PNorm = 34.1145, GNorm = 0.6248, lr_0 = 3.5902e-04
+Loss = 3.4089e-01, PNorm = 34.1158, GNorm = 0.3200, lr_0 = 3.6300e-04
+Loss = 2.5546e-01, PNorm = 34.1222, GNorm = 0.7207, lr_0 = 3.6698e-04
+Loss = 2.9452e-01, PNorm = 34.1213, GNorm = 0.1474, lr_0 = 3.7095e-04
+Loss = 3.3094e-01, PNorm = 34.1239, GNorm = 0.2095, lr_0 = 3.7493e-04
+Loss = 2.6151e-01, PNorm = 34.1289, GNorm = 0.2862, lr_0 = 3.7891e-04
+Loss = 3.3962e-01, PNorm = 34.1271, GNorm = 0.3884, lr_0 = 3.8289e-04
+Loss = 3.3502e-01, PNorm = 34.1306, GNorm = 0.5218, lr_0 = 3.8687e-04
+Loss = 3.4735e-01, PNorm = 34.1364, GNorm = 0.5274, lr_0 = 3.9085e-04
+Loss = 3.3773e-01, PNorm = 34.1383, GNorm = 0.4614, lr_0 = 3.9483e-04
+Loss = 2.6530e-01, PNorm = 34.1483, GNorm = 0.3311, lr_0 = 3.9881e-04
+Loss = 2.6624e-01, PNorm = 34.1472, GNorm = 0.2327, lr_0 = 4.0279e-04
+Loss = 2.6494e-01, PNorm = 34.1480, GNorm = 0.2981, lr_0 = 4.0676e-04
+Loss = 2.7637e-01, PNorm = 34.1508, GNorm = 0.3507, lr_0 = 4.1074e-04
+Loss = 3.0119e-01, PNorm = 34.1518, GNorm = 0.2656, lr_0 = 4.1472e-04
+Loss = 2.9817e-01, PNorm = 34.1575, GNorm = 0.5606, lr_0 = 4.1870e-04
+Loss = 3.0071e-01, PNorm = 34.1602, GNorm = 0.3610, lr_0 = 4.2268e-04
+Loss = 2.9735e-01, PNorm = 34.1666, GNorm = 0.3498, lr_0 = 4.2666e-04
+Loss = 3.1265e-01, PNorm = 34.1657, GNorm = 0.3483, lr_0 = 4.3064e-04
+Loss = 2.9825e-01, PNorm = 34.1719, GNorm = 0.3787, lr_0 = 4.3462e-04
+Loss = 3.9826e-01, PNorm = 34.1691, GNorm = 0.2804, lr_0 = 4.3859e-04
+Loss = 2.9407e-01, PNorm = 34.1846, GNorm = 0.1600, lr_0 = 4.4257e-04
+Loss = 2.6360e-01, PNorm = 34.1858, GNorm = 0.3518, lr_0 = 4.4655e-04
+Loss = 2.9160e-01, PNorm = 34.1867, GNorm = 0.1721, lr_0 = 4.5053e-04
+Loss = 3.0096e-01, PNorm = 34.1906, GNorm = 0.6397, lr_0 = 4.5451e-04
+Loss = 2.5512e-01, PNorm = 34.1970, GNorm = 0.2045, lr_0 = 4.5849e-04
+Loss = 2.1323e-01, PNorm = 34.2030, GNorm = 0.1634, lr_0 = 4.6247e-04
+Loss = 3.1708e-01, PNorm = 34.1963, GNorm = 0.4906, lr_0 = 4.6645e-04
+Loss = 3.1956e-01, PNorm = 34.2041, GNorm = 0.3286, lr_0 = 4.7042e-04
+Loss = 2.2594e-01, PNorm = 34.2143, GNorm = 0.2960, lr_0 = 4.7440e-04
+Loss = 2.5107e-01, PNorm = 34.2095, GNorm = 0.1985, lr_0 = 4.7838e-04
+Loss = 2.6868e-01, PNorm = 34.2128, GNorm = 0.4302, lr_0 = 4.8236e-04
+Loss = 3.6312e-01, PNorm = 34.2113, GNorm = 0.7995, lr_0 = 4.8634e-04
+Loss = 3.4746e-01, PNorm = 34.2186, GNorm = 0.3873, lr_0 = 4.9032e-04
+Loss = 2.7230e-01, PNorm = 34.2192, GNorm = 0.3905, lr_0 = 4.9430e-04
+Loss = 3.0974e-01, PNorm = 34.2196, GNorm = 0.6073, lr_0 = 4.9828e-04
+Loss = 3.8422e-01, PNorm = 34.2193, GNorm = 0.8090, lr_0 = 5.0225e-04
+Loss = 2.8248e-01, PNorm = 34.2257, GNorm = 0.4500, lr_0 = 5.0623e-04
+Loss = 2.9129e-01, PNorm = 34.2368, GNorm = 1.3806, lr_0 = 5.1021e-04
+Loss = 3.1452e-01, PNorm = 34.2316, GNorm = 0.2280, lr_0 = 5.1419e-04
+Loss = 3.1132e-01, PNorm = 34.2401, GNorm = 0.6121, lr_0 = 5.1817e-04
+Loss = 2.5196e-01, PNorm = 34.2461, GNorm = 0.8000, lr_0 = 5.2215e-04
+Loss = 2.2422e-01, PNorm = 34.2497, GNorm = 0.3043, lr_0 = 5.2613e-04
+Loss = 3.6981e-01, PNorm = 34.2440, GNorm = 0.1773, lr_0 = 5.3011e-04
+Loss = 3.6667e-01, PNorm = 34.2458, GNorm = 0.4143, lr_0 = 5.3408e-04
+Loss = 2.2278e-01, PNorm = 34.2601, GNorm = 0.2708, lr_0 = 5.3806e-04
+Loss = 3.6082e-01, PNorm = 34.2526, GNorm = 0.9766, lr_0 = 5.4204e-04
+Loss = 3.2130e-01, PNorm = 34.2540, GNorm = 0.3693, lr_0 = 5.4602e-04
+Loss = 3.0408e-01, PNorm = 34.2672, GNorm = 0.1077, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.312109
+Model 0 best validation cross_entropy = 0.312109 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.290434
+Ensemble test cross_entropy = 0.290434
+Fold 2
+Splitting data with seed 2
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.1279e-01, PNorm = 34.0560, GNorm = 1.3077, lr_0 = 1.0438e-04
+Loss = 3.1693e-01, PNorm = 34.0607, GNorm = 0.3688, lr_0 = 1.0836e-04
+Loss = 3.5118e-01, PNorm = 34.0609, GNorm = 1.8092, lr_0 = 1.1233e-04
+Loss = 3.1534e-01, PNorm = 34.0590, GNorm = 0.3280, lr_0 = 1.1631e-04
+Loss = 3.4834e-01, PNorm = 34.0583, GNorm = 0.7358, lr_0 = 1.2029e-04
+Loss = 2.8382e-01, PNorm = 34.0594, GNorm = 0.2971, lr_0 = 1.2427e-04
+Loss = 3.2529e-01, PNorm = 34.0596, GNorm = 0.4444, lr_0 = 1.2825e-04
+Loss = 1.8048e-01, PNorm = 34.0606, GNorm = 0.8104, lr_0 = 1.3223e-04
+Loss = 3.1757e-01, PNorm = 34.0606, GNorm = 0.3185, lr_0 = 1.3621e-04
+Loss = 2.8618e-01, PNorm = 34.0594, GNorm = 0.7742, lr_0 = 1.4019e-04
+Loss = 2.9784e-01, PNorm = 34.0595, GNorm = 0.4053, lr_0 = 1.4416e-04
+Loss = 3.1936e-01, PNorm = 34.0601, GNorm = 0.2949, lr_0 = 1.4814e-04
+Loss = 2.8086e-01, PNorm = 34.0605, GNorm = 0.7195, lr_0 = 1.5212e-04
+Loss = 2.8303e-01, PNorm = 34.0613, GNorm = 0.8469, lr_0 = 1.5610e-04
+Loss = 3.2815e-01, PNorm = 34.0597, GNorm = 1.0427, lr_0 = 1.6008e-04
+Loss = 2.3977e-01, PNorm = 34.0629, GNorm = 0.4060, lr_0 = 1.6406e-04
+Loss = 2.8066e-01, PNorm = 34.0632, GNorm = 1.5309, lr_0 = 1.6804e-04
+Loss = 3.5166e-01, PNorm = 34.0602, GNorm = 0.7231, lr_0 = 1.7202e-04
+Loss = 3.3318e-01, PNorm = 34.0620, GNorm = 0.4712, lr_0 = 1.7599e-04
+Loss = 2.7605e-01, PNorm = 34.0646, GNorm = 0.3186, lr_0 = 1.7997e-04
+Loss = 3.2540e-01, PNorm = 34.0631, GNorm = 0.2625, lr_0 = 1.8395e-04
+Loss = 2.7547e-01, PNorm = 34.0649, GNorm = 0.6923, lr_0 = 1.8793e-04
+Loss = 2.7804e-01, PNorm = 34.0667, GNorm = 0.5518, lr_0 = 1.9191e-04
+Loss = 3.5517e-01, PNorm = 34.0649, GNorm = 0.3225, lr_0 = 1.9589e-04
+Loss = 3.1949e-01, PNorm = 34.0661, GNorm = 0.6907, lr_0 = 1.9987e-04
+Loss = 2.9757e-01, PNorm = 34.0670, GNorm = 0.9709, lr_0 = 2.0385e-04
+Loss = 2.6962e-01, PNorm = 34.0679, GNorm = 0.4097, lr_0 = 2.0782e-04
+Loss = 3.4010e-01, PNorm = 34.0675, GNorm = 0.3109, lr_0 = 2.1180e-04
+Loss = 3.5979e-01, PNorm = 34.0670, GNorm = 0.6695, lr_0 = 2.1578e-04
+Loss = 3.0997e-01, PNorm = 34.0709, GNorm = 0.7898, lr_0 = 2.1976e-04
+Loss = 2.9070e-01, PNorm = 34.0726, GNorm = 0.4056, lr_0 = 2.2374e-04
+Loss = 2.8418e-01, PNorm = 34.0711, GNorm = 0.5468, lr_0 = 2.2772e-04
+Loss = 3.7150e-01, PNorm = 34.0715, GNorm = 0.7099, lr_0 = 2.3170e-04
+Loss = 2.4983e-01, PNorm = 34.0761, GNorm = 0.7756, lr_0 = 2.3568e-04
+Loss = 3.1661e-01, PNorm = 34.0763, GNorm = 0.3446, lr_0 = 2.3966e-04
+Loss = 2.8800e-01, PNorm = 34.0766, GNorm = 0.3140, lr_0 = 2.4363e-04
+Loss = 3.2487e-01, PNorm = 34.0774, GNorm = 0.2847, lr_0 = 2.4761e-04
+Loss = 3.1056e-01, PNorm = 34.0786, GNorm = 0.2849, lr_0 = 2.5159e-04
+Loss = 3.2134e-01, PNorm = 34.0803, GNorm = 0.3350, lr_0 = 2.5557e-04
+Loss = 2.8305e-01, PNorm = 34.0807, GNorm = 0.4270, lr_0 = 2.5955e-04
+Loss = 2.6342e-01, PNorm = 34.0841, GNorm = 0.2976, lr_0 = 2.6353e-04
+Loss = 3.8342e-01, PNorm = 34.0814, GNorm = 0.5734, lr_0 = 2.6751e-04
+Loss = 3.3826e-01, PNorm = 34.0853, GNorm = 0.3352, lr_0 = 2.7149e-04
+Loss = 3.1445e-01, PNorm = 34.0883, GNorm = 0.3301, lr_0 = 2.7546e-04
+Loss = 3.0706e-01, PNorm = 34.0881, GNorm = 0.4425, lr_0 = 2.7944e-04
+Loss = 2.8742e-01, PNorm = 34.0927, GNorm = 0.2879, lr_0 = 2.8342e-04
+Loss = 3.3366e-01, PNorm = 34.0914, GNorm = 0.6028, lr_0 = 2.8740e-04
+Loss = 2.7198e-01, PNorm = 34.0974, GNorm = 0.2034, lr_0 = 2.9138e-04
+Loss = 2.7737e-01, PNorm = 34.0990, GNorm = 0.3897, lr_0 = 2.9536e-04
+Loss = 3.0695e-01, PNorm = 34.0987, GNorm = 0.2255, lr_0 = 2.9934e-04
+Loss = 2.4437e-01, PNorm = 34.1021, GNorm = 0.3804, lr_0 = 3.0332e-04
+Loss = 2.8588e-01, PNorm = 34.1017, GNorm = 0.3113, lr_0 = 3.0729e-04
+Loss = 2.8726e-01, PNorm = 34.1020, GNorm = 0.6299, lr_0 = 3.1127e-04
+Loss = 2.1295e-01, PNorm = 34.1074, GNorm = 0.2758, lr_0 = 3.1525e-04
+Loss = 3.2482e-01, PNorm = 34.1032, GNorm = 0.4589, lr_0 = 3.1923e-04
+Loss = 2.8640e-01, PNorm = 34.1077, GNorm = 0.8470, lr_0 = 3.2321e-04
+Loss = 2.7907e-01, PNorm = 34.1101, GNorm = 0.8768, lr_0 = 3.2719e-04
+Loss = 3.7357e-01, PNorm = 34.1068, GNorm = 0.2390, lr_0 = 3.3117e-04
+Loss = 3.3004e-01, PNorm = 34.1120, GNorm = 0.3439, lr_0 = 3.3515e-04
+Loss = 4.0100e-01, PNorm = 34.1120, GNorm = 0.2181, lr_0 = 3.3912e-04
+Loss = 3.0667e-01, PNorm = 34.1138, GNorm = 0.3659, lr_0 = 3.4310e-04
+Loss = 2.6318e-01, PNorm = 34.1170, GNorm = 0.3585, lr_0 = 3.4708e-04
+Loss = 3.2532e-01, PNorm = 34.1149, GNorm = 0.2345, lr_0 = 3.5106e-04
+Loss = 3.1334e-01, PNorm = 34.1164, GNorm = 0.8341, lr_0 = 3.5504e-04
+Loss = 2.9922e-01, PNorm = 34.1235, GNorm = 0.2877, lr_0 = 3.5902e-04
+Loss = 2.9446e-01, PNorm = 34.1246, GNorm = 0.2051, lr_0 = 3.6300e-04
+Loss = 2.6403e-01, PNorm = 34.1267, GNorm = 0.5801, lr_0 = 3.6698e-04
+Loss = 3.0159e-01, PNorm = 34.1272, GNorm = 0.2426, lr_0 = 3.7095e-04
+Loss = 3.0738e-01, PNorm = 34.1295, GNorm = 0.3516, lr_0 = 3.7493e-04
+Loss = 2.9375e-01, PNorm = 34.1322, GNorm = 0.2438, lr_0 = 3.7891e-04
+Loss = 2.9121e-01, PNorm = 34.1306, GNorm = 0.5980, lr_0 = 3.8289e-04
+Loss = 3.1147e-01, PNorm = 34.1324, GNorm = 0.4096, lr_0 = 3.8687e-04
+Loss = 2.9275e-01, PNorm = 34.1337, GNorm = 0.2452, lr_0 = 3.9085e-04
+Loss = 3.0254e-01, PNorm = 34.1380, GNorm = 0.1949, lr_0 = 3.9483e-04
+Loss = 2.2726e-01, PNorm = 34.1428, GNorm = 0.4224, lr_0 = 3.9881e-04
+Loss = 3.6012e-01, PNorm = 34.1413, GNorm = 0.3894, lr_0 = 4.0279e-04
+Loss = 2.4853e-01, PNorm = 34.1529, GNorm = 0.4581, lr_0 = 4.0676e-04
+Loss = 3.4809e-01, PNorm = 34.1504, GNorm = 0.2544, lr_0 = 4.1074e-04
+Loss = 2.8292e-01, PNorm = 34.1560, GNorm = 0.3312, lr_0 = 4.1472e-04
+Loss = 2.4639e-01, PNorm = 34.1620, GNorm = 0.1255, lr_0 = 4.1870e-04
+Loss = 2.8961e-01, PNorm = 34.1616, GNorm = 0.3103, lr_0 = 4.2268e-04
+Loss = 2.6498e-01, PNorm = 34.1645, GNorm = 0.4382, lr_0 = 4.2666e-04
+Loss = 2.9033e-01, PNorm = 34.1667, GNorm = 0.7558, lr_0 = 4.3064e-04
+Loss = 3.0397e-01, PNorm = 34.1661, GNorm = 0.3067, lr_0 = 4.3462e-04
+Loss = 2.7388e-01, PNorm = 34.1746, GNorm = 0.2068, lr_0 = 4.3859e-04
+Loss = 2.8985e-01, PNorm = 34.1761, GNorm = 0.5233, lr_0 = 4.4257e-04
+Loss = 2.4955e-01, PNorm = 34.1854, GNorm = 0.3267, lr_0 = 4.4655e-04
+Loss = 3.1136e-01, PNorm = 34.1808, GNorm = 0.4392, lr_0 = 4.5053e-04
+Loss = 3.0741e-01, PNorm = 34.1862, GNorm = 0.3000, lr_0 = 4.5451e-04
+Loss = 2.3449e-01, PNorm = 34.1930, GNorm = 0.1075, lr_0 = 4.5849e-04
+Loss = 2.8332e-01, PNorm = 34.1894, GNorm = 0.2912, lr_0 = 4.6247e-04
+Loss = 2.9618e-01, PNorm = 34.1935, GNorm = 0.1271, lr_0 = 4.6645e-04
+Loss = 3.5627e-01, PNorm = 34.1942, GNorm = 0.2183, lr_0 = 4.7042e-04
+Loss = 3.3423e-01, PNorm = 34.1990, GNorm = 0.2048, lr_0 = 4.7440e-04
+Loss = 3.1236e-01, PNorm = 34.2036, GNorm = 0.5061, lr_0 = 4.7838e-04
+Loss = 2.7588e-01, PNorm = 34.2129, GNorm = 0.1535, lr_0 = 4.8236e-04
+Loss = 2.9667e-01, PNorm = 34.2130, GNorm = 0.2184, lr_0 = 4.8634e-04
+Loss = 3.0731e-01, PNorm = 34.2216, GNorm = 0.2126, lr_0 = 4.9032e-04
+Loss = 2.5995e-01, PNorm = 34.2288, GNorm = 0.4191, lr_0 = 4.9430e-04
+Loss = 2.6936e-01, PNorm = 34.2290, GNorm = 0.6453, lr_0 = 4.9828e-04
+Loss = 3.2593e-01, PNorm = 34.2346, GNorm = 0.7293, lr_0 = 5.0225e-04
+Loss = 3.9286e-01, PNorm = 34.2339, GNorm = 0.5419, lr_0 = 5.0623e-04
+Loss = 3.2599e-01, PNorm = 34.2520, GNorm = 0.3474, lr_0 = 5.1021e-04
+Loss = 3.0550e-01, PNorm = 34.2541, GNorm = 0.1480, lr_0 = 5.1419e-04
+Loss = 3.6369e-01, PNorm = 34.2561, GNorm = 0.1678, lr_0 = 5.1817e-04
+Loss = 2.4916e-01, PNorm = 34.2678, GNorm = 0.2024, lr_0 = 5.2215e-04
+Loss = 2.6196e-01, PNorm = 34.2671, GNorm = 0.1774, lr_0 = 5.2613e-04
+Loss = 2.7169e-01, PNorm = 34.2722, GNorm = 0.5442, lr_0 = 5.3011e-04
+Loss = 3.3962e-01, PNorm = 34.2723, GNorm = 0.3232, lr_0 = 5.3408e-04
+Loss = 2.9165e-01, PNorm = 34.2784, GNorm = 0.2271, lr_0 = 5.3806e-04
+Loss = 2.9398e-01, PNorm = 34.2785, GNorm = 0.4892, lr_0 = 5.4204e-04
+Loss = 2.8214e-01, PNorm = 34.2857, GNorm = 0.3730, lr_0 = 5.4602e-04
+Loss = 2.6976e-01, PNorm = 34.2839, GNorm = 0.1568, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.305651
+Model 0 best validation cross_entropy = 0.305651 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.311858
+Ensemble test cross_entropy = 0.311858
+Fold 3
+Splitting data with seed 3
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.3031e-01, PNorm = 34.0561, GNorm = 1.7603, lr_0 = 1.0438e-04
+Loss = 3.6715e-01, PNorm = 34.0601, GNorm = 0.7583, lr_0 = 1.0836e-04
+Loss = 3.5278e-01, PNorm = 34.0597, GNorm = 0.3718, lr_0 = 1.1233e-04
+Loss = 2.8790e-01, PNorm = 34.0588, GNorm = 0.5259, lr_0 = 1.1631e-04
+Loss = 3.3319e-01, PNorm = 34.0589, GNorm = 0.6773, lr_0 = 1.2029e-04
+Loss = 3.1905e-01, PNorm = 34.0590, GNorm = 0.6077, lr_0 = 1.2427e-04
+Loss = 3.0899e-01, PNorm = 34.0600, GNorm = 0.5449, lr_0 = 1.2825e-04
+Loss = 2.6978e-01, PNorm = 34.0613, GNorm = 1.0623, lr_0 = 1.3223e-04
+Loss = 2.6338e-01, PNorm = 34.0612, GNorm = 0.4334, lr_0 = 1.3621e-04
+Loss = 3.1883e-01, PNorm = 34.0617, GNorm = 0.5227, lr_0 = 1.4019e-04
+Loss = 2.7773e-01, PNorm = 34.0631, GNorm = 0.5207, lr_0 = 1.4416e-04
+Loss = 2.7670e-01, PNorm = 34.0636, GNorm = 0.6228, lr_0 = 1.4814e-04
+Loss = 3.6258e-01, PNorm = 34.0613, GNorm = 0.3770, lr_0 = 1.5212e-04
+Loss = 2.8816e-01, PNorm = 34.0631, GNorm = 0.5656, lr_0 = 1.5610e-04
+Loss = 3.0200e-01, PNorm = 34.0647, GNorm = 0.2811, lr_0 = 1.6008e-04
+Loss = 2.6320e-01, PNorm = 34.0647, GNorm = 0.5065, lr_0 = 1.6406e-04
+Loss = 3.1956e-01, PNorm = 34.0649, GNorm = 0.6294, lr_0 = 1.6804e-04
+Loss = 3.8133e-01, PNorm = 34.0631, GNorm = 0.6103, lr_0 = 1.7202e-04
+Loss = 2.8189e-01, PNorm = 34.0660, GNorm = 0.7457, lr_0 = 1.7599e-04
+Loss = 2.6729e-01, PNorm = 34.0669, GNorm = 0.8579, lr_0 = 1.7997e-04
+Loss = 3.2024e-01, PNorm = 34.0655, GNorm = 0.5644, lr_0 = 1.8395e-04
+Loss = 2.4043e-01, PNorm = 34.0682, GNorm = 0.2322, lr_0 = 1.8793e-04
+Loss = 2.5685e-01, PNorm = 34.0688, GNorm = 0.6967, lr_0 = 1.9191e-04
+Loss = 3.1490e-01, PNorm = 34.0675, GNorm = 0.2604, lr_0 = 1.9589e-04
+Loss = 3.3511e-01, PNorm = 34.0686, GNorm = 0.4063, lr_0 = 1.9987e-04
+Loss = 3.3037e-01, PNorm = 34.0695, GNorm = 0.3135, lr_0 = 2.0385e-04
+Loss = 3.1337e-01, PNorm = 34.0720, GNorm = 1.0755, lr_0 = 2.0782e-04
+Loss = 2.9951e-01, PNorm = 34.0711, GNorm = 0.3887, lr_0 = 2.1180e-04
+Loss = 2.7804e-01, PNorm = 34.0737, GNorm = 0.3990, lr_0 = 2.1578e-04
+Loss = 4.3191e-01, PNorm = 34.0707, GNorm = 0.7939, lr_0 = 2.1976e-04
+Loss = 3.1379e-01, PNorm = 34.0754, GNorm = 0.2993, lr_0 = 2.2374e-04
+Loss = 3.3743e-01, PNorm = 34.0781, GNorm = 1.3697, lr_0 = 2.2772e-04
+Loss = 3.1165e-01, PNorm = 34.0772, GNorm = 0.2870, lr_0 = 2.3170e-04
+Loss = 2.2679e-01, PNorm = 34.0820, GNorm = 0.7034, lr_0 = 2.3568e-04
+Loss = 2.7523e-01, PNorm = 34.0838, GNorm = 0.8287, lr_0 = 2.3966e-04
+Loss = 2.6611e-01, PNorm = 34.0829, GNorm = 0.2299, lr_0 = 2.4363e-04
+Loss = 3.1559e-01, PNorm = 34.0835, GNorm = 0.2617, lr_0 = 2.4761e-04
+Loss = 3.0392e-01, PNorm = 34.0839, GNorm = 0.5025, lr_0 = 2.5159e-04
+Loss = 3.2369e-01, PNorm = 34.0842, GNorm = 0.2745, lr_0 = 2.5557e-04
+Loss = 3.0122e-01, PNorm = 34.0846, GNorm = 0.3201, lr_0 = 2.5955e-04
+Loss = 2.9725e-01, PNorm = 34.0856, GNorm = 0.4718, lr_0 = 2.6353e-04
+Loss = 3.2607e-01, PNorm = 34.0851, GNorm = 0.3493, lr_0 = 2.6751e-04
+Loss = 3.5534e-01, PNorm = 34.0851, GNorm = 0.2711, lr_0 = 2.7149e-04
+Loss = 2.8102e-01, PNorm = 34.0885, GNorm = 0.2334, lr_0 = 2.7546e-04
+Loss = 2.8009e-01, PNorm = 34.0897, GNorm = 0.4430, lr_0 = 2.7944e-04
+Loss = 3.5395e-01, PNorm = 34.0886, GNorm = 1.2326, lr_0 = 2.8342e-04
+Loss = 3.1683e-01, PNorm = 34.0905, GNorm = 0.2951, lr_0 = 2.8740e-04
+Loss = 2.7500e-01, PNorm = 34.0944, GNorm = 0.8316, lr_0 = 2.9138e-04
+Loss = 2.8019e-01, PNorm = 34.0929, GNorm = 0.5066, lr_0 = 2.9536e-04
+Loss = 2.3669e-01, PNorm = 34.0985, GNorm = 0.4684, lr_0 = 2.9934e-04
+Loss = 2.7026e-01, PNorm = 34.0960, GNorm = 0.4152, lr_0 = 3.0332e-04
+Loss = 3.1654e-01, PNorm = 34.0949, GNorm = 0.3468, lr_0 = 3.0729e-04
+Loss = 3.4478e-01, PNorm = 34.0966, GNorm = 0.4330, lr_0 = 3.1127e-04
+Loss = 2.3884e-01, PNorm = 34.1004, GNorm = 0.2479, lr_0 = 3.1525e-04
+Loss = 3.2467e-01, PNorm = 34.0983, GNorm = 0.3871, lr_0 = 3.1923e-04
+Loss = 3.5430e-01, PNorm = 34.0997, GNorm = 0.8376, lr_0 = 3.2321e-04
+Loss = 3.3110e-01, PNorm = 34.1028, GNorm = 0.3715, lr_0 = 3.2719e-04
+Loss = 2.7704e-01, PNorm = 34.1052, GNorm = 0.4254, lr_0 = 3.3117e-04
+Loss = 3.0691e-01, PNorm = 34.1062, GNorm = 0.4471, lr_0 = 3.3515e-04
+Loss = 2.4204e-01, PNorm = 34.1128, GNorm = 0.3154, lr_0 = 3.3912e-04
+Loss = 2.8676e-01, PNorm = 34.1110, GNorm = 0.1615, lr_0 = 3.4310e-04
+Loss = 3.0160e-01, PNorm = 34.1118, GNorm = 0.4548, lr_0 = 3.4708e-04
+Loss = 3.1916e-01, PNorm = 34.1149, GNorm = 0.6438, lr_0 = 3.5106e-04
+Loss = 3.4301e-01, PNorm = 34.1134, GNorm = 0.1736, lr_0 = 3.5504e-04
+Loss = 2.6738e-01, PNorm = 34.1204, GNorm = 0.7294, lr_0 = 3.5902e-04
+Loss = 3.6500e-01, PNorm = 34.1157, GNorm = 0.9705, lr_0 = 3.6300e-04
+Loss = 3.1320e-01, PNorm = 34.1244, GNorm = 0.8226, lr_0 = 3.6698e-04
+Loss = 3.0822e-01, PNorm = 34.1224, GNorm = 0.5904, lr_0 = 3.7095e-04
+Loss = 2.3515e-01, PNorm = 34.1307, GNorm = 0.3648, lr_0 = 3.7493e-04
+Loss = 3.0905e-01, PNorm = 34.1272, GNorm = 0.7182, lr_0 = 3.7891e-04
+Loss = 2.7415e-01, PNorm = 34.1302, GNorm = 0.2212, lr_0 = 3.8289e-04
+Loss = 3.7421e-01, PNorm = 34.1278, GNorm = 0.4170, lr_0 = 3.8687e-04
+Loss = 2.8467e-01, PNorm = 34.1356, GNorm = 0.1871, lr_0 = 3.9085e-04
+Loss = 2.7365e-01, PNorm = 34.1373, GNorm = 0.4422, lr_0 = 3.9483e-04
+Loss = 3.0774e-01, PNorm = 34.1347, GNorm = 0.6547, lr_0 = 3.9881e-04
+Loss = 3.0056e-01, PNorm = 34.1375, GNorm = 0.2214, lr_0 = 4.0279e-04
+Loss = 2.9536e-01, PNorm = 34.1399, GNorm = 0.8440, lr_0 = 4.0676e-04
+Loss = 2.8714e-01, PNorm = 34.1396, GNorm = 0.4937, lr_0 = 4.1074e-04
+Loss = 2.7033e-01, PNorm = 34.1439, GNorm = 0.2342, lr_0 = 4.1472e-04
+Loss = 2.9292e-01, PNorm = 34.1446, GNorm = 0.1649, lr_0 = 4.1870e-04
+Loss = 2.7627e-01, PNorm = 34.1505, GNorm = 0.5182, lr_0 = 4.2268e-04
+Loss = 3.0072e-01, PNorm = 34.1497, GNorm = 0.2469, lr_0 = 4.2666e-04
+Loss = 3.0428e-01, PNorm = 34.1549, GNorm = 0.1785, lr_0 = 4.3064e-04
+Loss = 2.6528e-01, PNorm = 34.1595, GNorm = 0.4758, lr_0 = 4.3462e-04
+Loss = 3.5442e-01, PNorm = 34.1567, GNorm = 0.6903, lr_0 = 4.3859e-04
+Loss = 3.2202e-01, PNorm = 34.1599, GNorm = 0.2148, lr_0 = 4.4257e-04
+Loss = 3.1911e-01, PNorm = 34.1636, GNorm = 0.1860, lr_0 = 4.4655e-04
+Loss = 3.1083e-01, PNorm = 34.1664, GNorm = 0.6901, lr_0 = 4.5053e-04
+Loss = 3.4954e-01, PNorm = 34.1655, GNorm = 0.3341, lr_0 = 4.5451e-04
+Loss = 2.5006e-01, PNorm = 34.1761, GNorm = 0.3322, lr_0 = 4.5849e-04
+Loss = 2.9595e-01, PNorm = 34.1748, GNorm = 0.4121, lr_0 = 4.6247e-04
+Loss = 3.2723e-01, PNorm = 34.1749, GNorm = 0.2168, lr_0 = 4.6645e-04
+Loss = 3.2708e-01, PNorm = 34.1814, GNorm = 0.2601, lr_0 = 4.7042e-04
+Loss = 2.8136e-01, PNorm = 34.1875, GNorm = 0.2479, lr_0 = 4.7440e-04
+Loss = 2.6925e-01, PNorm = 34.1924, GNorm = 0.1628, lr_0 = 4.7838e-04
+Loss = 3.1884e-01, PNorm = 34.1911, GNorm = 0.3071, lr_0 = 4.8236e-04
+Loss = 2.3691e-01, PNorm = 34.2041, GNorm = 0.4204, lr_0 = 4.8634e-04
+Loss = 3.0349e-01, PNorm = 34.2022, GNorm = 0.2100, lr_0 = 4.9032e-04
+Loss = 2.4358e-01, PNorm = 34.2087, GNorm = 0.1279, lr_0 = 4.9430e-04
+Loss = 3.4713e-01, PNorm = 34.2094, GNorm = 0.4160, lr_0 = 4.9828e-04
+Loss = 2.9654e-01, PNorm = 34.2136, GNorm = 0.3531, lr_0 = 5.0225e-04
+Loss = 3.3050e-01, PNorm = 34.2193, GNorm = 0.2676, lr_0 = 5.0623e-04
+Loss = 3.4288e-01, PNorm = 34.2184, GNorm = 0.1499, lr_0 = 5.1021e-04
+Loss = 2.7790e-01, PNorm = 34.2262, GNorm = 0.4501, lr_0 = 5.1419e-04
+Loss = 3.1354e-01, PNorm = 34.2308, GNorm = 0.2347, lr_0 = 5.1817e-04
+Loss = 2.6213e-01, PNorm = 34.2290, GNorm = 0.1238, lr_0 = 5.2215e-04
+Loss = 3.1290e-01, PNorm = 34.2300, GNorm = 0.1502, lr_0 = 5.2613e-04
+Loss = 3.0825e-01, PNorm = 34.2299, GNorm = 0.1337, lr_0 = 5.3011e-04
+Loss = 2.6433e-01, PNorm = 34.2363, GNorm = 0.2961, lr_0 = 5.3408e-04
+Loss = 2.2425e-01, PNorm = 34.2385, GNorm = 0.3821, lr_0 = 5.3806e-04
+Loss = 2.8932e-01, PNorm = 34.2361, GNorm = 0.2931, lr_0 = 5.4204e-04
+Loss = 3.4178e-01, PNorm = 34.2356, GNorm = 0.1872, lr_0 = 5.4602e-04
+Loss = 3.5666e-01, PNorm = 34.2400, GNorm = 0.1929, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.293522
+Model 0 best validation cross_entropy = 0.293522 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.302408
+Ensemble test cross_entropy = 0.302408
+Fold 4
+Splitting data with seed 4
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.0280e-01, PNorm = 34.0561, GNorm = 1.5616, lr_0 = 1.0438e-04
+Loss = 3.5421e-01, PNorm = 34.0605, GNorm = 0.4706, lr_0 = 1.0836e-04
+Loss = 3.1978e-01, PNorm = 34.0607, GNorm = 1.3104, lr_0 = 1.1233e-04
+Loss = 3.7217e-01, PNorm = 34.0590, GNorm = 0.5739, lr_0 = 1.1631e-04
+Loss = 2.7680e-01, PNorm = 34.0594, GNorm = 0.2641, lr_0 = 1.2029e-04
+Loss = 3.0202e-01, PNorm = 34.0605, GNorm = 1.0825, lr_0 = 1.2427e-04
+Loss = 3.3831e-01, PNorm = 34.0614, GNorm = 0.3786, lr_0 = 1.2825e-04
+Loss = 2.6369e-01, PNorm = 34.0619, GNorm = 0.6000, lr_0 = 1.3223e-04
+Loss = 2.8518e-01, PNorm = 34.0628, GNorm = 0.6886, lr_0 = 1.3621e-04
+Loss = 3.3392e-01, PNorm = 34.0622, GNorm = 0.4483, lr_0 = 1.4019e-04
+Loss = 3.1844e-01, PNorm = 34.0622, GNorm = 0.2968, lr_0 = 1.4416e-04
+Loss = 3.3050e-01, PNorm = 34.0632, GNorm = 0.5973, lr_0 = 1.4814e-04
+Loss = 2.5891e-01, PNorm = 34.0643, GNorm = 0.3715, lr_0 = 1.5212e-04
+Loss = 3.2620e-01, PNorm = 34.0642, GNorm = 0.5961, lr_0 = 1.5610e-04
+Loss = 3.1636e-01, PNorm = 34.0639, GNorm = 0.5273, lr_0 = 1.6008e-04
+Loss = 3.1319e-01, PNorm = 34.0638, GNorm = 0.9102, lr_0 = 1.6406e-04
+Loss = 2.6546e-01, PNorm = 34.0660, GNorm = 0.6477, lr_0 = 1.6804e-04
+Loss = 3.2846e-01, PNorm = 34.0631, GNorm = 0.3981, lr_0 = 1.7202e-04
+Loss = 3.4088e-01, PNorm = 34.0635, GNorm = 0.6270, lr_0 = 1.7599e-04
+Loss = 2.0831e-01, PNorm = 34.0674, GNorm = 0.3393, lr_0 = 1.7997e-04
+Loss = 2.6371e-01, PNorm = 34.0668, GNorm = 0.2859, lr_0 = 1.8395e-04
+Loss = 2.8870e-01, PNorm = 34.0655, GNorm = 0.3362, lr_0 = 1.8793e-04
+Loss = 2.5105e-01, PNorm = 34.0688, GNorm = 1.2710, lr_0 = 1.9191e-04
+Loss = 2.4866e-01, PNorm = 34.0686, GNorm = 0.3097, lr_0 = 1.9589e-04
+Loss = 2.8396e-01, PNorm = 34.0677, GNorm = 0.6787, lr_0 = 1.9987e-04
+Loss = 3.0841e-01, PNorm = 34.0679, GNorm = 0.5428, lr_0 = 2.0385e-04
+Loss = 2.8240e-01, PNorm = 34.0704, GNorm = 1.0093, lr_0 = 2.0782e-04
+Loss = 3.0505e-01, PNorm = 34.0695, GNorm = 0.3031, lr_0 = 2.1180e-04
+Loss = 3.3311e-01, PNorm = 34.0696, GNorm = 0.2913, lr_0 = 2.1578e-04
+Loss = 3.2320e-01, PNorm = 34.0726, GNorm = 1.2485, lr_0 = 2.1976e-04
+Loss = 3.2375e-01, PNorm = 34.0714, GNorm = 0.5505, lr_0 = 2.2374e-04
+Loss = 2.8517e-01, PNorm = 34.0747, GNorm = 0.3605, lr_0 = 2.2772e-04
+Loss = 2.9890e-01, PNorm = 34.0753, GNorm = 0.9734, lr_0 = 2.3170e-04
+Loss = 2.6857e-01, PNorm = 34.0752, GNorm = 0.4086, lr_0 = 2.3568e-04
+Loss = 2.7074e-01, PNorm = 34.0780, GNorm = 0.2021, lr_0 = 2.3966e-04
+Loss = 3.1256e-01, PNorm = 34.0766, GNorm = 0.3604, lr_0 = 2.4363e-04
+Loss = 2.8838e-01, PNorm = 34.0791, GNorm = 0.5118, lr_0 = 2.4761e-04
+Loss = 3.2479e-01, PNorm = 34.0793, GNorm = 0.7901, lr_0 = 2.5159e-04
+Loss = 3.3881e-01, PNorm = 34.0794, GNorm = 0.5846, lr_0 = 2.5557e-04
+Loss = 3.3236e-01, PNorm = 34.0809, GNorm = 0.2442, lr_0 = 2.5955e-04
+Loss = 2.4923e-01, PNorm = 34.0854, GNorm = 0.1428, lr_0 = 2.6353e-04
+Loss = 3.5538e-01, PNorm = 34.0815, GNorm = 0.3807, lr_0 = 2.6751e-04
+Loss = 2.9313e-01, PNorm = 34.0848, GNorm = 0.8024, lr_0 = 2.7149e-04
+Loss = 3.0088e-01, PNorm = 34.0885, GNorm = 0.4670, lr_0 = 2.7546e-04
+Loss = 3.2998e-01, PNorm = 34.0861, GNorm = 0.4808, lr_0 = 2.7944e-04
+Loss = 3.0004e-01, PNorm = 34.0898, GNorm = 0.3009, lr_0 = 2.8342e-04
+Loss = 3.5578e-01, PNorm = 34.0895, GNorm = 0.4563, lr_0 = 2.8740e-04
+Loss = 2.9907e-01, PNorm = 34.0929, GNorm = 0.8078, lr_0 = 2.9138e-04
+Loss = 3.5491e-01, PNorm = 34.0920, GNorm = 0.4683, lr_0 = 2.9536e-04
+Loss = 2.4996e-01, PNorm = 34.0972, GNorm = 0.5404, lr_0 = 2.9934e-04
+Loss = 2.9832e-01, PNorm = 34.0961, GNorm = 0.2087, lr_0 = 3.0332e-04
+Loss = 2.7692e-01, PNorm = 34.0982, GNorm = 0.5060, lr_0 = 3.0729e-04
+Loss = 2.9800e-01, PNorm = 34.0998, GNorm = 0.1357, lr_0 = 3.1127e-04
+Loss = 2.7076e-01, PNorm = 34.1007, GNorm = 0.2556, lr_0 = 3.1525e-04
+Loss = 2.7189e-01, PNorm = 34.1017, GNorm = 0.7142, lr_0 = 3.1923e-04
+Loss = 3.1836e-01, PNorm = 34.1025, GNorm = 0.2650, lr_0 = 3.2321e-04
+Loss = 2.9658e-01, PNorm = 34.1035, GNorm = 0.2051, lr_0 = 3.2719e-04
+Loss = 3.5279e-01, PNorm = 34.1047, GNorm = 0.2157, lr_0 = 3.3117e-04
+Loss = 3.3387e-01, PNorm = 34.1075, GNorm = 0.6535, lr_0 = 3.3515e-04
+Loss = 2.9539e-01, PNorm = 34.1119, GNorm = 0.3269, lr_0 = 3.3912e-04
+Loss = 3.4299e-01, PNorm = 34.1126, GNorm = 0.6194, lr_0 = 3.4310e-04
+Loss = 3.4890e-01, PNorm = 34.1124, GNorm = 0.6485, lr_0 = 3.4708e-04
+Loss = 2.5723e-01, PNorm = 34.1209, GNorm = 0.7499, lr_0 = 3.5106e-04
+Loss = 3.6528e-01, PNorm = 34.1158, GNorm = 0.6216, lr_0 = 3.5504e-04
+Loss = 3.3217e-01, PNorm = 34.1237, GNorm = 0.3541, lr_0 = 3.5902e-04
+Loss = 2.7921e-01, PNorm = 34.1251, GNorm = 0.3962, lr_0 = 3.6300e-04
+Loss = 2.7430e-01, PNorm = 34.1271, GNorm = 0.2888, lr_0 = 3.6698e-04
+Loss = 2.7324e-01, PNorm = 34.1298, GNorm = 0.3389, lr_0 = 3.7095e-04
+Loss = 2.5155e-01, PNorm = 34.1334, GNorm = 0.2087, lr_0 = 3.7493e-04
+Loss = 2.4207e-01, PNorm = 34.1364, GNorm = 0.3905, lr_0 = 3.7891e-04
+Loss = 3.4759e-01, PNorm = 34.1354, GNorm = 0.1811, lr_0 = 3.8289e-04
+Loss = 2.4922e-01, PNorm = 34.1414, GNorm = 0.1863, lr_0 = 3.8687e-04
+Loss = 3.3842e-01, PNorm = 34.1406, GNorm = 0.3862, lr_0 = 3.9085e-04
+Loss = 3.7207e-01, PNorm = 34.1453, GNorm = 0.3162, lr_0 = 3.9483e-04
+Loss = 2.8320e-01, PNorm = 34.1532, GNorm = 0.1902, lr_0 = 3.9881e-04
+Loss = 3.7108e-01, PNorm = 34.1505, GNorm = 0.7215, lr_0 = 4.0279e-04
+Loss = 3.3601e-01, PNorm = 34.1608, GNorm = 0.3348, lr_0 = 4.0676e-04
+Loss = 2.8882e-01, PNorm = 34.1658, GNorm = 0.1961, lr_0 = 4.1074e-04
+Loss = 2.8911e-01, PNorm = 34.1723, GNorm = 0.1681, lr_0 = 4.1472e-04
+Loss = 2.3628e-01, PNorm = 34.1764, GNorm = 0.6532, lr_0 = 4.1870e-04
+Loss = 3.1620e-01, PNorm = 34.1730, GNorm = 0.3589, lr_0 = 4.2268e-04
+Loss = 3.1889e-01, PNorm = 34.1790, GNorm = 0.1501, lr_0 = 4.2666e-04
+Loss = 2.9458e-01, PNorm = 34.1832, GNorm = 0.5542, lr_0 = 4.3064e-04
+Loss = 3.2658e-01, PNorm = 34.1826, GNorm = 0.4073, lr_0 = 4.3462e-04
+Loss = 2.7854e-01, PNorm = 34.1881, GNorm = 0.5340, lr_0 = 4.3859e-04
+Loss = 2.1683e-01, PNorm = 34.1935, GNorm = 0.1217, lr_0 = 4.4257e-04
+Loss = 2.7474e-01, PNorm = 34.1929, GNorm = 0.4732, lr_0 = 4.4655e-04
+Loss = 2.9156e-01, PNorm = 34.1961, GNorm = 0.6337, lr_0 = 4.5053e-04
+Loss = 2.9167e-01, PNorm = 34.1995, GNorm = 0.2401, lr_0 = 4.5451e-04
+Loss = 3.1382e-01, PNorm = 34.2033, GNorm = 0.3001, lr_0 = 4.5849e-04
+Loss = 3.2950e-01, PNorm = 34.2020, GNorm = 0.6369, lr_0 = 4.6247e-04
+Loss = 2.5664e-01, PNorm = 34.2134, GNorm = 0.2334, lr_0 = 4.6645e-04
+Loss = 3.3638e-01, PNorm = 34.2082, GNorm = 0.5121, lr_0 = 4.7042e-04
+Loss = 2.9958e-01, PNorm = 34.2186, GNorm = 0.2431, lr_0 = 4.7440e-04
+Loss = 3.3265e-01, PNorm = 34.2172, GNorm = 0.4609, lr_0 = 4.7838e-04
+Loss = 2.9175e-01, PNorm = 34.2208, GNorm = 0.6008, lr_0 = 4.8236e-04
+Loss = 2.7529e-01, PNorm = 34.2276, GNorm = 0.5160, lr_0 = 4.8634e-04
+Loss = 3.1682e-01, PNorm = 34.2223, GNorm = 0.2072, lr_0 = 4.9032e-04
+Loss = 3.4238e-01, PNorm = 34.2277, GNorm = 0.3366, lr_0 = 4.9430e-04
+Loss = 3.1881e-01, PNorm = 34.2296, GNorm = 0.2565, lr_0 = 4.9828e-04
+Loss = 3.0752e-01, PNorm = 34.2338, GNorm = 0.2049, lr_0 = 5.0225e-04
+Loss = 3.1482e-01, PNorm = 34.2332, GNorm = 0.2386, lr_0 = 5.0623e-04
+Loss = 2.9025e-01, PNorm = 34.2373, GNorm = 0.5769, lr_0 = 5.1021e-04
+Loss = 2.9819e-01, PNorm = 34.2373, GNorm = 0.1736, lr_0 = 5.1419e-04
+Loss = 3.2282e-01, PNorm = 34.2387, GNorm = 0.2480, lr_0 = 5.1817e-04
+Loss = 3.4505e-01, PNorm = 34.2415, GNorm = 0.1471, lr_0 = 5.2215e-04
+Loss = 2.3608e-01, PNorm = 34.2502, GNorm = 0.2668, lr_0 = 5.2613e-04
+Loss = 3.4512e-01, PNorm = 34.2421, GNorm = 0.1834, lr_0 = 5.3011e-04
+Loss = 3.0424e-01, PNorm = 34.2515, GNorm = 0.3338, lr_0 = 5.3408e-04
+Loss = 3.5446e-01, PNorm = 34.2512, GNorm = 0.2463, lr_0 = 5.3806e-04
+Loss = 3.7312e-01, PNorm = 34.2529, GNorm = 0.4543, lr_0 = 5.4204e-04
+Loss = 2.2200e-01, PNorm = 34.2673, GNorm = 0.1567, lr_0 = 5.4602e-04
+Loss = 3.0251e-01, PNorm = 34.2615, GNorm = 0.1500, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.308138
+Model 0 best validation cross_entropy = 0.308138 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.290247
+Ensemble test cross_entropy = 0.290247
+5-fold cross validation
+	Seed 0 ==> test cross_entropy = 0.303858
+	Seed 1 ==> test cross_entropy = 0.290434
+	Seed 2 ==> test cross_entropy = 0.311858
+	Seed 3 ==> test cross_entropy = 0.302408
+	Seed 4 ==> test cross_entropy = 0.290247
+Overall test cross_entropy = 0.299761 +/- 0.008338
+Elapsed time = 0:46:14
+Command line
+python C:\Users\misme\Documents\EPFL\MA3\ML\solubility_prediction\models\GraphModel.py
+Args
+{'activation': 'ReLU',
+ 'adding_h': False,
+ 'aggregation': 'mean',
+ 'aggregation_norm': 100,
+ 'atom_descriptor_scaling': True,
+ 'atom_descriptors': None,
+ 'atom_descriptors_path': None,
+ 'atom_descriptors_size': 0,
+ 'atom_features_size': 0,
+ 'atom_messages': False,
+ 'batch_size': 50,
+ 'bias': False,
+ 'bias_solvent': False,
+ 'bond_feature_scaling': True,
+ 'bond_features_path': None,
+ 'bond_features_size': 0,
+ 'cache_cutoff': 10000,
+ 'checkpoint_dir': None,
+ 'checkpoint_frzn': None,
+ 'checkpoint_path': None,
+ 'checkpoint_paths': None,
+ 'class_balance': False,
+ 'config_path': None,
+ 'crossval_index_dir': None,
+ 'crossval_index_file': None,
+ 'crossval_index_sets': None,
+ 'cuda': False,
+ 'data_path': '../data/train.csv',
+ 'data_weights_path': None,
+ 'dataset_type': 'multiclass',
+ 'depth': 3,
+ 'depth_solvent': 3,
+ 'device': device(type='cpu'),
+ 'dropout': 0.05,
+ 'empty_cache': False,
+ 'ensemble_size': 1,
+ 'epochs': 1,
+ 'evidential_regularization': 0,
+ 'explicit_h': False,
+ 'extra_metrics': [],
+ 'features_generator': None,
+ 'features_only': False,
+ 'features_path': None,
+ 'features_scaling': True,
+ 'features_size': None,
+ 'ffn_hidden_size': 300,
+ 'ffn_num_layers': 2,
+ 'final_lr': 0.0001,
+ 'folds_file': None,
+ 'freeze_first_only': False,
+ 'frzn_ffn_layers': 0,
+ 'gpu': None,
+ 'grad_clip': None,
+ 'hidden_size': 300,
+ 'hidden_size_solvent': 300,
+ 'ignore_columns': None,
+ 'init_lr': 0.0001,
+ 'log_frequency': 10,
+ 'loss_function': 'cross_entropy',
+ 'max_data_size': None,
+ 'max_lr': 0.001,
+ 'metric': 'cross_entropy',
+ 'metrics': ['cross_entropy'],
+ 'minimize_score': True,
+ 'mpn_shared': False,
+ 'multiclass_num_classes': 3,
+ 'no_atom_descriptor_scaling': False,
+ 'no_bond_features_scaling': False,
+ 'no_cache_mol': False,
+ 'no_cuda': False,
+ 'no_features_scaling': False,
+ 'num_folds': 5,
+ 'num_lrs': 1,
+ 'num_tasks': 1,
+ 'num_workers': 8,
+ 'number_of_molecules': 1,
+ 'overwrite_default_atom_features': False,
+ 'overwrite_default_bond_features': False,
+ 'phase_features_path': None,
+ 'pytorch_seed': 0,
+ 'quiet': False,
+ 'reaction': False,
+ 'reaction_mode': 'reac_diff',
+ 'reaction_solvent': False,
+ 'resume_experiment': False,
+ 'save_dir': 'GraphModelCheckpoint',
+ 'save_preds': False,
+ 'save_smiles_splits': False,
+ 'seed': 0,
+ 'separate_test_atom_descriptors_path': None,
+ 'separate_test_bond_features_path': None,
+ 'separate_test_features_path': None,
+ 'separate_test_path': None,
+ 'separate_test_phase_features_path': None,
+ 'separate_val_atom_descriptors_path': None,
+ 'separate_val_bond_features_path': None,
+ 'separate_val_features_path': None,
+ 'separate_val_path': None,
+ 'separate_val_phase_features_path': None,
+ 'show_individual_scores': False,
+ 'smiles_columns': ['smiles'],
+ 'spectra_activation': 'exp',
+ 'spectra_phase_mask_path': None,
+ 'spectra_target_floor': 1e-08,
+ 'split_key_molecule': 0,
+ 'split_sizes': [0.8, 0.1, 0.1],
+ 'split_type': 'random',
+ 'target_columns': ['sol_category'],
+ 'target_weights': None,
+ 'task_names': ['sol_category'],
+ 'test': False,
+ 'test_fold_index': None,
+ 'train_data_size': None,
+ 'undirected': False,
+ 'use_input_features': False,
+ 'val_fold_index': None,
+ 'warmup_epochs': 2.0}
+Setting molecule featurization parameters to default.
+Loading data
+Number of tasks = 1
+Fold 0
+Splitting data with seed 0
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.2897e-01, PNorm = 34.0560, GNorm = 1.3350, lr_0 = 1.0438e-04
+Loss = 3.0928e-01, PNorm = 34.0610, GNorm = 1.2324, lr_0 = 1.0836e-04
+Loss = 2.9541e-01, PNorm = 34.0611, GNorm = 0.2068, lr_0 = 1.1233e-04
+Loss = 3.0341e-01, PNorm = 34.0599, GNorm = 0.7713, lr_0 = 1.1631e-04
+Loss = 3.2922e-01, PNorm = 34.0591, GNorm = 0.6192, lr_0 = 1.2029e-04
+Loss = 3.5394e-01, PNorm = 34.0597, GNorm = 0.2892, lr_0 = 1.2427e-04
+Loss = 3.2114e-01, PNorm = 34.0604, GNorm = 0.6109, lr_0 = 1.2825e-04
+Loss = 2.4549e-01, PNorm = 34.0624, GNorm = 0.4141, lr_0 = 1.3223e-04
+Loss = 2.9261e-01, PNorm = 34.0629, GNorm = 0.4116, lr_0 = 1.3621e-04
+Loss = 3.4045e-01, PNorm = 34.0615, GNorm = 0.3714, lr_0 = 1.4019e-04
+Loss = 3.2366e-01, PNorm = 34.0615, GNorm = 0.5285, lr_0 = 1.4416e-04
+Loss = 3.3277e-01, PNorm = 34.0617, GNorm = 0.8278, lr_0 = 1.4814e-04
+Loss = 3.3629e-01, PNorm = 34.0618, GNorm = 0.4657, lr_0 = 1.5212e-04
+Loss = 2.3735e-01, PNorm = 34.0635, GNorm = 0.6381, lr_0 = 1.5610e-04
+Loss = 3.3802e-01, PNorm = 34.0638, GNorm = 0.3041, lr_0 = 1.6008e-04
+Loss = 2.9078e-01, PNorm = 34.0636, GNorm = 1.1538, lr_0 = 1.6406e-04
+Loss = 3.4018e-01, PNorm = 34.0646, GNorm = 0.9998, lr_0 = 1.6804e-04
+Loss = 2.7023e-01, PNorm = 34.0658, GNorm = 0.5833, lr_0 = 1.7202e-04
+Loss = 2.7975e-01, PNorm = 34.0671, GNorm = 0.3629, lr_0 = 1.7599e-04
+Loss = 2.8862e-01, PNorm = 34.0665, GNorm = 0.2355, lr_0 = 1.7997e-04
+Loss = 3.0324e-01, PNorm = 34.0675, GNorm = 0.5221, lr_0 = 1.8395e-04
+Loss = 3.3220e-01, PNorm = 34.0678, GNorm = 1.1370, lr_0 = 1.8793e-04
+Loss = 2.7476e-01, PNorm = 34.0721, GNorm = 0.8361, lr_0 = 1.9191e-04
+Loss = 3.0175e-01, PNorm = 34.0712, GNorm = 0.4402, lr_0 = 1.9589e-04
+Loss = 3.6494e-01, PNorm = 34.0694, GNorm = 1.1708, lr_0 = 1.9987e-04
+Loss = 2.9056e-01, PNorm = 34.0739, GNorm = 0.1970, lr_0 = 2.0385e-04
+Loss = 3.1629e-01, PNorm = 34.0723, GNorm = 0.6465, lr_0 = 2.0782e-04
+Loss = 3.1845e-01, PNorm = 34.0719, GNorm = 0.4077, lr_0 = 2.1180e-04
+Loss = 3.3216e-01, PNorm = 34.0728, GNorm = 0.3018, lr_0 = 2.1578e-04
+Loss = 2.9675e-01, PNorm = 34.0745, GNorm = 0.2773, lr_0 = 2.1976e-04
+Loss = 2.6358e-01, PNorm = 34.0776, GNorm = 0.1580, lr_0 = 2.2374e-04
+Loss = 2.6325e-01, PNorm = 34.0767, GNorm = 0.3220, lr_0 = 2.2772e-04
+Loss = 3.3862e-01, PNorm = 34.0770, GNorm = 1.2964, lr_0 = 2.3170e-04
+Loss = 2.9155e-01, PNorm = 34.0775, GNorm = 0.5382, lr_0 = 2.3568e-04
+Loss = 2.7050e-01, PNorm = 34.0788, GNorm = 0.4704, lr_0 = 2.3966e-04
+Loss = 2.8959e-01, PNorm = 34.0811, GNorm = 0.2959, lr_0 = 2.4363e-04
+Loss = 3.1577e-01, PNorm = 34.0803, GNorm = 0.3284, lr_0 = 2.4761e-04
+Loss = 3.1093e-01, PNorm = 34.0813, GNorm = 0.7882, lr_0 = 2.5159e-04
+Loss = 2.6958e-01, PNorm = 34.0837, GNorm = 0.5791, lr_0 = 2.5557e-04
+Loss = 2.8518e-01, PNorm = 34.0831, GNorm = 0.3476, lr_0 = 2.5955e-04
+Loss = 2.8559e-01, PNorm = 34.0857, GNorm = 0.3553, lr_0 = 2.6353e-04
+Loss = 3.3521e-01, PNorm = 34.0872, GNorm = 0.3680, lr_0 = 2.6751e-04
+Loss = 2.8721e-01, PNorm = 34.0881, GNorm = 0.4565, lr_0 = 2.7149e-04
+Loss = 3.6340e-01, PNorm = 34.0889, GNorm = 0.2912, lr_0 = 2.7546e-04
+Loss = 2.3773e-01, PNorm = 34.0941, GNorm = 0.2797, lr_0 = 2.7944e-04
+Loss = 3.1632e-01, PNorm = 34.0951, GNorm = 0.3291, lr_0 = 2.8342e-04
+Loss = 3.1463e-01, PNorm = 34.0940, GNorm = 0.5495, lr_0 = 2.8740e-04
+Loss = 2.3699e-01, PNorm = 34.1006, GNorm = 0.4625, lr_0 = 2.9138e-04
+Loss = 3.0242e-01, PNorm = 34.0979, GNorm = 0.1740, lr_0 = 2.9536e-04
+Loss = 2.6595e-01, PNorm = 34.1005, GNorm = 0.1984, lr_0 = 2.9934e-04
+Loss = 3.0045e-01, PNorm = 34.1003, GNorm = 0.2433, lr_0 = 3.0332e-04
+Loss = 2.4253e-01, PNorm = 34.1034, GNorm = 0.2394, lr_0 = 3.0729e-04
+Loss = 3.5340e-01, PNorm = 34.1007, GNorm = 0.6303, lr_0 = 3.1127e-04
+Loss = 3.6387e-01, PNorm = 34.1035, GNorm = 0.2712, lr_0 = 3.1525e-04
+Loss = 3.3530e-01, PNorm = 34.1063, GNorm = 0.3697, lr_0 = 3.1923e-04
+Loss = 2.9600e-01, PNorm = 34.1106, GNorm = 0.4076, lr_0 = 3.2321e-04
+Loss = 2.9660e-01, PNorm = 34.1113, GNorm = 0.2409, lr_0 = 3.2719e-04
+Loss = 2.9015e-01, PNorm = 34.1151, GNorm = 0.3122, lr_0 = 3.3117e-04
+Loss = 2.9872e-01, PNorm = 34.1178, GNorm = 0.5785, lr_0 = 3.3515e-04
+Loss = 3.1613e-01, PNorm = 34.1194, GNorm = 0.5576, lr_0 = 3.3912e-04
+Loss = 2.8616e-01, PNorm = 34.1248, GNorm = 0.3663, lr_0 = 3.4310e-04
+Loss = 3.0075e-01, PNorm = 34.1249, GNorm = 0.3329, lr_0 = 3.4708e-04
+Loss = 3.2247e-01, PNorm = 34.1265, GNorm = 0.2320, lr_0 = 3.5106e-04
+Loss = 3.3463e-01, PNorm = 34.1252, GNorm = 0.4866, lr_0 = 3.5504e-04
+Loss = 3.7512e-01, PNorm = 34.1266, GNorm = 0.7301, lr_0 = 3.5902e-04
+Loss = 2.6754e-01, PNorm = 34.1318, GNorm = 0.5290, lr_0 = 3.6300e-04
+Loss = 3.4742e-01, PNorm = 34.1290, GNorm = 0.5237, lr_0 = 3.6698e-04
+Loss = 2.8403e-01, PNorm = 34.1374, GNorm = 0.3562, lr_0 = 3.7095e-04
+Loss = 1.5710e-01, PNorm = 34.1451, GNorm = 0.1839, lr_0 = 3.7493e-04
+Loss = 3.4611e-01, PNorm = 34.1363, GNorm = 0.5423, lr_0 = 3.7891e-04
+Loss = 3.1612e-01, PNorm = 34.1435, GNorm = 0.5910, lr_0 = 3.8289e-04
+Loss = 2.4944e-01, PNorm = 34.1520, GNorm = 0.1850, lr_0 = 3.8687e-04
+Loss = 2.8027e-01, PNorm = 34.1490, GNorm = 0.4044, lr_0 = 3.9085e-04
+Loss = 2.7426e-01, PNorm = 34.1546, GNorm = 0.1936, lr_0 = 3.9483e-04
+Loss = 2.3480e-01, PNorm = 34.1571, GNorm = 0.4581, lr_0 = 3.9881e-04
+Loss = 3.1524e-01, PNorm = 34.1535, GNorm = 0.4244, lr_0 = 4.0279e-04
+Loss = 3.2121e-01, PNorm = 34.1542, GNorm = 0.3888, lr_0 = 4.0676e-04
+Loss = 2.5870e-01, PNorm = 34.1588, GNorm = 0.2618, lr_0 = 4.1074e-04
+Loss = 3.5133e-01, PNorm = 34.1558, GNorm = 0.2270, lr_0 = 4.1472e-04
+Loss = 2.6608e-01, PNorm = 34.1606, GNorm = 0.2757, lr_0 = 4.1870e-04
+Loss = 3.1548e-01, PNorm = 34.1649, GNorm = 0.4374, lr_0 = 4.2268e-04
+Loss = 2.8615e-01, PNorm = 34.1657, GNorm = 0.1966, lr_0 = 4.2666e-04
+Loss = 2.7829e-01, PNorm = 34.1677, GNorm = 0.2351, lr_0 = 4.3064e-04
+Loss = 3.2037e-01, PNorm = 34.1690, GNorm = 0.2516, lr_0 = 4.3462e-04
+Loss = 2.9313e-01, PNorm = 34.1725, GNorm = 0.2984, lr_0 = 4.3859e-04
+Loss = 3.3508e-01, PNorm = 34.1750, GNorm = 0.2737, lr_0 = 4.4257e-04
+Loss = 3.7615e-01, PNorm = 34.1797, GNorm = 0.2525, lr_0 = 4.4655e-04
+Loss = 2.5455e-01, PNorm = 34.1922, GNorm = 0.1803, lr_0 = 4.5053e-04
+Loss = 3.0331e-01, PNorm = 34.1872, GNorm = 0.5501, lr_0 = 4.5451e-04
+Loss = 3.7451e-01, PNorm = 34.1906, GNorm = 0.4308, lr_0 = 4.5849e-04
+Loss = 3.5271e-01, PNorm = 34.1948, GNorm = 0.1423, lr_0 = 4.6247e-04
+Loss = 2.9584e-01, PNorm = 34.1994, GNorm = 0.3147, lr_0 = 4.6645e-04
+Loss = 2.1131e-01, PNorm = 34.2095, GNorm = 0.2122, lr_0 = 4.7042e-04
+Loss = 2.5876e-01, PNorm = 34.2091, GNorm = 0.2068, lr_0 = 4.7440e-04
+Loss = 3.3034e-01, PNorm = 34.2046, GNorm = 0.4643, lr_0 = 4.7838e-04
+Loss = 2.9463e-01, PNorm = 34.2146, GNorm = 0.4319, lr_0 = 4.8236e-04
+Loss = 3.0055e-01, PNorm = 34.2141, GNorm = 0.3004, lr_0 = 4.8634e-04
+Loss = 2.3833e-01, PNorm = 34.2193, GNorm = 0.3141, lr_0 = 4.9032e-04
+Loss = 3.4612e-01, PNorm = 34.2179, GNorm = 0.2271, lr_0 = 4.9430e-04
+Loss = 3.6390e-01, PNorm = 34.2170, GNorm = 0.1432, lr_0 = 4.9828e-04
+Loss = 3.1426e-01, PNorm = 34.2258, GNorm = 0.1419, lr_0 = 5.0225e-04
+Loss = 2.8798e-01, PNorm = 34.2261, GNorm = 0.3331, lr_0 = 5.0623e-04
+Loss = 3.1309e-01, PNorm = 34.2256, GNorm = 0.2640, lr_0 = 5.1021e-04
+Loss = 2.7098e-01, PNorm = 34.2335, GNorm = 0.1129, lr_0 = 5.1419e-04
+Loss = 3.2072e-01, PNorm = 34.2349, GNorm = 0.7413, lr_0 = 5.1817e-04
+Loss = 3.2093e-01, PNorm = 34.2348, GNorm = 0.1738, lr_0 = 5.2215e-04
+Loss = 3.2428e-01, PNorm = 34.2438, GNorm = 0.7249, lr_0 = 5.2613e-04
+Loss = 3.2176e-01, PNorm = 34.2432, GNorm = 0.2948, lr_0 = 5.3011e-04
+Loss = 3.0780e-01, PNorm = 34.2510, GNorm = 0.2981, lr_0 = 5.3408e-04
+Loss = 3.5709e-01, PNorm = 34.2554, GNorm = 0.7883, lr_0 = 5.3806e-04
+Loss = 2.6467e-01, PNorm = 34.2589, GNorm = 0.1757, lr_0 = 5.4204e-04
+Loss = 2.6953e-01, PNorm = 34.2685, GNorm = 0.1665, lr_0 = 5.4602e-04
+Loss = 3.2663e-01, PNorm = 34.2665, GNorm = 0.1034, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.296535
+Model 0 best validation cross_entropy = 0.296535 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.303860
+Ensemble test cross_entropy = 0.303860
+Fold 1
+Splitting data with seed 1
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.3459e-01, PNorm = 34.0559, GNorm = 0.6673, lr_0 = 1.0438e-04
+Loss = 3.9818e-01, PNorm = 34.0600, GNorm = 1.6900, lr_0 = 1.0836e-04
+Loss = 3.0965e-01, PNorm = 34.0599, GNorm = 0.8815, lr_0 = 1.1233e-04
+Loss = 2.5579e-01, PNorm = 34.0597, GNorm = 0.7630, lr_0 = 1.1631e-04
+Loss = 3.5306e-01, PNorm = 34.0589, GNorm = 0.3903, lr_0 = 1.2029e-04
+Loss = 2.4874e-01, PNorm = 34.0595, GNorm = 0.7341, lr_0 = 1.2427e-04
+Loss = 3.1354e-01, PNorm = 34.0609, GNorm = 0.2588, lr_0 = 1.2825e-04
+Loss = 3.0318e-01, PNorm = 34.0598, GNorm = 0.4235, lr_0 = 1.3223e-04
+Loss = 2.6827e-01, PNorm = 34.0602, GNorm = 0.5386, lr_0 = 1.3621e-04
+Loss = 3.1750e-01, PNorm = 34.0607, GNorm = 0.4050, lr_0 = 1.4019e-04
+Loss = 2.7310e-01, PNorm = 34.0618, GNorm = 0.2296, lr_0 = 1.4416e-04
+Loss = 3.0460e-01, PNorm = 34.0616, GNorm = 0.7605, lr_0 = 1.4814e-04
+Loss = 2.5509e-01, PNorm = 34.0612, GNorm = 0.7483, lr_0 = 1.5212e-04
+Loss = 3.0088e-01, PNorm = 34.0622, GNorm = 0.2821, lr_0 = 1.5610e-04
+Loss = 3.3432e-01, PNorm = 34.0616, GNorm = 0.8635, lr_0 = 1.6008e-04
+Loss = 2.4752e-01, PNorm = 34.0643, GNorm = 0.3175, lr_0 = 1.6406e-04
+Loss = 3.5516e-01, PNorm = 34.0630, GNorm = 0.3577, lr_0 = 1.6804e-04
+Loss = 2.8642e-01, PNorm = 34.0631, GNorm = 0.4507, lr_0 = 1.7202e-04
+Loss = 3.4141e-01, PNorm = 34.0634, GNorm = 0.4129, lr_0 = 1.7599e-04
+Loss = 3.2158e-01, PNorm = 34.0640, GNorm = 0.8552, lr_0 = 1.7997e-04
+Loss = 2.8771e-01, PNorm = 34.0651, GNorm = 0.6480, lr_0 = 1.8395e-04
+Loss = 3.4499e-01, PNorm = 34.0652, GNorm = 0.7161, lr_0 = 1.8793e-04
+Loss = 3.6289e-01, PNorm = 34.0650, GNorm = 0.9070, lr_0 = 1.9191e-04
+Loss = 2.8755e-01, PNorm = 34.0686, GNorm = 0.3567, lr_0 = 1.9589e-04
+Loss = 2.3098e-01, PNorm = 34.0694, GNorm = 0.3350, lr_0 = 1.9987e-04
+Loss = 2.6435e-01, PNorm = 34.0686, GNorm = 0.8428, lr_0 = 2.0385e-04
+Loss = 3.0065e-01, PNorm = 34.0684, GNorm = 0.4911, lr_0 = 2.0782e-04
+Loss = 3.6287e-01, PNorm = 34.0688, GNorm = 0.3524, lr_0 = 2.1180e-04
+Loss = 2.7681e-01, PNorm = 34.0709, GNorm = 0.6531, lr_0 = 2.1578e-04
+Loss = 3.3363e-01, PNorm = 34.0702, GNorm = 0.6014, lr_0 = 2.1976e-04
+Loss = 3.0213e-01, PNorm = 34.0719, GNorm = 0.3714, lr_0 = 2.2374e-04
+Loss = 2.7386e-01, PNorm = 34.0743, GNorm = 0.4050, lr_0 = 2.2772e-04
+Loss = 2.4786e-01, PNorm = 34.0754, GNorm = 0.1890, lr_0 = 2.3170e-04
+Loss = 3.8355e-01, PNorm = 34.0725, GNorm = 0.5282, lr_0 = 2.3568e-04
+Loss = 2.9091e-01, PNorm = 34.0772, GNorm = 0.7844, lr_0 = 2.3966e-04
+Loss = 3.6613e-01, PNorm = 34.0750, GNorm = 0.6003, lr_0 = 2.4363e-04
+Loss = 2.8121e-01, PNorm = 34.0807, GNorm = 0.3662, lr_0 = 2.4761e-04
+Loss = 2.6864e-01, PNorm = 34.0800, GNorm = 0.2705, lr_0 = 2.5159e-04
+Loss = 3.0775e-01, PNorm = 34.0787, GNorm = 0.4307, lr_0 = 2.5557e-04
+Loss = 3.1942e-01, PNorm = 34.0807, GNorm = 0.4350, lr_0 = 2.5955e-04
+Loss = 3.1491e-01, PNorm = 34.0801, GNorm = 0.3697, lr_0 = 2.6353e-04
+Loss = 3.5807e-01, PNorm = 34.0809, GNorm = 1.3331, lr_0 = 2.6751e-04
+Loss = 3.9338e-01, PNorm = 34.0793, GNorm = 0.9299, lr_0 = 2.7149e-04
+Loss = 3.5446e-01, PNorm = 34.0839, GNorm = 0.9624, lr_0 = 2.7546e-04
+Loss = 2.8870e-01, PNorm = 34.0842, GNorm = 0.4793, lr_0 = 2.7944e-04
+Loss = 3.1327e-01, PNorm = 34.0869, GNorm = 0.1907, lr_0 = 2.8342e-04
+Loss = 2.8715e-01, PNorm = 34.0864, GNorm = 0.6497, lr_0 = 2.8740e-04
+Loss = 2.8547e-01, PNorm = 34.0882, GNorm = 0.3633, lr_0 = 2.9138e-04
+Loss = 2.7754e-01, PNorm = 34.0903, GNorm = 0.4551, lr_0 = 2.9536e-04
+Loss = 2.4096e-01, PNorm = 34.0919, GNorm = 0.2063, lr_0 = 2.9934e-04
+Loss = 2.5905e-01, PNorm = 34.0924, GNorm = 0.3938, lr_0 = 3.0332e-04
+Loss = 3.4245e-01, PNorm = 34.0921, GNorm = 0.3373, lr_0 = 3.0729e-04
+Loss = 2.5199e-01, PNorm = 34.0961, GNorm = 0.1793, lr_0 = 3.1127e-04
+Loss = 3.5122e-01, PNorm = 34.0937, GNorm = 0.3203, lr_0 = 3.1525e-04
+Loss = 3.0088e-01, PNorm = 34.0983, GNorm = 0.1994, lr_0 = 3.1923e-04
+Loss = 2.4183e-01, PNorm = 34.1027, GNorm = 0.3235, lr_0 = 3.2321e-04
+Loss = 2.5218e-01, PNorm = 34.1016, GNorm = 0.2587, lr_0 = 3.2719e-04
+Loss = 2.2309e-01, PNorm = 34.1050, GNorm = 0.3956, lr_0 = 3.3117e-04
+Loss = 3.1023e-01, PNorm = 34.1030, GNorm = 0.3016, lr_0 = 3.3515e-04
+Loss = 3.2699e-01, PNorm = 34.1048, GNorm = 0.2822, lr_0 = 3.3912e-04
+Loss = 2.7496e-01, PNorm = 34.1077, GNorm = 0.2434, lr_0 = 3.4310e-04
+Loss = 3.0050e-01, PNorm = 34.1085, GNorm = 0.2132, lr_0 = 3.4708e-04
+Loss = 3.1363e-01, PNorm = 34.1107, GNorm = 0.3141, lr_0 = 3.5106e-04
+Loss = 3.1992e-01, PNorm = 34.1122, GNorm = 0.7180, lr_0 = 3.5504e-04
+Loss = 3.0857e-01, PNorm = 34.1150, GNorm = 0.6224, lr_0 = 3.5902e-04
+Loss = 3.4158e-01, PNorm = 34.1161, GNorm = 0.3256, lr_0 = 3.6300e-04
+Loss = 2.5545e-01, PNorm = 34.1226, GNorm = 0.7238, lr_0 = 3.6698e-04
+Loss = 2.9448e-01, PNorm = 34.1215, GNorm = 0.1401, lr_0 = 3.7095e-04
+Loss = 3.3098e-01, PNorm = 34.1238, GNorm = 0.2082, lr_0 = 3.7493e-04
+Loss = 2.6182e-01, PNorm = 34.1287, GNorm = 0.2922, lr_0 = 3.7891e-04
+Loss = 3.3972e-01, PNorm = 34.1269, GNorm = 0.4025, lr_0 = 3.8289e-04
+Loss = 3.3506e-01, PNorm = 34.1299, GNorm = 0.5385, lr_0 = 3.8687e-04
+Loss = 3.4795e-01, PNorm = 34.1361, GNorm = 0.5508, lr_0 = 3.9085e-04
+Loss = 3.3752e-01, PNorm = 34.1378, GNorm = 0.4756, lr_0 = 3.9483e-04
+Loss = 2.6539e-01, PNorm = 34.1484, GNorm = 0.3188, lr_0 = 3.9881e-04
+Loss = 2.6659e-01, PNorm = 34.1476, GNorm = 0.2383, lr_0 = 4.0279e-04
+Loss = 2.6516e-01, PNorm = 34.1489, GNorm = 0.3075, lr_0 = 4.0676e-04
+Loss = 2.7583e-01, PNorm = 34.1528, GNorm = 0.3757, lr_0 = 4.1074e-04
+Loss = 3.0081e-01, PNorm = 34.1544, GNorm = 0.2781, lr_0 = 4.1472e-04
+Loss = 2.9827e-01, PNorm = 34.1598, GNorm = 0.5626, lr_0 = 4.1870e-04
+Loss = 3.0029e-01, PNorm = 34.1620, GNorm = 0.3684, lr_0 = 4.2268e-04
+Loss = 2.9764e-01, PNorm = 34.1687, GNorm = 0.3489, lr_0 = 4.2666e-04
+Loss = 3.1250e-01, PNorm = 34.1690, GNorm = 0.3511, lr_0 = 4.3064e-04
+Loss = 2.9679e-01, PNorm = 34.1762, GNorm = 0.3770, lr_0 = 4.3462e-04
+Loss = 3.9905e-01, PNorm = 34.1730, GNorm = 0.2756, lr_0 = 4.3859e-04
+Loss = 2.9432e-01, PNorm = 34.1879, GNorm = 0.1549, lr_0 = 4.4257e-04
+Loss = 2.6345e-01, PNorm = 34.1893, GNorm = 0.3454, lr_0 = 4.4655e-04
+Loss = 2.9086e-01, PNorm = 34.1893, GNorm = 0.1714, lr_0 = 4.5053e-04
+Loss = 3.0134e-01, PNorm = 34.1925, GNorm = 0.6252, lr_0 = 4.5451e-04
+Loss = 2.5504e-01, PNorm = 34.1982, GNorm = 0.1946, lr_0 = 4.5849e-04
+Loss = 2.1414e-01, PNorm = 34.2032, GNorm = 0.1569, lr_0 = 4.6247e-04
+Loss = 3.1641e-01, PNorm = 34.1964, GNorm = 0.4639, lr_0 = 4.6645e-04
+Loss = 3.1986e-01, PNorm = 34.2021, GNorm = 0.3509, lr_0 = 4.7042e-04
+Loss = 2.2500e-01, PNorm = 34.2124, GNorm = 0.3057, lr_0 = 4.7440e-04
+Loss = 2.5069e-01, PNorm = 34.2085, GNorm = 0.1832, lr_0 = 4.7838e-04
+Loss = 2.6822e-01, PNorm = 34.2121, GNorm = 0.4375, lr_0 = 4.8236e-04
+Loss = 3.6200e-01, PNorm = 34.2112, GNorm = 0.7884, lr_0 = 4.8634e-04
+Loss = 3.4696e-01, PNorm = 34.2183, GNorm = 0.3816, lr_0 = 4.9032e-04
+Loss = 2.7203e-01, PNorm = 34.2187, GNorm = 0.3848, lr_0 = 4.9430e-04
+Loss = 3.0988e-01, PNorm = 34.2188, GNorm = 0.6032, lr_0 = 4.9828e-04
+Loss = 3.8346e-01, PNorm = 34.2192, GNorm = 0.7927, lr_0 = 5.0225e-04
+Loss = 2.8165e-01, PNorm = 34.2267, GNorm = 0.4543, lr_0 = 5.0623e-04
+Loss = 2.8990e-01, PNorm = 34.2385, GNorm = 1.3693, lr_0 = 5.1021e-04
+Loss = 3.1501e-01, PNorm = 34.2339, GNorm = 0.2257, lr_0 = 5.1419e-04
+Loss = 3.1062e-01, PNorm = 34.2428, GNorm = 0.5892, lr_0 = 5.1817e-04
+Loss = 2.5272e-01, PNorm = 34.2491, GNorm = 0.8431, lr_0 = 5.2215e-04
+Loss = 2.2508e-01, PNorm = 34.2519, GNorm = 0.3174, lr_0 = 5.2613e-04
+Loss = 3.6881e-01, PNorm = 34.2469, GNorm = 0.1843, lr_0 = 5.3011e-04
+Loss = 3.6637e-01, PNorm = 34.2481, GNorm = 0.4063, lr_0 = 5.3408e-04
+Loss = 2.2309e-01, PNorm = 34.2640, GNorm = 0.2845, lr_0 = 5.3806e-04
+Loss = 3.6156e-01, PNorm = 34.2563, GNorm = 0.9869, lr_0 = 5.4204e-04
+Loss = 3.2150e-01, PNorm = 34.2579, GNorm = 0.3720, lr_0 = 5.4602e-04
+Loss = 3.0460e-01, PNorm = 34.2709, GNorm = 0.1043, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.312040
+Model 0 best validation cross_entropy = 0.312040 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.290351
+Ensemble test cross_entropy = 0.290351
+Fold 2
+Splitting data with seed 2
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.1279e-01, PNorm = 34.0560, GNorm = 1.3077, lr_0 = 1.0438e-04
+Loss = 3.1693e-01, PNorm = 34.0607, GNorm = 0.3688, lr_0 = 1.0836e-04
+Loss = 3.5118e-01, PNorm = 34.0609, GNorm = 1.8092, lr_0 = 1.1233e-04
+Loss = 3.1534e-01, PNorm = 34.0590, GNorm = 0.3280, lr_0 = 1.1631e-04
+Loss = 3.4834e-01, PNorm = 34.0583, GNorm = 0.7358, lr_0 = 1.2029e-04
+Loss = 2.8382e-01, PNorm = 34.0594, GNorm = 0.2971, lr_0 = 1.2427e-04
+Loss = 3.2529e-01, PNorm = 34.0596, GNorm = 0.4444, lr_0 = 1.2825e-04
+Loss = 1.8048e-01, PNorm = 34.0606, GNorm = 0.8104, lr_0 = 1.3223e-04
+Loss = 3.1757e-01, PNorm = 34.0606, GNorm = 0.3185, lr_0 = 1.3621e-04
+Loss = 2.8618e-01, PNorm = 34.0594, GNorm = 0.7742, lr_0 = 1.4019e-04
+Loss = 2.9784e-01, PNorm = 34.0595, GNorm = 0.4053, lr_0 = 1.4416e-04
+Loss = 3.1936e-01, PNorm = 34.0601, GNorm = 0.2949, lr_0 = 1.4814e-04
+Loss = 2.8086e-01, PNorm = 34.0605, GNorm = 0.7195, lr_0 = 1.5212e-04
+Loss = 2.8303e-01, PNorm = 34.0613, GNorm = 0.8470, lr_0 = 1.5610e-04
+Loss = 3.2815e-01, PNorm = 34.0597, GNorm = 1.0427, lr_0 = 1.6008e-04
+Loss = 2.3978e-01, PNorm = 34.0629, GNorm = 0.4064, lr_0 = 1.6406e-04
+Loss = 2.8064e-01, PNorm = 34.0632, GNorm = 1.5323, lr_0 = 1.6804e-04
+Loss = 3.5168e-01, PNorm = 34.0602, GNorm = 0.7228, lr_0 = 1.7202e-04
+Loss = 3.3316e-01, PNorm = 34.0620, GNorm = 0.4708, lr_0 = 1.7599e-04
+Loss = 2.7611e-01, PNorm = 34.0646, GNorm = 0.3228, lr_0 = 1.7997e-04
+Loss = 3.2541e-01, PNorm = 34.0631, GNorm = 0.2609, lr_0 = 1.8395e-04
+Loss = 2.7552e-01, PNorm = 34.0648, GNorm = 0.6885, lr_0 = 1.8793e-04
+Loss = 2.7797e-01, PNorm = 34.0666, GNorm = 0.5550, lr_0 = 1.9191e-04
+Loss = 3.5491e-01, PNorm = 34.0650, GNorm = 0.3274, lr_0 = 1.9589e-04
+Loss = 3.1940e-01, PNorm = 34.0661, GNorm = 0.6996, lr_0 = 1.9987e-04
+Loss = 2.9755e-01, PNorm = 34.0670, GNorm = 0.9611, lr_0 = 2.0385e-04
+Loss = 2.6970e-01, PNorm = 34.0679, GNorm = 0.4060, lr_0 = 2.0782e-04
+Loss = 3.4022e-01, PNorm = 34.0675, GNorm = 0.3062, lr_0 = 2.1180e-04
+Loss = 3.5941e-01, PNorm = 34.0673, GNorm = 0.6681, lr_0 = 2.1578e-04
+Loss = 3.0954e-01, PNorm = 34.0714, GNorm = 0.7886, lr_0 = 2.1976e-04
+Loss = 2.9040e-01, PNorm = 34.0726, GNorm = 0.4129, lr_0 = 2.2374e-04
+Loss = 2.8458e-01, PNorm = 34.0711, GNorm = 0.5721, lr_0 = 2.2772e-04
+Loss = 3.7204e-01, PNorm = 34.0714, GNorm = 0.7092, lr_0 = 2.3170e-04
+Loss = 2.4983e-01, PNorm = 34.0759, GNorm = 0.7855, lr_0 = 2.3568e-04
+Loss = 3.1681e-01, PNorm = 34.0761, GNorm = 0.3316, lr_0 = 2.3966e-04
+Loss = 2.8932e-01, PNorm = 34.0765, GNorm = 0.3126, lr_0 = 2.4363e-04
+Loss = 3.2472e-01, PNorm = 34.0779, GNorm = 0.2980, lr_0 = 2.4761e-04
+Loss = 3.1157e-01, PNorm = 34.0791, GNorm = 0.2823, lr_0 = 2.5159e-04
+Loss = 3.2120e-01, PNorm = 34.0811, GNorm = 0.3272, lr_0 = 2.5557e-04
+Loss = 2.8370e-01, PNorm = 34.0818, GNorm = 0.4172, lr_0 = 2.5955e-04
+Loss = 2.6346e-01, PNorm = 34.0855, GNorm = 0.2868, lr_0 = 2.6353e-04
+Loss = 3.8435e-01, PNorm = 34.0829, GNorm = 0.5600, lr_0 = 2.6751e-04
+Loss = 3.3764e-01, PNorm = 34.0870, GNorm = 0.3073, lr_0 = 2.7149e-04
+Loss = 3.1450e-01, PNorm = 34.0899, GNorm = 0.3438, lr_0 = 2.7546e-04
+Loss = 3.0613e-01, PNorm = 34.0893, GNorm = 0.4162, lr_0 = 2.7944e-04
+Loss = 2.8644e-01, PNorm = 34.0937, GNorm = 0.2951, lr_0 = 2.8342e-04
+Loss = 3.3460e-01, PNorm = 34.0922, GNorm = 0.5978, lr_0 = 2.8740e-04
+Loss = 2.7154e-01, PNorm = 34.0980, GNorm = 0.2155, lr_0 = 2.9138e-04
+Loss = 2.7761e-01, PNorm = 34.0992, GNorm = 0.3947, lr_0 = 2.9536e-04
+Loss = 3.0690e-01, PNorm = 34.0990, GNorm = 0.2162, lr_0 = 2.9934e-04
+Loss = 2.4311e-01, PNorm = 34.1024, GNorm = 0.3949, lr_0 = 3.0332e-04
+Loss = 2.8506e-01, PNorm = 34.1024, GNorm = 0.3123, lr_0 = 3.0729e-04
+Loss = 2.8649e-01, PNorm = 34.1027, GNorm = 0.6360, lr_0 = 3.1127e-04
+Loss = 2.1287e-01, PNorm = 34.1080, GNorm = 0.2735, lr_0 = 3.1525e-04
+Loss = 3.2476e-01, PNorm = 34.1044, GNorm = 0.4646, lr_0 = 3.1923e-04
+Loss = 2.8614e-01, PNorm = 34.1091, GNorm = 0.8570, lr_0 = 3.2321e-04
+Loss = 2.7985e-01, PNorm = 34.1109, GNorm = 0.8872, lr_0 = 3.2719e-04
+Loss = 3.7233e-01, PNorm = 34.1072, GNorm = 0.2493, lr_0 = 3.3117e-04
+Loss = 3.2949e-01, PNorm = 34.1127, GNorm = 0.3436, lr_0 = 3.3515e-04
+Loss = 4.0182e-01, PNorm = 34.1136, GNorm = 0.2276, lr_0 = 3.3912e-04
+Loss = 3.0591e-01, PNorm = 34.1163, GNorm = 0.3698, lr_0 = 3.4310e-04
+Loss = 2.6301e-01, PNorm = 34.1202, GNorm = 0.3570, lr_0 = 3.4708e-04
+Loss = 3.2495e-01, PNorm = 34.1183, GNorm = 0.2456, lr_0 = 3.5106e-04
+Loss = 3.1277e-01, PNorm = 34.1199, GNorm = 0.8477, lr_0 = 3.5504e-04
+Loss = 2.9971e-01, PNorm = 34.1275, GNorm = 0.2905, lr_0 = 3.5902e-04
+Loss = 2.9530e-01, PNorm = 34.1287, GNorm = 0.2046, lr_0 = 3.6300e-04
+Loss = 2.6486e-01, PNorm = 34.1311, GNorm = 0.5845, lr_0 = 3.6698e-04
+Loss = 3.0165e-01, PNorm = 34.1316, GNorm = 0.2359, lr_0 = 3.7095e-04
+Loss = 3.0764e-01, PNorm = 34.1340, GNorm = 0.3623, lr_0 = 3.7493e-04
+Loss = 2.9322e-01, PNorm = 34.1365, GNorm = 0.2530, lr_0 = 3.7891e-04
+Loss = 2.9198e-01, PNorm = 34.1344, GNorm = 0.5922, lr_0 = 3.8289e-04
+Loss = 3.1081e-01, PNorm = 34.1362, GNorm = 0.4113, lr_0 = 3.8687e-04
+Loss = 2.9218e-01, PNorm = 34.1376, GNorm = 0.2471, lr_0 = 3.9085e-04
+Loss = 3.0258e-01, PNorm = 34.1417, GNorm = 0.1882, lr_0 = 3.9483e-04
+Loss = 2.2717e-01, PNorm = 34.1462, GNorm = 0.4144, lr_0 = 3.9881e-04
+Loss = 3.5924e-01, PNorm = 34.1436, GNorm = 0.3919, lr_0 = 4.0279e-04
+Loss = 2.4831e-01, PNorm = 34.1541, GNorm = 0.4649, lr_0 = 4.0676e-04
+Loss = 3.4797e-01, PNorm = 34.1521, GNorm = 0.2697, lr_0 = 4.1074e-04
+Loss = 2.8245e-01, PNorm = 34.1577, GNorm = 0.3253, lr_0 = 4.1472e-04
+Loss = 2.4594e-01, PNorm = 34.1644, GNorm = 0.1204, lr_0 = 4.1870e-04
+Loss = 2.8983e-01, PNorm = 34.1644, GNorm = 0.2970, lr_0 = 4.2268e-04
+Loss = 2.6645e-01, PNorm = 34.1671, GNorm = 0.4479, lr_0 = 4.2666e-04
+Loss = 2.8987e-01, PNorm = 34.1701, GNorm = 0.7416, lr_0 = 4.3064e-04
+Loss = 3.0267e-01, PNorm = 34.1694, GNorm = 0.3023, lr_0 = 4.3462e-04
+Loss = 2.7326e-01, PNorm = 34.1775, GNorm = 0.2106, lr_0 = 4.3859e-04
+Loss = 2.8913e-01, PNorm = 34.1790, GNorm = 0.4966, lr_0 = 4.4257e-04
+Loss = 2.4876e-01, PNorm = 34.1886, GNorm = 0.3167, lr_0 = 4.4655e-04
+Loss = 3.1157e-01, PNorm = 34.1850, GNorm = 0.4263, lr_0 = 4.5053e-04
+Loss = 3.0709e-01, PNorm = 34.1901, GNorm = 0.2860, lr_0 = 4.5451e-04
+Loss = 2.3487e-01, PNorm = 34.1972, GNorm = 0.0986, lr_0 = 4.5849e-04
+Loss = 2.8314e-01, PNorm = 34.1939, GNorm = 0.2964, lr_0 = 4.6247e-04
+Loss = 2.9599e-01, PNorm = 34.1979, GNorm = 0.1354, lr_0 = 4.6645e-04
+Loss = 3.5668e-01, PNorm = 34.1989, GNorm = 0.2033, lr_0 = 4.7042e-04
+Loss = 3.3460e-01, PNorm = 34.2034, GNorm = 0.2193, lr_0 = 4.7440e-04
+Loss = 3.1278e-01, PNorm = 34.2085, GNorm = 0.4986, lr_0 = 4.7838e-04
+Loss = 2.7485e-01, PNorm = 34.2180, GNorm = 0.1560, lr_0 = 4.8236e-04
+Loss = 2.9668e-01, PNorm = 34.2177, GNorm = 0.2360, lr_0 = 4.8634e-04
+Loss = 3.0767e-01, PNorm = 34.2255, GNorm = 0.2159, lr_0 = 4.9032e-04
+Loss = 2.6044e-01, PNorm = 34.2333, GNorm = 0.4232, lr_0 = 4.9430e-04
+Loss = 2.7064e-01, PNorm = 34.2331, GNorm = 0.6429, lr_0 = 4.9828e-04
+Loss = 3.2594e-01, PNorm = 34.2387, GNorm = 0.6931, lr_0 = 5.0225e-04
+Loss = 3.9393e-01, PNorm = 34.2365, GNorm = 0.5385, lr_0 = 5.0623e-04
+Loss = 3.2599e-01, PNorm = 34.2539, GNorm = 0.3355, lr_0 = 5.1021e-04
+Loss = 3.0414e-01, PNorm = 34.2575, GNorm = 0.1514, lr_0 = 5.1419e-04
+Loss = 3.6426e-01, PNorm = 34.2585, GNorm = 0.1627, lr_0 = 5.1817e-04
+Loss = 2.4914e-01, PNorm = 34.2693, GNorm = 0.1955, lr_0 = 5.2215e-04
+Loss = 2.6216e-01, PNorm = 34.2688, GNorm = 0.1982, lr_0 = 5.2613e-04
+Loss = 2.7079e-01, PNorm = 34.2730, GNorm = 0.5064, lr_0 = 5.3011e-04
+Loss = 3.3949e-01, PNorm = 34.2723, GNorm = 0.3342, lr_0 = 5.3408e-04
+Loss = 2.9152e-01, PNorm = 34.2774, GNorm = 0.2251, lr_0 = 5.3806e-04
+Loss = 2.9378e-01, PNorm = 34.2769, GNorm = 0.4793, lr_0 = 5.4204e-04
+Loss = 2.8190e-01, PNorm = 34.2833, GNorm = 0.3606, lr_0 = 5.4602e-04
+Loss = 2.6984e-01, PNorm = 34.2821, GNorm = 0.1537, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.305623
+Model 0 best validation cross_entropy = 0.305623 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.311850
+Ensemble test cross_entropy = 0.311850
+Fold 3
+Splitting data with seed 3
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.3031e-01, PNorm = 34.0561, GNorm = 1.7603, lr_0 = 1.0438e-04
+Loss = 3.6715e-01, PNorm = 34.0601, GNorm = 0.7583, lr_0 = 1.0836e-04
+Loss = 3.5278e-01, PNorm = 34.0597, GNorm = 0.3718, lr_0 = 1.1233e-04
+Loss = 2.8790e-01, PNorm = 34.0588, GNorm = 0.5259, lr_0 = 1.1631e-04
+Loss = 3.3319e-01, PNorm = 34.0589, GNorm = 0.6773, lr_0 = 1.2029e-04
+Loss = 3.1905e-01, PNorm = 34.0590, GNorm = 0.6077, lr_0 = 1.2427e-04
+Loss = 3.0899e-01, PNorm = 34.0600, GNorm = 0.5449, lr_0 = 1.2825e-04
+Loss = 2.6978e-01, PNorm = 34.0613, GNorm = 1.0623, lr_0 = 1.3223e-04
+Loss = 2.6338e-01, PNorm = 34.0612, GNorm = 0.4334, lr_0 = 1.3621e-04
+Loss = 3.1883e-01, PNorm = 34.0617, GNorm = 0.5227, lr_0 = 1.4019e-04
+Loss = 2.7773e-01, PNorm = 34.0631, GNorm = 0.5207, lr_0 = 1.4416e-04
+Loss = 2.7670e-01, PNorm = 34.0636, GNorm = 0.6228, lr_0 = 1.4814e-04
+Loss = 3.6258e-01, PNorm = 34.0613, GNorm = 0.3770, lr_0 = 1.5212e-04
+Loss = 2.8816e-01, PNorm = 34.0631, GNorm = 0.5656, lr_0 = 1.5610e-04
+Loss = 3.0200e-01, PNorm = 34.0647, GNorm = 0.2811, lr_0 = 1.6008e-04
+Loss = 2.6320e-01, PNorm = 34.0647, GNorm = 0.5065, lr_0 = 1.6406e-04
+Loss = 3.1956e-01, PNorm = 34.0649, GNorm = 0.6294, lr_0 = 1.6804e-04
+Loss = 3.8133e-01, PNorm = 34.0631, GNorm = 0.6103, lr_0 = 1.7202e-04
+Loss = 2.8189e-01, PNorm = 34.0660, GNorm = 0.7457, lr_0 = 1.7599e-04
+Loss = 2.6729e-01, PNorm = 34.0669, GNorm = 0.8579, lr_0 = 1.7997e-04
+Loss = 3.2024e-01, PNorm = 34.0655, GNorm = 0.5644, lr_0 = 1.8395e-04
+Loss = 2.4043e-01, PNorm = 34.0682, GNorm = 0.2322, lr_0 = 1.8793e-04
+Loss = 2.5685e-01, PNorm = 34.0688, GNorm = 0.6967, lr_0 = 1.9191e-04
+Loss = 3.1490e-01, PNorm = 34.0675, GNorm = 0.2604, lr_0 = 1.9589e-04
+Loss = 3.3511e-01, PNorm = 34.0686, GNorm = 0.4063, lr_0 = 1.9987e-04
+Loss = 3.3037e-01, PNorm = 34.0695, GNorm = 0.3135, lr_0 = 2.0385e-04
+Loss = 3.1337e-01, PNorm = 34.0720, GNorm = 1.0755, lr_0 = 2.0782e-04
+Loss = 2.9951e-01, PNorm = 34.0711, GNorm = 0.3887, lr_0 = 2.1180e-04
+Loss = 2.7804e-01, PNorm = 34.0737, GNorm = 0.3990, lr_0 = 2.1578e-04
+Loss = 4.3191e-01, PNorm = 34.0707, GNorm = 0.7939, lr_0 = 2.1976e-04
+Loss = 3.1379e-01, PNorm = 34.0754, GNorm = 0.2993, lr_0 = 2.2374e-04
+Loss = 3.3743e-01, PNorm = 34.0781, GNorm = 1.3697, lr_0 = 2.2772e-04
+Loss = 3.1165e-01, PNorm = 34.0772, GNorm = 0.2870, lr_0 = 2.3170e-04
+Loss = 2.2679e-01, PNorm = 34.0820, GNorm = 0.7034, lr_0 = 2.3568e-04
+Loss = 2.7523e-01, PNorm = 34.0838, GNorm = 0.8287, lr_0 = 2.3966e-04
+Loss = 2.6611e-01, PNorm = 34.0829, GNorm = 0.2299, lr_0 = 2.4363e-04
+Loss = 3.1559e-01, PNorm = 34.0835, GNorm = 0.2617, lr_0 = 2.4761e-04
+Loss = 3.0392e-01, PNorm = 34.0839, GNorm = 0.5025, lr_0 = 2.5159e-04
+Loss = 3.2369e-01, PNorm = 34.0842, GNorm = 0.2745, lr_0 = 2.5557e-04
+Loss = 3.0122e-01, PNorm = 34.0846, GNorm = 0.3201, lr_0 = 2.5955e-04
+Loss = 2.9725e-01, PNorm = 34.0856, GNorm = 0.4718, lr_0 = 2.6353e-04
+Loss = 3.2607e-01, PNorm = 34.0851, GNorm = 0.3493, lr_0 = 2.6751e-04
+Loss = 3.5534e-01, PNorm = 34.0851, GNorm = 0.2711, lr_0 = 2.7149e-04
+Loss = 2.8102e-01, PNorm = 34.0885, GNorm = 0.2334, lr_0 = 2.7546e-04
+Loss = 2.8009e-01, PNorm = 34.0897, GNorm = 0.4430, lr_0 = 2.7944e-04
+Loss = 3.5395e-01, PNorm = 34.0886, GNorm = 1.2326, lr_0 = 2.8342e-04
+Loss = 3.1683e-01, PNorm = 34.0905, GNorm = 0.2951, lr_0 = 2.8740e-04
+Loss = 2.7500e-01, PNorm = 34.0944, GNorm = 0.8316, lr_0 = 2.9138e-04
+Loss = 2.8019e-01, PNorm = 34.0929, GNorm = 0.5066, lr_0 = 2.9536e-04
+Loss = 2.3669e-01, PNorm = 34.0985, GNorm = 0.4684, lr_0 = 2.9934e-04
+Loss = 2.7026e-01, PNorm = 34.0960, GNorm = 0.4152, lr_0 = 3.0332e-04
+Loss = 3.1654e-01, PNorm = 34.0949, GNorm = 0.3468, lr_0 = 3.0729e-04
+Loss = 3.4478e-01, PNorm = 34.0966, GNorm = 0.4330, lr_0 = 3.1127e-04
+Loss = 2.3884e-01, PNorm = 34.1004, GNorm = 0.2479, lr_0 = 3.1525e-04
+Loss = 3.2467e-01, PNorm = 34.0983, GNorm = 0.3871, lr_0 = 3.1923e-04
+Loss = 3.5430e-01, PNorm = 34.0997, GNorm = 0.8376, lr_0 = 3.2321e-04
+Loss = 3.3110e-01, PNorm = 34.1028, GNorm = 0.3715, lr_0 = 3.2719e-04
+Loss = 2.7704e-01, PNorm = 34.1052, GNorm = 0.4254, lr_0 = 3.3117e-04
+Loss = 3.0691e-01, PNorm = 34.1062, GNorm = 0.4471, lr_0 = 3.3515e-04
+Loss = 2.4204e-01, PNorm = 34.1128, GNorm = 0.3154, lr_0 = 3.3912e-04
+Loss = 2.8676e-01, PNorm = 34.1110, GNorm = 0.1615, lr_0 = 3.4310e-04
+Loss = 3.0160e-01, PNorm = 34.1118, GNorm = 0.4548, lr_0 = 3.4708e-04
+Loss = 3.1916e-01, PNorm = 34.1149, GNorm = 0.6438, lr_0 = 3.5106e-04
+Loss = 3.4301e-01, PNorm = 34.1134, GNorm = 0.1736, lr_0 = 3.5504e-04
+Loss = 2.6738e-01, PNorm = 34.1204, GNorm = 0.7294, lr_0 = 3.5902e-04
+Loss = 3.6500e-01, PNorm = 34.1157, GNorm = 0.9705, lr_0 = 3.6300e-04
+Loss = 3.1320e-01, PNorm = 34.1244, GNorm = 0.8226, lr_0 = 3.6698e-04
+Loss = 3.0822e-01, PNorm = 34.1224, GNorm = 0.5904, lr_0 = 3.7095e-04
+Loss = 2.3515e-01, PNorm = 34.1307, GNorm = 0.3648, lr_0 = 3.7493e-04
+Loss = 3.0905e-01, PNorm = 34.1272, GNorm = 0.7182, lr_0 = 3.7891e-04
+Loss = 2.7415e-01, PNorm = 34.1302, GNorm = 0.2212, lr_0 = 3.8289e-04
+Loss = 3.7421e-01, PNorm = 34.1278, GNorm = 0.4170, lr_0 = 3.8687e-04
+Loss = 2.8467e-01, PNorm = 34.1356, GNorm = 0.1871, lr_0 = 3.9085e-04
+Loss = 2.7365e-01, PNorm = 34.1373, GNorm = 0.4422, lr_0 = 3.9483e-04
+Loss = 3.0774e-01, PNorm = 34.1347, GNorm = 0.6547, lr_0 = 3.9881e-04
+Loss = 3.0056e-01, PNorm = 34.1375, GNorm = 0.2214, lr_0 = 4.0279e-04
+Loss = 2.9536e-01, PNorm = 34.1399, GNorm = 0.8440, lr_0 = 4.0676e-04
+Loss = 2.8714e-01, PNorm = 34.1396, GNorm = 0.4937, lr_0 = 4.1074e-04
+Loss = 2.7033e-01, PNorm = 34.1439, GNorm = 0.2342, lr_0 = 4.1472e-04
+Loss = 2.9292e-01, PNorm = 34.1446, GNorm = 0.1649, lr_0 = 4.1870e-04
+Loss = 2.7627e-01, PNorm = 34.1505, GNorm = 0.5182, lr_0 = 4.2268e-04
+Loss = 3.0072e-01, PNorm = 34.1497, GNorm = 0.2469, lr_0 = 4.2666e-04
+Loss = 3.0428e-01, PNorm = 34.1549, GNorm = 0.1785, lr_0 = 4.3064e-04
+Loss = 2.6528e-01, PNorm = 34.1595, GNorm = 0.4758, lr_0 = 4.3462e-04
+Loss = 3.5442e-01, PNorm = 34.1567, GNorm = 0.6903, lr_0 = 4.3859e-04
+Loss = 3.2202e-01, PNorm = 34.1599, GNorm = 0.2148, lr_0 = 4.4257e-04
+Loss = 3.1911e-01, PNorm = 34.1636, GNorm = 0.1860, lr_0 = 4.4655e-04
+Loss = 3.1083e-01, PNorm = 34.1664, GNorm = 0.6901, lr_0 = 4.5053e-04
+Loss = 3.4954e-01, PNorm = 34.1655, GNorm = 0.3341, lr_0 = 4.5451e-04
+Loss = 2.5006e-01, PNorm = 34.1761, GNorm = 0.3322, lr_0 = 4.5849e-04
+Loss = 2.9595e-01, PNorm = 34.1748, GNorm = 0.4121, lr_0 = 4.6247e-04
+Loss = 3.2723e-01, PNorm = 34.1749, GNorm = 0.2168, lr_0 = 4.6645e-04
+Loss = 3.2708e-01, PNorm = 34.1814, GNorm = 0.2601, lr_0 = 4.7042e-04
+Loss = 2.8136e-01, PNorm = 34.1875, GNorm = 0.2479, lr_0 = 4.7440e-04
+Loss = 2.6925e-01, PNorm = 34.1924, GNorm = 0.1628, lr_0 = 4.7838e-04
+Loss = 3.1884e-01, PNorm = 34.1911, GNorm = 0.3071, lr_0 = 4.8236e-04
+Loss = 2.3691e-01, PNorm = 34.2041, GNorm = 0.4204, lr_0 = 4.8634e-04
+Loss = 3.0349e-01, PNorm = 34.2022, GNorm = 0.2100, lr_0 = 4.9032e-04
+Loss = 2.4358e-01, PNorm = 34.2087, GNorm = 0.1279, lr_0 = 4.9430e-04
+Loss = 3.4713e-01, PNorm = 34.2094, GNorm = 0.4160, lr_0 = 4.9828e-04
+Loss = 2.9654e-01, PNorm = 34.2136, GNorm = 0.3531, lr_0 = 5.0225e-04
+Loss = 3.3050e-01, PNorm = 34.2193, GNorm = 0.2676, lr_0 = 5.0623e-04
+Loss = 3.4288e-01, PNorm = 34.2184, GNorm = 0.1499, lr_0 = 5.1021e-04
+Loss = 2.7790e-01, PNorm = 34.2262, GNorm = 0.4501, lr_0 = 5.1419e-04
+Loss = 3.1354e-01, PNorm = 34.2308, GNorm = 0.2347, lr_0 = 5.1817e-04
+Loss = 2.6213e-01, PNorm = 34.2290, GNorm = 0.1238, lr_0 = 5.2215e-04
+Loss = 3.1290e-01, PNorm = 34.2300, GNorm = 0.1502, lr_0 = 5.2613e-04
+Loss = 3.0825e-01, PNorm = 34.2299, GNorm = 0.1337, lr_0 = 5.3011e-04
+Loss = 2.6433e-01, PNorm = 34.2363, GNorm = 0.2961, lr_0 = 5.3408e-04
+Loss = 2.2425e-01, PNorm = 34.2385, GNorm = 0.3821, lr_0 = 5.3806e-04
+Loss = 2.8932e-01, PNorm = 34.2361, GNorm = 0.2931, lr_0 = 5.4204e-04
+Loss = 3.4178e-01, PNorm = 34.2356, GNorm = 0.1872, lr_0 = 5.4602e-04
+Loss = 3.5666e-01, PNorm = 34.2400, GNorm = 0.1929, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.293522
+Model 0 best validation cross_entropy = 0.293522 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.302408
+Ensemble test cross_entropy = 0.302408
+Fold 4
+Splitting data with seed 4
+Total size = 70,711 | train size = 56,568 | val size = 7,071 | test size = 7,072
+Building model 0
+MoleculeModel(
+  (multiclass_softmax): Softmax(dim=2)
+  (encoder): MPN(
+    (encoder): ModuleList(
+      (0): MPNEncoder(
+        (dropout_layer): Dropout(p=0.05, inplace=False)
+        (act_func): ReLU()
+        (W_i): Linear(in_features=147, out_features=300, bias=False)
+        (W_h): Linear(in_features=300, out_features=300, bias=False)
+        (W_o): Linear(in_features=433, out_features=300, bias=True)
+      )
+    )
+  )
+  (ffn): Sequential(
+    (0): Dropout(p=0.05, inplace=False)
+    (1): Linear(in_features=300, out_features=300, bias=True)
+    (2): ReLU()
+    (3): Dropout(p=0.05, inplace=False)
+    (4): Linear(in_features=300, out_features=3, bias=True)
+  )
+)
+Number of parameters = 355,803
+Epoch 0
+Loss = 5.0280e-01, PNorm = 34.0561, GNorm = 1.5616, lr_0 = 1.0438e-04
+Loss = 3.5421e-01, PNorm = 34.0605, GNorm = 0.4706, lr_0 = 1.0836e-04
+Loss = 3.1978e-01, PNorm = 34.0607, GNorm = 1.3104, lr_0 = 1.1233e-04
+Loss = 3.7217e-01, PNorm = 34.0590, GNorm = 0.5739, lr_0 = 1.1631e-04
+Loss = 2.7680e-01, PNorm = 34.0594, GNorm = 0.2641, lr_0 = 1.2029e-04
+Loss = 3.0202e-01, PNorm = 34.0605, GNorm = 1.0825, lr_0 = 1.2427e-04
+Loss = 3.3831e-01, PNorm = 34.0614, GNorm = 0.3786, lr_0 = 1.2825e-04
+Loss = 2.6369e-01, PNorm = 34.0619, GNorm = 0.6000, lr_0 = 1.3223e-04
+Loss = 2.8518e-01, PNorm = 34.0628, GNorm = 0.6886, lr_0 = 1.3621e-04
+Loss = 3.3392e-01, PNorm = 34.0622, GNorm = 0.4483, lr_0 = 1.4019e-04
+Loss = 3.1844e-01, PNorm = 34.0622, GNorm = 0.2968, lr_0 = 1.4416e-04
+Loss = 3.3050e-01, PNorm = 34.0632, GNorm = 0.5973, lr_0 = 1.4814e-04
+Loss = 2.5891e-01, PNorm = 34.0643, GNorm = 0.3715, lr_0 = 1.5212e-04
+Loss = 3.2620e-01, PNorm = 34.0642, GNorm = 0.5961, lr_0 = 1.5610e-04
+Loss = 3.1636e-01, PNorm = 34.0639, GNorm = 0.5273, lr_0 = 1.6008e-04
+Loss = 3.1319e-01, PNorm = 34.0638, GNorm = 0.9102, lr_0 = 1.6406e-04
+Loss = 2.6546e-01, PNorm = 34.0660, GNorm = 0.6477, lr_0 = 1.6804e-04
+Loss = 3.2846e-01, PNorm = 34.0631, GNorm = 0.3981, lr_0 = 1.7202e-04
+Loss = 3.4088e-01, PNorm = 34.0635, GNorm = 0.6270, lr_0 = 1.7599e-04
+Loss = 2.0831e-01, PNorm = 34.0674, GNorm = 0.3393, lr_0 = 1.7997e-04
+Loss = 2.6371e-01, PNorm = 34.0668, GNorm = 0.2859, lr_0 = 1.8395e-04
+Loss = 2.8870e-01, PNorm = 34.0655, GNorm = 0.3362, lr_0 = 1.8793e-04
+Loss = 2.5105e-01, PNorm = 34.0688, GNorm = 1.2710, lr_0 = 1.9191e-04
+Loss = 2.4866e-01, PNorm = 34.0686, GNorm = 0.3097, lr_0 = 1.9589e-04
+Loss = 2.8396e-01, PNorm = 34.0677, GNorm = 0.6787, lr_0 = 1.9987e-04
+Loss = 3.0841e-01, PNorm = 34.0679, GNorm = 0.5428, lr_0 = 2.0385e-04
+Loss = 2.8240e-01, PNorm = 34.0704, GNorm = 1.0093, lr_0 = 2.0782e-04
+Loss = 3.0505e-01, PNorm = 34.0695, GNorm = 0.3031, lr_0 = 2.1180e-04
+Loss = 3.3311e-01, PNorm = 34.0696, GNorm = 0.2913, lr_0 = 2.1578e-04
+Loss = 3.2320e-01, PNorm = 34.0726, GNorm = 1.2485, lr_0 = 2.1976e-04
+Loss = 3.2375e-01, PNorm = 34.0714, GNorm = 0.5505, lr_0 = 2.2374e-04
+Loss = 2.8517e-01, PNorm = 34.0747, GNorm = 0.3605, lr_0 = 2.2772e-04
+Loss = 2.9890e-01, PNorm = 34.0753, GNorm = 0.9734, lr_0 = 2.3170e-04
+Loss = 2.6857e-01, PNorm = 34.0752, GNorm = 0.4086, lr_0 = 2.3568e-04
+Loss = 2.7074e-01, PNorm = 34.0780, GNorm = 0.2021, lr_0 = 2.3966e-04
+Loss = 3.1256e-01, PNorm = 34.0766, GNorm = 0.3604, lr_0 = 2.4363e-04
+Loss = 2.8838e-01, PNorm = 34.0791, GNorm = 0.5118, lr_0 = 2.4761e-04
+Loss = 3.2479e-01, PNorm = 34.0793, GNorm = 0.7901, lr_0 = 2.5159e-04
+Loss = 3.3881e-01, PNorm = 34.0794, GNorm = 0.5846, lr_0 = 2.5557e-04
+Loss = 3.3236e-01, PNorm = 34.0809, GNorm = 0.2442, lr_0 = 2.5955e-04
+Loss = 2.4923e-01, PNorm = 34.0854, GNorm = 0.1428, lr_0 = 2.6353e-04
+Loss = 3.5538e-01, PNorm = 34.0815, GNorm = 0.3807, lr_0 = 2.6751e-04
+Loss = 2.9313e-01, PNorm = 34.0848, GNorm = 0.8024, lr_0 = 2.7149e-04
+Loss = 3.0088e-01, PNorm = 34.0885, GNorm = 0.4670, lr_0 = 2.7546e-04
+Loss = 3.2998e-01, PNorm = 34.0861, GNorm = 0.4808, lr_0 = 2.7944e-04
+Loss = 3.0004e-01, PNorm = 34.0898, GNorm = 0.3009, lr_0 = 2.8342e-04
+Loss = 3.5578e-01, PNorm = 34.0895, GNorm = 0.4563, lr_0 = 2.8740e-04
+Loss = 2.9907e-01, PNorm = 34.0929, GNorm = 0.8078, lr_0 = 2.9138e-04
+Loss = 3.5491e-01, PNorm = 34.0920, GNorm = 0.4683, lr_0 = 2.9536e-04
+Loss = 2.4996e-01, PNorm = 34.0972, GNorm = 0.5404, lr_0 = 2.9934e-04
+Loss = 2.9832e-01, PNorm = 34.0961, GNorm = 0.2087, lr_0 = 3.0332e-04
+Loss = 2.7692e-01, PNorm = 34.0982, GNorm = 0.5060, lr_0 = 3.0729e-04
+Loss = 2.9800e-01, PNorm = 34.0998, GNorm = 0.1357, lr_0 = 3.1127e-04
+Loss = 2.7076e-01, PNorm = 34.1007, GNorm = 0.2556, lr_0 = 3.1525e-04
+Loss = 2.7189e-01, PNorm = 34.1017, GNorm = 0.7142, lr_0 = 3.1923e-04
+Loss = 3.1836e-01, PNorm = 34.1025, GNorm = 0.2650, lr_0 = 3.2321e-04
+Loss = 2.9658e-01, PNorm = 34.1035, GNorm = 0.2051, lr_0 = 3.2719e-04
+Loss = 3.5279e-01, PNorm = 34.1047, GNorm = 0.2157, lr_0 = 3.3117e-04
+Loss = 3.3387e-01, PNorm = 34.1075, GNorm = 0.6536, lr_0 = 3.3515e-04
+Loss = 2.9539e-01, PNorm = 34.1119, GNorm = 0.3268, lr_0 = 3.3912e-04
+Loss = 3.4299e-01, PNorm = 34.1126, GNorm = 0.6193, lr_0 = 3.4310e-04
+Loss = 3.4889e-01, PNorm = 34.1125, GNorm = 0.6483, lr_0 = 3.4708e-04
+Loss = 2.5723e-01, PNorm = 34.1209, GNorm = 0.7495, lr_0 = 3.5106e-04
+Loss = 3.6526e-01, PNorm = 34.1158, GNorm = 0.6212, lr_0 = 3.5504e-04
+Loss = 3.3215e-01, PNorm = 34.1237, GNorm = 0.3536, lr_0 = 3.5902e-04
+Loss = 2.7922e-01, PNorm = 34.1251, GNorm = 0.3951, lr_0 = 3.6300e-04
+Loss = 2.7429e-01, PNorm = 34.1272, GNorm = 0.2904, lr_0 = 3.6698e-04
+Loss = 2.7324e-01, PNorm = 34.1304, GNorm = 0.3400, lr_0 = 3.7095e-04
+Loss = 2.5157e-01, PNorm = 34.1340, GNorm = 0.2079, lr_0 = 3.7493e-04
+Loss = 2.4202e-01, PNorm = 34.1373, GNorm = 0.3927, lr_0 = 3.7891e-04
+Loss = 3.4773e-01, PNorm = 34.1362, GNorm = 0.1790, lr_0 = 3.8289e-04
+Loss = 2.4913e-01, PNorm = 34.1424, GNorm = 0.1872, lr_0 = 3.8687e-04
+Loss = 3.3892e-01, PNorm = 34.1412, GNorm = 0.3891, lr_0 = 3.9085e-04
+Loss = 3.7203e-01, PNorm = 34.1456, GNorm = 0.3127, lr_0 = 3.9483e-04
+Loss = 2.8330e-01, PNorm = 34.1528, GNorm = 0.1873, lr_0 = 3.9881e-04
+Loss = 3.7076e-01, PNorm = 34.1495, GNorm = 0.7207, lr_0 = 4.0279e-04
+Loss = 3.3614e-01, PNorm = 34.1584, GNorm = 0.3417, lr_0 = 4.0676e-04
+Loss = 2.8906e-01, PNorm = 34.1627, GNorm = 0.1989, lr_0 = 4.1074e-04
+Loss = 2.8934e-01, PNorm = 34.1678, GNorm = 0.1619, lr_0 = 4.1472e-04
+Loss = 2.3641e-01, PNorm = 34.1717, GNorm = 0.6640, lr_0 = 4.1870e-04
+Loss = 3.1645e-01, PNorm = 34.1684, GNorm = 0.3751, lr_0 = 4.2268e-04
+Loss = 3.1952e-01, PNorm = 34.1735, GNorm = 0.1584, lr_0 = 4.2666e-04
+Loss = 2.9403e-01, PNorm = 34.1782, GNorm = 0.5326, lr_0 = 4.3064e-04
+Loss = 3.2676e-01, PNorm = 34.1771, GNorm = 0.4202, lr_0 = 4.3462e-04
+Loss = 2.7923e-01, PNorm = 34.1824, GNorm = 0.5287, lr_0 = 4.3859e-04
+Loss = 2.1665e-01, PNorm = 34.1868, GNorm = 0.1213, lr_0 = 4.4257e-04
+Loss = 2.7514e-01, PNorm = 34.1854, GNorm = 0.4673, lr_0 = 4.4655e-04
+Loss = 2.9161e-01, PNorm = 34.1882, GNorm = 0.6301, lr_0 = 4.5053e-04
+Loss = 2.9165e-01, PNorm = 34.1913, GNorm = 0.2347, lr_0 = 4.5451e-04
+Loss = 3.1351e-01, PNorm = 34.1950, GNorm = 0.2941, lr_0 = 4.5849e-04
+Loss = 3.2932e-01, PNorm = 34.1936, GNorm = 0.6272, lr_0 = 4.6247e-04
+Loss = 2.5642e-01, PNorm = 34.2047, GNorm = 0.2295, lr_0 = 4.6645e-04
+Loss = 3.3633e-01, PNorm = 34.2000, GNorm = 0.5073, lr_0 = 4.7042e-04
+Loss = 2.9924e-01, PNorm = 34.2107, GNorm = 0.2482, lr_0 = 4.7440e-04
+Loss = 3.3259e-01, PNorm = 34.2094, GNorm = 0.4716, lr_0 = 4.7838e-04
+Loss = 2.9200e-01, PNorm = 34.2136, GNorm = 0.5912, lr_0 = 4.8236e-04
+Loss = 2.7553e-01, PNorm = 34.2202, GNorm = 0.5111, lr_0 = 4.8634e-04
+Loss = 3.1681e-01, PNorm = 34.2151, GNorm = 0.2098, lr_0 = 4.9032e-04
+Loss = 3.4260e-01, PNorm = 34.2208, GNorm = 0.3350, lr_0 = 4.9430e-04
+Loss = 3.1895e-01, PNorm = 34.2230, GNorm = 0.2533, lr_0 = 4.9828e-04
+Loss = 3.0772e-01, PNorm = 34.2271, GNorm = 0.2024, lr_0 = 5.0225e-04
+Loss = 3.1484e-01, PNorm = 34.2261, GNorm = 0.2370, lr_0 = 5.0623e-04
+Loss = 2.9011e-01, PNorm = 34.2298, GNorm = 0.5696, lr_0 = 5.1021e-04
+Loss = 2.9820e-01, PNorm = 34.2291, GNorm = 0.1711, lr_0 = 5.1419e-04
+Loss = 3.2257e-01, PNorm = 34.2295, GNorm = 0.2510, lr_0 = 5.1817e-04
+Loss = 3.4531e-01, PNorm = 34.2319, GNorm = 0.1407, lr_0 = 5.2215e-04
+Loss = 2.3605e-01, PNorm = 34.2404, GNorm = 0.2529, lr_0 = 5.2613e-04
+Loss = 3.4460e-01, PNorm = 34.2330, GNorm = 0.1734, lr_0 = 5.3011e-04
+Loss = 3.0425e-01, PNorm = 34.2424, GNorm = 0.3212, lr_0 = 5.3408e-04
+Loss = 3.5398e-01, PNorm = 34.2428, GNorm = 0.2376, lr_0 = 5.3806e-04
+Loss = 3.7308e-01, PNorm = 34.2447, GNorm = 0.4466, lr_0 = 5.4204e-04
+Loss = 2.2241e-01, PNorm = 34.2597, GNorm = 0.1465, lr_0 = 5.4602e-04
+Loss = 3.0357e-01, PNorm = 34.2527, GNorm = 0.1375, lr_0 = 5.5000e-04
+Validation cross_entropy = 0.306930
+Model 0 best validation cross_entropy = 0.306930 on epoch 0
+Loading pretrained parameter "encoder.encoder.0.cached_zero_vector".
+Loading pretrained parameter "encoder.encoder.0.W_i.weight".
+Loading pretrained parameter "encoder.encoder.0.W_h.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.weight".
+Loading pretrained parameter "encoder.encoder.0.W_o.bias".
+Loading pretrained parameter "ffn.1.weight".
+Loading pretrained parameter "ffn.1.bias".
+Loading pretrained parameter "ffn.4.weight".
+Loading pretrained parameter "ffn.4.bias".
+Model 0 test cross_entropy = 0.289271
+Ensemble test cross_entropy = 0.289271
+5-fold cross validation
+	Seed 0 ==> test cross_entropy = 0.303860
+	Seed 1 ==> test cross_entropy = 0.290351
+	Seed 2 ==> test cross_entropy = 0.311850
+	Seed 3 ==> test cross_entropy = 0.302408
+	Seed 4 ==> test cross_entropy = 0.289271
+Overall test cross_entropy = 0.299548 +/- 0.008583
+Elapsed time = 1:00:39

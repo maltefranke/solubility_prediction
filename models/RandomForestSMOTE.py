@@ -6,16 +6,12 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 from utils import *
-from data_preparation import *
+from data_preparationSMOTE import *
 
 
-def rf_learning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_weights: List[float] = None, seed: int = 13,
-               sample_weights: List[float] = None) \
+def rf_learning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, seed: int = 13) \
         -> List[RandomForestClassifier]:
-    label_weights = {0: label_weights[0], 1: label_weights[1], 2: label_weights[2]}
-
     rfs = []
-
     kfold = KFold(n_splits=CV, shuffle=True)
 
     for i, (train_idx, test_idx) in enumerate(kfold.split(X)):
@@ -23,16 +19,31 @@ def rf_learning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_we
         X_train_i, X_test_i = X[train_idx], X[test_idx]
         y_train_i, y_test_i = y[train_idx], y[test_idx]
 
-        sample_weights_i = None
-        if sample_weights is not None:
-            sample_weights_i = np.array(sample_weights)[train_idx]
+        # resample the train set to have balanced classes
+        X_train_i, y_train_i = up_down_sampling(X_train_i, y_train_i, seed)
+        # print('Number of 0 in training set = ', np.sum(y_train_i==0))
+        # we can't use train_idx anymore!!!!
 
-        rf = RandomForestClassifier(n_estimators=10, max_depth=depth, criterion="entropy", random_state=seed,
-                                    class_weight=label_weights)
+        train_size_i = y_train_i.shape[0]
+        num_low_i = np.count_nonzero(y_train_i == 0)
+        num_medium_i = np.count_nonzero(y_train_i == 1)
+        num_high_i = np.count_nonzero(y_train_i == 2)
 
-        rf.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
+        weights_i = [
+            1 - num_low_i / train_size_i,
+            1 - num_medium_i / train_size_i,
+            1 - num_high_i / train_size_i,
+        ]
+        print('The weights should be balanced now:', weights_i)
+
+        rf = RandomForestClassifier(n_estimators=10, max_depth=depth, criterion="entropy",
+                                    random_state=seed)
+
+        rf.fit(X_train_i, y_train_i, sample_weight=None)
 
         y_pred = rf.predict(X_test_i)
+        # print(np.sum(y_pred==0))
+        # print(np.sum(y_test_i==0))
         kappa = quadratic_weighted_kappa(y_pred, y_test_i)
         print("Kappa = ", kappa)
 
@@ -72,10 +83,6 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
-    # GENERATE BALANCED CLASSES
-    # Up/downsampling
-    targets, all_fps = up_down_sampling(targets, all_fps)
-
     # see how balanced the data is and assign weights
     train_data_size = targets.shape[0]
 
@@ -88,7 +95,6 @@ if __name__ == "__main__":
         1 - num_medium / train_data_size,
         1 - num_high / train_data_size,
     ]
-    print('The weights should be balanced now!')
     print(weights)
 
     seed = 13
@@ -99,9 +105,10 @@ if __name__ == "__main__":
     all_fps = all_fps[p]
     targets = targets[p]
 
-    sample_weights = [weights[i] for i in targets]
+    # sample_weights = [weights[i] for i in targets]
 
-    rfs = rf_learning(all_fps, targets, CV=5, label_weights=weights, sample_weights=sample_weights, seed=seed)
+    # we apply up-downsampling only to the train set in cross-validation
+    rfs = rf_learning(all_fps, targets, CV=5, seed=seed)
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)

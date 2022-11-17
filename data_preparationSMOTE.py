@@ -50,9 +50,12 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
 
     return all_fps
 
-def up_down_sampling(y, X):
+
+def up_down_sampling(X, y, seed: int=13):
     """
-    Add copies of the observations of the minority classes and remove observations from the majority class
+    Add copies of the observations of the minority classes and changes it slightly through the SMOTE
+    algorithm and remove observations from the majority class. Returns the random permutation of the
+    balanced classes.
     Args:
         y: classes values
         X: observations
@@ -61,28 +64,36 @@ def up_down_sampling(y, X):
         y_balanced
         X_balanced
     """
-
-    # dividing the data in subsets depending on the class
+    # dividing the data depending on the classes
     X2 = X[np.where(y == 2)]
     X1 = X[np.where(y == 1)]
     X0 = X[np.where(y == 0)]
 
-    # up-sample minority classes
-    X0_up = resample(X0, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13)
-    X1_up = resample(X1, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13)
+    # down-sample majority class (reduced to 40% of the whole initial dataset)
+    X2_down = resample(X2, replace=False, n_samples=int(X.shape[0] * 0.4), random_state=seed)
 
-    # down-sample majority class
-    X2_down = resample(X2, replace=False, n_samples=int(X.shape[0] * 0.5), random_state=13)
+    # creating a unique set of data with down-sampled majority class
+    X_down = np.concatenate((X0, X1, X2_down))
+    y_down = np.concatenate((np.zeros(X0.shape[0], dtype=np.int8),
+                            np.ones(X1.shape[0], dtype=np.int8),
+                            2*np.ones(X2_down.shape[0], dtype=np.int8)))
 
-    X_balanced = np.concatenate((X0_up, X1_up, X2_down))
-    y_balanced = np.concatenate((np.zeros(X0_up.shape[0], dtype=np.int8), np.ones(X1_up.shape[0], dtype=np.int8), 2*np.ones(X2_down.shape[0], dtype=np.int8)))
-    print(X_balanced.shape, y_balanced.shape)
+    # up-sample minority classes - SMOTE algorithm
+    # in this way we have the same number of datapoints for each class... no other way
+    X_balanced, y_balanced = smote_algorithm(X_down, y_down, seed)
+    # print(X_balanced.shape, y_balanced.shape)
 
-    return y_balanced, X_balanced
+    # we permute/shuffle our data first
+    # p = np.random.permutation(y_balanced.shape[0])
+    # X_balanced = X_balanced[p]
+    # y_balanced = y_balanced[p]
 
-def smote_algorithm(y, X):
+    return X_balanced, y_balanced
+
+
+def smote_algorithm(X, y, seed: int=13):
     """
-    Up-sample the minority class
+    Up-sample the minority classes of the given X and y vectors by applying the SMOTE algorithm
     Args:
         y: classes values
         X: observations
@@ -94,7 +105,7 @@ def smote_algorithm(y, X):
     sm = SMOTE(random_state=seed)
     X_resampled, y_resampled = sm.fit_resample(X, y)
 
-    return y_resampled, X_resampled
+    return X_resampled, y_resampled
 
 
 # TODO test if this function works
@@ -160,16 +171,6 @@ def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
             writer.writerow([id, pred])
 
 
-def calculate_class_weights(targets: np.array, num_classes: int = 3) -> List[float]:
-
-    # see how balanced the data is and assign weights
-    train_data_size = targets.shape[0]
-
-    weights = [1 - np.count_nonzero(targets == int(i)) / train_data_size for i in range(num_classes)]
-
-    return weights
-
-
 if __name__ == "__main__":
 
     this_dir = os.getcwd()
@@ -195,7 +196,7 @@ if __name__ == "__main__":
     seed = 13
     np.random.seed(seed)
 
-    # we permutate/shuffle our data first
+    # we permute/shuffle our data first
     p = np.random.permutation(targets.shape[0])
     all_fps = all_fps[p]
     targets = targets[p]
