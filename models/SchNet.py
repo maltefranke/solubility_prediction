@@ -69,7 +69,7 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
 def setup_schnet(class_weights: List[float]) -> spk.task.AtomisticTask:
 
     cutoff = 5.
-    n_atom_basis = 30
+    n_atom_basis = 256
 
     pairwise_distance = spk.atomistic.PairwiseDistances()  # calculates pairwise distances between atoms
     radial_basis = spk.nn.GaussianRBF(n_rbf=20, cutoff=cutoff)
@@ -79,7 +79,8 @@ def setup_schnet(class_weights: List[float]) -> spk.task.AtomisticTask:
         cutoff_fn=spk.nn.CosineCutoff(cutoff)
     )
 
-    pred_solubility = spk.atomistic.Atomwise(n_in=n_atom_basis, n_out=3, output_key='solubility_class')
+    pred_solubility = spk.atomistic.Atomwise(n_in=n_atom_basis, n_out=3, n_hidden=500, n_layers=3,
+                                             output_key='solubility_class')
 
     nn_solubility = spk.model.NeuralNetworkPotential(
         representation=schnet,
@@ -169,7 +170,7 @@ def schnet_pipeline(data_dir: str, model_dir: str) -> None:
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    submission_path = os.path.join(model_dir, "SchNet_submission.csv")
+    submission_path = os.path.join(model_dir, "SchNet_submission_big_net.csv")
     if os.path.exists(submission_path):
         print("Prediction have already been made!")
         return
