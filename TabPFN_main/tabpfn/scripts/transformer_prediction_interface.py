@@ -205,11 +205,11 @@ class TabPFNClassifier(BaseEstimator, ClassifierMixin):
         self.X_ = X
         self.y_ = y
 
-        if X.shape[1] > self.max_num_features:
-            raise ValueError(
-                "The number of features for this classifier is restricted to ",
-                self.max_num_features,
-            )
+        # if X.shape[1] > self.max_num_features:
+        #    raise ValueError(
+        #        "The number of features for this classifier is restricted to ",
+        #        self.max_num_features,
+        #    )
         if len(np.unique(y)) > self.max_num_classes:
             raise ValueError(
                 "The number of classes for this classifier is restricted to ",
@@ -593,7 +593,10 @@ def transformer_predict(
                         (
                             eval_xs_.shape[0],
                             eval_xs_.shape[1],
-                            max_features - eval_xs_.shape[2],
+                            max_features
+                            - eval_xs_.shape[
+                                2
+                            ],  # if you print it it gives 100....
                         )
                     ).to(device),
                 ],
