@@ -231,6 +231,35 @@ def calculate_class_weights(
     return weights
 
 
+def create_subsample_train_csv(data_dir: str):
+    path = os.path.join(data_dir, "random_undersampling.csv")
+    train_path = os.path.join(data_dir, "train.csv")
+    ids, smiles, targets = load_train_data(train_path)
+
+    p = np.random.permutation(targets.shape[0])
+    smiles = np.array(smiles)[p]
+    targets = targets[p]
+
+    # dividing the data in subsets depending on the class
+    smiles_per_class = []
+    for class_idx in range(3):
+        smiles_class_i = np.array(smiles)[np.where(targets == class_idx)].tolist()
+        smiles_per_class.append(smiles_class_i)
+
+    min_len = min([len(i) for i in smiles_per_class])
+
+    with open(path, "w") as subsampling_file:
+        writer = csv.writer(subsampling_file, delimiter=",")
+        writer.writerow(["smiles", "sol_category"])
+
+        for idx, smiles_class_i in enumerate(smiles_per_class):
+            subsampled_smiles = smiles_class_i[:min_len]
+
+            for temp_smiles in subsampled_smiles:
+                writer.writerow([temp_smiles, idx])
+
+
+
 if __name__ == "__main__":
 
     this_dir = os.getcwd()
