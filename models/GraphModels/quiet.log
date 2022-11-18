@@ -1,0 +1,16 @@
+Fold 0
+Model 0 best validation cross_entropy = 1.094253 on epoch 5
+Model 0 test cross_entropy = 1.102839
+Model 1 best validation cross_entropy = 1.093781 on epoch 10
+Model 1 test cross_entropy = 1.105717
+Model 2 best validation cross_entropy = 1.094485 on epoch 7
+Model 2 test cross_entropy = 1.101165
+Model 3 best validation cross_entropy = 1.097044 on epoch 3
+Model 3 test cross_entropy = 1.098575
+Model 4 best validation cross_entropy = 1.094100 on epoch 4
+Model 4 test cross_entropy = 1.100634
+Ensemble test cross_entropy = 1.100532
+1-fold cross validation
+	Seed 0 ==> test cross_entropy = 1.100532
+Overall test cross_entropy = 1.100532 +/- 0.000000
+Elapsed time = 0:12:30
