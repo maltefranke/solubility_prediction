@@ -10,6 +10,7 @@ from rdkit.Chem import rdFingerprintGenerator
 from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
 from sklearn.utils import resample
 # from imblearn.over_sampling import SMOTE
+from mordred import Calculator, descriptors
 
 from models.ANN import *
 
@@ -49,6 +50,25 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     all_fps = np.array(all_fps)
 
     return all_fps
+
+
+def smiles_to_qm_descriptors(smiles: List[str], data_dir: str) -> np.array:
+    qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.npy")
+    if not os.path.exists(qm_descriptor_file):
+        calc = Calculator(descriptors, ignore_3D=True)
+
+        mols = [Chem.MolFromSmiles(s) for s in smiles]
+
+        df = calc.pandas(mols)
+
+        qm_descriptors = df.to_numpy()
+        np.save(qm_descriptor_file, qm_descriptors)
+
+    else:
+        qm_descriptors = np.load(qm_descriptor_file, allow_pickle=True)
+
+    return qm_descriptors
+
 
 def up_down_sampling(y, X):
     """
@@ -96,7 +116,6 @@ def up_down_sampling(y, X):
     # return y_resampled, X_resampled
 
 
-# TODO test if this function works
 def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
     """
     Transform a list of SMILES into their 3D representation using rdkit functions
@@ -134,11 +153,6 @@ def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
             continue
 
     return all_atomic_nums, all_positions
-
-
-# TODO maybe not even needed depending on the framework we use
-def smiles_to_graph(smiles: List[str]):
-    pass
 
 
 def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
@@ -181,15 +195,7 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
-    # see how balanced the data is and assign weights
-    train_data_size = targets.shape[0]
-
-    num_low = np.count_nonzero(targets == 0)
-    num_medium = np.count_nonzero(targets == 1)
-    num_high = np.count_nonzero(targets == 2)
-
-    weights = [1 - num_low/train_data_size, 1 - num_medium/train_data_size, 1 - num_high/train_data_size]
-    print(weights)
+    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
 
     seed = 13
     np.random.seed(seed)
@@ -199,15 +205,5 @@ if __name__ == "__main__":
     all_fps = all_fps[p]
     targets = targets[p]
 
-    # train an ensemble of ANNs, or load trained models if training was done previously
-    model_checkpoints = ann_learning(all_fps, targets, ann_save_path=os.path.join(this_dir, "TestResults"),
-                                     label_weights=weights)
 
-    submission_ids, submission_smiles = load_test_data(test_path)
-    X = smiles_to_morgan_fp(submission_smiles)
-    input_dim = X.shape[-1]
-    final_predictions = predict_ann_ensemble(X, input_dim, model_checkpoints)
-
-    submission_file = os.path.join(this_dir, "predictions.csv")
-    create_submission_file(submission_ids, final_predictions, submission_file)
 
