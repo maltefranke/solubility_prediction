@@ -4,6 +4,7 @@ from typing import Tuple, List
 import numpy as np
 import pandas as pd
 import rdkit
+import h5py
 from rdkit import Chem as Chem
 from rdkit.Chem import AllChem as AllChem
 from rdkit.Chem import rdFingerprintGenerator
@@ -51,6 +52,7 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     return all_fps
 
 
+"""
 def smiles_to_qm_descriptors(smiles: List[str], data_dir: str) -> np.array:
     qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.npy")
     if not os.path.exists(qm_descriptor_file):
@@ -65,6 +67,30 @@ def smiles_to_qm_descriptors(smiles: List[str], data_dir: str) -> np.array:
 
     else:
         qm_descriptors = np.load(qm_descriptor_file, allow_pickle=True)
+
+    return qm_descriptors
+"""
+
+
+def smiles_to_qm_descriptors(smiles: List[str], data_dir: str) -> np.array:
+    qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
+    if not os.path.exists(qm_descriptor_file):
+        calc = Calculator(descriptors, ignore_3D=True)
+
+        mols = [Chem.MolFromSmiles(s) for s in smiles]
+
+        df = calc.pandas(mols)
+
+        qm_descriptors = df.to_numpy()
+
+        qm_descriptors = qm_descriptors.astype(np.float64)
+        with h5py.File(qm_descriptor_file, "w") as hf:
+            hf.create_dataset("descriptors", data=qm_descriptors)
+
+    else:
+        with h5py.File(qm_descriptor_file, "r") as hf:
+            qm_descriptors = hf["descriptors"][:]
+        # qm_descriptors = np.load(qm_descriptor_file, allow_pickle=True)
 
     return qm_descriptors
 
@@ -87,14 +113,26 @@ def up_down_sampling(y, X):
     X0 = X[np.where(y == 0)]
 
     # up-sample minority classes
-    X0_up = resample(X0, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13)
-    X1_up = resample(X1, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13)
+    X0_up = resample(
+        X0, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13
+    )
+    X1_up = resample(
+        X1, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13
+    )
 
     # down-sample majority class
-    X2_down = resample(X2, replace=False, n_samples=int(X.shape[0] * 0.5), random_state=13)
+    X2_down = resample(
+        X2, replace=False, n_samples=int(X.shape[0] * 0.5), random_state=13
+    )
 
     X_balanced = np.concatenate((X0_up, X1_up, X2_down))
-    y_balanced = np.concatenate((np.zeros(X0_up.shape[0], dtype=np.int8), np.ones(X1_up.shape[0], dtype=np.int8), 2*np.ones(X2_down.shape[0], dtype=np.int8)))
+    y_balanced = np.concatenate(
+        (
+            np.zeros(X0_up.shape[0], dtype=np.int8),
+            np.ones(X1_up.shape[0], dtype=np.int8),
+            2 * np.ones(X2_down.shape[0], dtype=np.int8),
+        )
+    )
     print(X_balanced.shape, y_balanced.shape)
 
     return y_balanced, X_balanced
@@ -144,7 +182,9 @@ def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
                 atomic_nums.append(int(atom.GetAtomicNum()))
 
                 positions = molecule.GetConformer().GetAtomPosition(i)
-                atom_positions.append(np.array([positions.x, positions.y, positions.z]).tolist())
+                atom_positions.append(
+                    np.array([positions.x, positions.y, positions.z]).tolist()
+                )
 
             all_atomic_nums.append(atomic_nums)
             all_positions.append(atom_positions)
@@ -156,7 +196,9 @@ def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
     return all_atomic_nums, all_positions
 
 
-def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
+def create_submission_file(
+    ids: List[str], y_pred: np.array, path: str
+) -> None:
     """
     Function to create the final submission file
     Args:
@@ -174,12 +216,17 @@ def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
             writer.writerow([id, pred])
 
 
-def calculate_class_weights(targets: np.array, num_classes: int = 3) -> List[float]:
+def calculate_class_weights(
+    targets: np.array, num_classes: int = 3
+) -> List[float]:
 
     # see how balanced the data is and assign weights
     train_data_size = targets.shape[0]
 
-    weights = [1 - np.count_nonzero(targets == int(i)) / train_data_size for i in range(num_classes)]
+    weights = [
+        1 - np.count_nonzero(targets == int(i)) / train_data_size
+        for i in range(num_classes)
+    ]
 
     return weights
 
@@ -205,6 +252,3 @@ if __name__ == "__main__":
     p = np.random.permutation(targets.shape[0])
     all_fps = all_fps[p]
     targets = targets[p]
-
-
-
