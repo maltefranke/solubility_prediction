@@ -1,9 +1,11 @@
 import chemprop
+import numpy as np
+
 from data_preparation import *
 
 
 # Training
-def train_graph_model(data_path='../data/train.csv', CV=5, batch_size=50):
+def train_graph_model(data_path='../data/train.csv', ensemble_size=5, batch_size=50):
     """
     Function that trains the MPNN
     :param data_path:
@@ -19,18 +21,18 @@ def train_graph_model(data_path='../data/train.csv', CV=5, batch_size=50):
         "--metric", "cross_entropy",
         "--dropout", "0.05",
         "--epochs", "1",
-        "--num_folds", f"{CV}",
+        "--ensemble_size", f"{ensemble_size}"
         '--batch_size', f"{batch_size}"
     ]
 
     args = chemprop.args.TrainArgs().parse_args(arguments)
-    mean_score, std_score = chemprop.train.cross_validate(args=args, train_func=chemprop.train.run_training)
+    mean_score, std_score = chemprop.train.run_training(args=args)
 
     return mean_score, std_score
 
 
 # Testing
-def test_graph_model(data_path='../data/test.csv', preds_path='output_graphs.csv', CV=5):
+def predict_graph_model(data_path='../data/test.csv', preds_path='output_graphs.csv', CV=5):
     """
     Function that makes predictions on our test data starting from the trained model
     :param data_path:
@@ -51,7 +53,7 @@ def test_graph_model(data_path='../data/test.csv', preds_path='output_graphs.csv
     return preds
 
 
-def load_preds_data(preds_path: str) -> Tuple[List[str], List[str], np.array, np.array, np.array]:
+def load_graph_predictions(preds_path: str) -> Tuple[List[str], np.array]:
     """
     Function to load the output file created by test_graph_model
     :param preds_path:
@@ -61,14 +63,20 @@ def load_preds_data(preds_path: str) -> Tuple[List[str], List[str], np.array, np
 
     ids = df["Id"].values.tolist()
     smiles = df["smiles"].values.tolist()
-    sol0 = df["sol_category_class_0"].values.tolist()
-    sol0 = np.array(sol0)
-    sol1 = df["sol_category_class_1"].values.tolist()
-    sol1 = np.array(sol1)
-    sol2 = df["sol_category_class_2"].values.tolist()
-    sol2 = np.array(sol2)
+    sol0 = df["sol_category_class_0"].numpy()
+    # sol0 = np.array(sol0)
+    sol1 = df["sol_category_class_1"].numpy()
+    # sol1 = np.array(sol1)
+    sol2 = df["sol_category_class_2"].numpy()
+    # sol2 = np.array(sol2)
 
-    return ids, smiles, sol0, sol1, sol2
+    # this should make a vector size (N, 3)
+    sol_logits = np.concatenate([sol0, sol1, sol2], axis=1)
+
+    # this takes the argument (class) of the highest probability
+    predictions = np.argmax(sol_logits, axis=0)
+
+    return ids, predictions
 
 
 if __name__ == "__main__":
@@ -84,12 +92,12 @@ if __name__ == "__main__":
     mean, std = train_graph_model(batch_size=256)
 
     # Make predictions
-    output = test_graph_model()
+    output = predict_graph_model()
 
     # Deduce the right final predictions
     # get output of graph model
     preds_path = 'output_graphs.csv'
-    submission_ids, smiles, sol0, sol1, sol2 = load_preds_data(preds_path)
+    submission_ids, predictions = load_graph_predictions(preds_path)
 
     final_predictions = []
 
