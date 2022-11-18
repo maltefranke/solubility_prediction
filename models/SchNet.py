@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
     data_dir = os.path.join(this_dir, "data")
 
-    schnet_model_dir = os.path.join(os.getcwd(), "SchNet models")
+    schnet_model_dir = os.path.join(os.getcwd(), "SchNet_models")
     if not os.path.exists(schnet_model_dir):
         os.mkdir(schnet_model_dir)
 
