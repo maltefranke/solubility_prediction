@@ -36,7 +36,7 @@ def predict_graph_model(data_path: str, ensemble_size=5,):
         '--test_path', data_path,
         '--preds_path', "/dev/null",
         '--checkpoint_dir', 'GraphModels',
-        '--smiles_columns', 'smiles',
+        '--smiles_columns', 'smiles'
         #"--ensemble_size", f"{ensemble_size}",
     ]
 
