@@ -106,7 +106,8 @@ if __name__ == "__main__":
     # introduce descriptores
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
     all_fps = np.concatenate((qm_descriptors, all_fps), axis=1)
-    all_fps, imputation = nan_imputation(all_fps)
+    # all_fps, imputation = nan_imputation(all_fps)
+    all_fps, imputation = nan_elimination(all_fps)
 
     train_data_size = targets.shape[0]
 
@@ -159,6 +160,6 @@ if __name__ == "__main__":
     final_predictions = predict_xgb_ensemble(xgbs, X)
 
     submission_file = os.path.join(
-        this_dir, "xg_boost_predictions_descriptors_weights.csv"
+        this_dir, "xg_boost_predictions_descriptors_weights_nonan.csv"
     )
     create_submission_file(submission_ids, final_predictions, submission_file)
