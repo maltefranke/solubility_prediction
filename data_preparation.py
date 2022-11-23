@@ -72,8 +72,19 @@ def smiles_to_qm_descriptors(smiles: List[str], data_dir: str) -> np.array:
 """
 
 
-def smiles_to_qm_descriptors(smiles: List[str], data_dir: str) -> np.array:
-    qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
+def smiles_to_qm_descriptors(
+    smiles: List[str], data_dir: str, type_="train"
+) -> np.array:
+
+    if type_ == "train":
+        qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
+    elif type_ == "test":
+        qm_descriptor_file = os.path.join(data_dir, "test_qm_descriptors.h5")
+    else:
+        qm_descriptor_file = os.path.join(
+            data_dir, "descriptors_collection.h5"
+        )
+
     if not os.path.exists(qm_descriptor_file):
         calc = Calculator(descriptors, ignore_3D=True)
 
@@ -243,7 +254,9 @@ def create_subsample_train_csv(data_dir: str):
     # dividing the data in subsets depending on the class
     smiles_per_class = []
     for class_idx in range(3):
-        smiles_class_i = np.array(smiles)[np.where(targets == class_idx)].tolist()
+        smiles_class_i = np.array(smiles)[
+            np.where(targets == class_idx)
+        ].tolist()
         smiles_per_class.append(smiles_class_i)
 
     min_len = min([len(i) for i in smiles_per_class])
@@ -259,6 +272,57 @@ def create_subsample_train_csv(data_dir: str):
                 writer.writerow([temp_smiles, idx])
 
 
+def nan_imputation(data):
+    """
+
+    Parameters
+    ----------
+    data : dataset to be checked
+
+    Returns
+    -------
+    data : dataset without nan values
+
+    """
+    N, M = data.shape
+    columns = []
+    missing = np.zeros(M)
+    for i in range(M):
+        missing[i] = len(np.where(np.isnan(data[:, i]))[0]) / N
+
+        if missing[i] > 0.5:
+            columns.append(i)
+
+        elif missing[i] > 0:
+            median = np.nanmedian(data[:, i])
+            data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+
+    for col in columns:
+        data = np.delete(data, col, axis=1)
+
+    return data, columns
+
+
+def standardize(x, bias=False):
+    """Compute the standard scores of the data. If bias is True, ignores the first column.
+            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            !!!!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!
+            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    Generic fucntion,It must be modified to deal with this dataset.
+    For example we should check which features are categorical and exclude them
+    as well as the fingerprints
+    """
+
+    mean, std = np.mean(x, axis=0), np.std(x, axis=0)
+    x = x - mean
+    x[:, std > 0] = x[:, std > 0] / std[std > 0]
+
+    # Reset normalisation of intercept column
+    if bias:
+        x[:, 0] = 1
+
+    return x
+
 
 if __name__ == "__main__":
 
@@ -269,7 +333,7 @@ if __name__ == "__main__":
     test_path = os.path.join(data_dir, "test.csv")
 
     # get data and transform smiles -> morgan fingerprint
-    ids, smiles, targets = load_train_data(train_path)
+    ids, smiles = load_test_data(test_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
@@ -278,6 +342,6 @@ if __name__ == "__main__":
     np.random.seed(seed)
 
     # we permutate/shuffle our data first
-    p = np.random.permutation(targets.shape[0])
-    all_fps = all_fps[p]
-    targets = targets[p]
+    # p = np.random.permutation(targets.shape[0])
+    # all_fps = all_fps[p]
+    # targets = targets[p]
