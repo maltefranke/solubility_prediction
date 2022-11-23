@@ -4,3 +4,5 @@ models/__pycache__/
 models/SchNet_models/SchNet_train.db
 models/splitting.lock
 models/SchNet models/split.npz
+data/train_qm_descriptors.h5
+data/test_qm_descriptors.h5

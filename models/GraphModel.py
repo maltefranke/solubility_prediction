@@ -1,18 +1,30 @@
 import chemprop
 import numpy as np
+import tempfile
+import csv
 
 from data_preparation import *
 
 
 # Training
-def train_graph_model(data_path: str, ensemble_size=5, batch_size=128):
+def train_graph_model(data_path: str, ensemble_size=5, batch_size=128, class_weights=None):
+    ids, smiles, targets = load_train_data(data_path)
+
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as csvfile:
+        writer = csv.writer(csvfile, delimiter=",")
+        writer.writerow(["class_weights"])
+        for target in targets:
+            if class_weights is None:
+                writer.writerow([1])
+            else:
+                writer.writerow([class_weights[int(target)]])
 
     arguments = [
         '--data_path', data_path,
         '--smiles_columns', 'smiles',
         '--target_columns', 'sol_category',
         '--dataset_type', 'multiclass',
-        # '--num_tasks', '1',
+        '--data_weights_path', f'{csvfile.name}',
         '--multiclass_num_classes', "3",
         '--save_dir', 'GraphModels',
         "--metric", "cross_entropy",
@@ -23,21 +35,18 @@ def train_graph_model(data_path: str, ensemble_size=5, batch_size=128):
     ]
 
     args = chemprop.args.TrainArgs().parse_args(arguments)
-    # data = chemprop.data.utils.get_data(path=data_path, smiles_columns="smiles", target_columns=["sol_category"], args=args)
-    # metrics_log = chemprop.train.run_training(data=data, args=args)
     mae, std = chemprop.train.cross_validate(args=args, train_func=chemprop.train.run_training)
     metrics_log = {"mae": mae, "std": std}
     return metrics_log
 
 
 # Testing
-def predict_graph_model(data_path: str, ensemble_size=5,):
+def predict_graph_model(data_path: str):
     arguments = [
         '--test_path', data_path,
         '--preds_path', "/dev/null",
         '--checkpoint_dir', 'GraphModels',
         '--smiles_columns', 'smiles'
-        #"--ensemble_size", f"{ensemble_size}",
     ]
 
     args = chemprop.args.PredictArgs().parse_args(arguments)
@@ -55,7 +64,7 @@ def predict_graph_model(data_path: str, ensemble_size=5,):
 
 def graph_pipeline(data_dir: str, model_dir: str):
 
-    train_path = os.path.join(data_dir, "random_undersampling.csv")
+    train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
     graph_dir = os.path.join(model_dir, "GraphModels")
