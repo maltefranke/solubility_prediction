@@ -272,7 +272,7 @@ def create_subsample_train_csv(data_dir: str):
                 writer.writerow([temp_smiles, idx])
 
 
-def nan_imputation(data):
+def nan_elimination(data):
     """
 
     Parameters
@@ -284,26 +284,69 @@ def nan_imputation(data):
     data : dataset without nan values
 
     """
+
     N, M = data.shape
     columns = []
+    list_of_counts = []
+    modified_columns = []
     missing = np.zeros(M)
     for i in range(M):
         missing[i] = len(np.where(np.isnan(data[:, i]))[0]) / N
 
-        if missing[i] > 0.5:
+        if missing[i] > 0.0:
+            columns.append(i)
+
+    data = np.delete(data, columns, axis=1)
+
+    return data, columns
+
+
+def nan_imputation(data, categorical="False"):
+    """
+
+    Parameters
+    ----------
+    data : dataset to be checked
+
+    Returns
+    -------
+    data : dataset without nan values
+
+    """
+
+    N, M = data.shape
+    columns = []
+    list_of_counts = []
+    modified_columns = []
+    missing = np.zeros(M)
+    for i in range(M):
+        missing[i] = len(np.where(np.isnan(data[:, i]))[0]) / N
+
+        if missing[i] > 0.50:
             columns.append(i)
 
         elif missing[i] > 0:
+
+            if (
+                categorical == "True"
+                and len(np.where(np.isnan(data[:, i]))[0]) != 0
+                and check_categorical(np.mod(np.abs(data[:, i]), 1.0))
+            ):
+                # to be given to find categorical in order to consider them as categorical too even if they can contain a "non-integer" value
+                modified_columns.append(
+                    i - len(columns)
+                )  # index in the new matrix without nans
+
             median = np.nanmedian(data[:, i])
             data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
 
     for col in columns:
         data = np.delete(data, col, axis=1)
 
-    return data, columns
+    return data, columns, np.array(modified_columns)
 
 
-def standardize(x, bias=False):
+def standardize(x, non_categorical):
     """Compute the standard scores of the data. If bias is True, ignores the first column.
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             !!!!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!
@@ -314,14 +357,48 @@ def standardize(x, bias=False):
     """
 
     mean, std = np.mean(x, axis=0), np.std(x, axis=0)
-    x = x - mean
-    x[:, std > 0] = x[:, std > 0] / std[std > 0]
+    x[:, non_categorical] = x[:, non_categorical] - mean[non_categorical]
 
-    # Reset normalisation of intercept column
-    if bias:
-        x[:, 0] = 1
+    flag = np.full(x.shape[1], 0, dtype=bool)
+    x[:, np.logical_and(flag, std > 0)] = (
+        x[:, np.logical_and(flag, std > 0)]
+        / std[np.logical_and(flag, std > 0)]
+    )
 
     return x
+
+
+def check_categorical(column):
+
+    idx = np.where(np.isnan(column))
+    data_copy[idx] = 0.0
+
+    column = np.abs(column)
+    rem = np.mod(column, 1.0)
+
+    if (np.sum(rem, axis=0)) == 0.0:
+        return "True"
+
+    return "False"
+
+
+# def find_categorical(data, modified=np.array([])):
+def find_categorical(data, modified=np.array([])):
+    data_copy = data
+
+    # find nans
+    idxs = np.where(np.isnan(data))
+    data_copy[idxs[0], idxs[1]] = 0.0
+
+    data_copy = np.abs(data_copy)
+    rem = np.mod(data_copy, 1.0)
+
+    idx = np.argwhere(np.all(rem[..., :] == 0, axis=0))
+    # idx = np.concatenate(idx, modified)
+
+    # idx = idx.unique()
+
+    return idx
 
 
 if __name__ == "__main__":
