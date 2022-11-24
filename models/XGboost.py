@@ -16,23 +16,17 @@ from data_preparation import *
 def xgb_learning(
     X: np.array,
     y: np.array,
-    CV: int = 5,
-    depth: int = 20,
-    label_weights: List[float] = None,
     seed: int = 13,
+    CV: int = 5,
     sample_weights: List[float] = None,
 ) -> List[xgboost.XGBClassifier]:
-    label_weights = {
-        0: label_weights[0],
-        1: label_weights[1],
-        2: label_weights[2],
-    }
+
 
     xgbs = []
 
-    kfold = KFold(n_splits=CV, shuffle=True)
+    split = split_by_class(y, CV=CV)
 
-    for i, (train_idx, test_idx) in enumerate(kfold.split(X)):
+    for i, (train_idx, test_idx) in enumerate(split):
 
         X_train_i, X_test_i = X[train_idx], X[test_idx]
         y_train_i, y_test_i = y[train_idx], y[test_idx]
@@ -105,23 +99,12 @@ if __name__ == "__main__":
     all_fps = smiles_to_morgan_fp(smiles)
     # introduce descriptors
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+
     # we perform standardization only on qm descriptors!
     qm_descriptors, columns_info, standardization_data = nan_imputation(qm_descriptors, 0.5)
     all_fps = np.concatenate((qm_descriptors, all_fps), axis=1)
 
     train_data_size = targets.shape[0]
-
-    num_low = np.count_nonzero(targets == 0)
-    num_medium = np.count_nonzero(targets == 1)
-    num_high = np.count_nonzero(targets == 2)
-
-    weights = [
-        1 - num_low / train_data_size,
-        1 - num_medium / train_data_size,
-        1 - num_high / train_data_size,
-    ]
-    print("The weights should be balanced now!")
-    print(weights)
 
     # we permute/shuffle our data first
     seed = 13
@@ -131,20 +114,16 @@ if __name__ == "__main__":
     all_fps = all_fps[p]
     targets = targets[p]
 
+    weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 
     xgbs = xgb_learning(
         all_fps,
         targets,
         CV=5,
-        label_weights=weights,
         sample_weights=sample_weights,
         seed=seed,
     )
-
-    submission_ids, submission_smiles = load_test_data(test_path)
-    X = smiles_to_morgan_fp(submission_smiles)
-    input_dim = X.shape[-1]
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)

@@ -242,6 +242,37 @@ def calculate_class_weights(
     return weights
 
 
+def indices_by_class(targets: np.array, num_classes: int = 3) -> List[np.array]:
+    class_indices = []
+    for class_ in range(num_classes):
+        class_idx = np.where(targets == class_)[0]
+        class_indices.append(class_idx)
+    return class_indices
+
+
+def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
+    splitted_classes_indices = indices_by_class(targets, num_classes)
+
+    kfold = KFold(n_splits=CV)
+
+    train_indices = [[[] for i in range(num_classes)] for j in range(CV)]
+    test_indices = [[[] for i in range(num_classes)] for j in range(CV)]
+    for idx, class_i_indices in enumerate(splitted_classes_indices):
+        for split_i, (train_split_i, test_split_i) in enumerate(kfold.split(class_i_indices)):
+            train_idx_class_i = class_i_indices[train_split_i]
+            train_indices[split_i][idx].append(train_idx_class_i)
+
+            test_idx_class_i = class_i_indices[test_split_i]
+            test_indices[split_i][idx].append(test_idx_class_i)
+
+    train_indices = [np.concatenate(i, axis=1).squeeze() for i in train_indices]
+    test_indices = [np.concatenate(i, axis=1).squeeze() for i in test_indices]
+
+    final_splits = [(train_i, test_i) for train_i, test_i in zip(train_indices, test_indices)]
+
+    return final_splits
+
+
 def create_subsample_train_csv(data_dir: str):
     path = os.path.join(data_dir, "random_undersampling.csv")
     train_path = os.path.join(data_dir, "train.csv")
@@ -373,6 +404,7 @@ def standardize_qm_test(data, columns_info, standardization_data):
 
     return data
 
+
 def check_categorical(column):
     """
     Function that checks if a columns contains categorical feature or not (ignoring the nan values)
@@ -416,16 +448,13 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    # get data and transform smiles -> morgan fingerprint
-    ids, smiles = load_test_data(test_path)
-    all_fps = smiles_to_morgan_fp(smiles)
+    ids, smiles, targets = load_train_data(train_path)
+    X = smiles_to_morgan_fp(smiles)
 
-    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+    # add new splitting like this:
+    split = split_by_class(targets)
 
-    seed = 13
-    np.random.seed(seed)
+    for i, (train_idx, test_idx) in enumerate(split):
+        # ... the rest stays the same
+        pass
 
-    # we permutate/shuffle our data first
-    # p = np.random.permutation(targets.shape[0])
-    # all_fps = all_fps[p]
-    # targets = targets[p]
