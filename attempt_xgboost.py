@@ -103,18 +103,17 @@ if __name__ == "__main__":
     # get data and transform smiles -> morgan fingerprint
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
-    # introduce descriptores
-    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-    # all_fps, imputation = nan_imputation(all_fps)
-    qm_descriptors, imputation = nan_elimination(qm_descriptors)
-    non_categorical = np.delete(
-        np.array(range(0, qm_descriptors.shape[1])),
-        find_categorical(qm_descriptors),
-    )
-    qm_descriptors = standardize(qm_descriptors, non_categorical)
 
+    # introduce descriptors
+    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
     all_fps = np.concatenate((qm_descriptors, all_fps), axis=1)
 
+    # dataset transformation
+    all_fps, imputation, modified = nan_imputation(all_fps, categorical="True")
+    categorical_features = find_categorical(qm_descriptors, modified)
+    to_keep = np.delete(
+        np.array(range(0, qm_descriptors.shape[1])), categorical_features
+    )
     train_data_size = targets.shape[0]
 
     num_low = np.count_nonzero(targets == 0)
@@ -152,22 +151,20 @@ if __name__ == "__main__":
     X = smiles_to_morgan_fp(submission_smiles)
     input_dim = X.shape[-1]
 
+    submission_ids, submission_smiles = load_test_data(test_path)
+    X = smiles_to_morgan_fp(submission_smiles)
     # descriptors
     qm_descriptors_test = smiles_to_qm_descriptors(
         submission_smiles, data_dir, "test"
     )
+    X = np.concatenate((qm_descriptors_test, X), axis=1)
 
     for col in imputation:
-        qm_descriptors_test = np.delete(qm_descriptors_test, col, axis=1)
-
-    qm_descriptors_test = standardize(qm_descriptors_test, non_categorical)
-
-    X = np.concatenate((qm_descriptors_test, X), axis=1)
+        X = np.delete(X, col, axis=1)
 
     final_predictions = predict_xgb_ensemble(xgbs, X)
 
     submission_file = os.path.join(
-        this_dir,
-        "xg_boost_predictions_descriptors_weights_nonan_standardize.csv",
+        this_dir, "xg_boost_predictions_descriptors_weights.csv"
     )
     create_submission_file(submission_ids, final_predictions, submission_file)

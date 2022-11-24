@@ -296,8 +296,7 @@ def nan_elimination(data):
         if missing[i] > 0.0:
             columns.append(i)
 
-    for col in columns:
-        data = np.delete(data, col, axis=1)
+    data = np.delete(data, columns, axis=1)
 
     return data, columns
 
@@ -360,8 +359,10 @@ def standardize(x, non_categorical):
     mean, std = np.mean(x, axis=0), np.std(x, axis=0)
     x[:, non_categorical] = x[:, non_categorical] - mean[non_categorical]
 
-    x[:, non_categorical and std > 0] = (
-        x[:, non_categorical and std > 0] / std[non_categorical and std > 0]
+    flag = np.full(x.shape[1], 0, dtype=bool)
+    x[:, np.logical_and(flag, std > 0)] = (
+        x[:, np.logical_and(flag, std > 0)]
+        / std[np.logical_and(flag, std > 0)]
     )
 
     return x
@@ -381,8 +382,8 @@ def check_categorical(column):
     return "False"
 
 
-def find_categorical(data, modified):
-
+# def find_categorical(data, modified=np.array([])):
+def find_categorical(data, modified=np.array([])):
     data_copy = data
 
     # find nans
@@ -393,9 +394,9 @@ def find_categorical(data, modified):
     rem = np.mod(data_copy, 1.0)
 
     idx = np.argwhere(np.all(rem[..., :] == 0, axis=0))
-    idx = np.concatenate(idx, modified)
+    # idx = np.concatenate(idx, modified)
 
-    idx = idx.unique()
+    # idx = idx.unique()
 
     return idx
 
