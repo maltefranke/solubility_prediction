@@ -343,23 +343,30 @@ def nan_imputation(data, nan_tolerance=0.5):
     """
 
     N, M = data.shape
+
     modified_columns = []
     # list that contains 0 if the col is removed, 1 if it is categorical, # 2 if it needs to be standardized
+
     standardization_data_train = np.empty((M, 3))
     # matrix that contains median, mean and std for each column that has been standardized
+
+    erased = []
+    # list of erased column (to substitute the necessary reduction of i and M in the for loop)
 
     for i in range(M):
         nan_percentage = len(np.where(np.isnan(data[:, i]))[0]) / N
 
         if nan_percentage > nan_tolerance:  # remove column
-            data = np.delete(data, i, axis=1)
+            # data = np.delete(data, i, axis=1)
             modified_columns.append(0)
-            i -= 1
-            M -= 1
+            # i -= 1
+            # M -= 1
             # check if this work, not sure!!
-
+            erased.append(i)
         else:  # do not remove this column
-            if check_categorical(data[:, i]):  # if it is categorical, don't do anything
+            if check_categorical(
+                data[:, i]
+            ):  # if it is categorical, don't do anything
                 modified_columns.append(1)
 
             else:  # it needs to be standardized
@@ -371,6 +378,8 @@ def nan_imputation(data, nan_tolerance=0.5):
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
                 standardization_data_train[i, :] = median, mean, std
 
+    data = np.delete(data, erased, axis=1)
+
     return data, np.array(modified_columns), standardization_data_train
 
 
@@ -381,7 +390,10 @@ def standardize(x):
     :return: standardized x, mean, std
     """
     mean, std = np.nanmean(x, axis=0), np.nanstd(x, axis=0)
-    x = (x - mean) / std
+    # x = (x - mean) / std
+    x = x - mean
+    if std > 0:
+        x = x / std
 
     return x, mean, std
 
