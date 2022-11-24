@@ -272,133 +272,140 @@ def create_subsample_train_csv(data_dir: str):
                 writer.writerow([temp_smiles, idx])
 
 
-def nan_elimination(data):
+# def nan_elimination(data):
+#     """
+#
+#     Parameters
+#     ----------
+#     data : dataset to be checked
+#
+#     Returns
+#     -------
+#     data : dataset without nan values
+#
+#     """
+#
+#     N, M = data.shape
+#     columns = []
+#     list_of_counts = []
+#     modified_columns = []
+#     missing = np.zeros(M)
+#     for i in range(M):
+#         missing[i] = len(np.where(np.isnan(data[:, i]))[0]) / N
+#
+#         if missing[i] > 0.0:
+#             columns.append(i)
+#
+#     data = np.delete(data, columns, axis=1)
+#
+#     return data, columns
+
+
+def nan_imputation(data, nan_tolerance=0.5):
     """
-
-    Parameters
-    ----------
-    data : dataset to be checked
-
-    Returns
-    -------
-    data : dataset without nan values
-
-    """
-
-    N, M = data.shape
-    columns = []
-    list_of_counts = []
-    modified_columns = []
-    missing = np.zeros(M)
-    for i in range(M):
-        missing[i] = len(np.where(np.isnan(data[:, i]))[0]) / N
-
-        if missing[i] > 0.0:
-            columns.append(i)
-
-    data = np.delete(data, columns, axis=1)
-
-    return data, columns
-
-
-def nan_imputation(data, categorical="False"):
-    """
-
-    Parameters
-    ----------
-    data : dataset to be checked
-
-    Returns
-    -------
-    data : dataset without nan values
-
+    Function that removes columns with too many nan values (depending on the tolerance) and standardizes
+    the data substituting the median to the nan values.
+    It doesn't touch the categorical features.
+    :param nan_tolerance: percentage of nan we want to accept for each column
+    :param data: list with only qm_descriptors!!!!!!!!
+    :return:
     """
 
     N, M = data.shape
-    columns = []
-    list_of_counts = []
     modified_columns = []
-    missing = np.zeros(M)
+    # list that contains 0 if the col is removed, 1 if it is categorical, # 2 if it needs to be standardized
+    standardization_data_train = np.empty((M, 3))
+    # matrix that contains median, mean and std for each column that has been standardized
+
     for i in range(M):
-        missing[i] = len(np.where(np.isnan(data[:, i]))[0]) / N
+        nan_percentage = len(np.where(np.isnan(data[:, i]))[0]) / N
 
-        if missing[i] > 0.50:
-            columns.append(i)
+        if nan_percentage > nan_tolerance:  # remove column
+            data = np.delete(data, i, axis=1)
+            modified_columns.append(0)
+            i -= 1
+            M -= 1
+            # check if this work, not sure!!
 
-        elif missing[i] > 0:
+        else:  # do not remove this column
+            if check_categorical(data[:, i]):  # if it is categorical, don't do anything
+                modified_columns.append(1)
 
-            if (
-                categorical == "True"
-                and len(np.where(np.isnan(data[:, i]))[0]) != 0
-                and check_categorical(np.mod(np.abs(data[:, i]), 1.0))
-            ):
-                # to be given to find categorical in order to consider them as categorical too even if they can contain a "non-integer" value
-                modified_columns.append(
-                    i - len(columns)
-                )  # index in the new matrix without nans
+            else:  # it needs to be standardized
+                modified_columns.append(2)
+                median = np.nanmedian(data[:, i])
+                # standardization (shouldn't affect nan values)
+                data[:, 1], mean, std = standardize(data[:, 1])
+                # replace nan with median
+                data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+                standardization_data_train[i, :] = median, mean, std
 
-            median = np.nanmedian(data[:, i])
+    return data, np.array(modified_columns), standardization_data_train
+
+
+def standardize(x):
+    """
+    Given a column x, it calculates mean and std ignoring nan values and applies standardization
+    :param x:
+    :return: standardized x, mean, std
+    """
+    mean, std = np.nanmean(x, axis=0), np.nanstd(x, axis=0)
+    x = (x - mean) / std
+
+    return x, mean, std
+
+
+def standardize_qm_test(data, columns_info, standardization_data):
+
+    N, M = data.shape
+
+    for i in range(M):
+        if columns_info[i] == 0:
+            data = np.delete(data, i, axis=1)
+            i -= 1
+            M -= 1
+        elif columns_info[i] == 2:
+            median = standardization_data[i, 0]
+            mean = standardization_data[i, 1]
+            std = standardization_data[i, 2]
+            data[i, :] = (data[i, :] - mean) / std
             data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
 
-    for col in columns:
-        data = np.delete(data, col, axis=1)
-
-    return data, columns, np.array(modified_columns)
-
-
-def standardize(x, non_categorical):
-    """Compute the standard scores of the data. If bias is True, ignores the first column.
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            !!!!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    Generic fucntion,It must be modified to deal with this dataset.
-    For example we should check which features are categorical and exclude them
-    as well as the fingerprints
-    """
-
-    mean, std = np.mean(x, axis=0), np.std(x, axis=0)
-    x[:, non_categorical] = x[:, non_categorical] - mean[non_categorical]
-
-    flag = np.full(x.shape[1], 0, dtype=bool)
-    x[:, np.logical_and(flag, std > 0)] = (
-        x[:, np.logical_and(flag, std > 0)]
-        / std[np.logical_and(flag, std > 0)]
-    )
-
-    return x
-
+    return data
 
 def check_categorical(column):
+    """
+    Function that checks if a columns contains categorical feature or not (ignoring the nan values)
+    :param column:
+    :return: Bool
+    """
+    # removing nan values and substituting them with 0
+    column_removed = np.where(np.isnan(column), 0, column)
+    # calculating the modulus of the column
+    modulus = np.mod(np.abs(column_removed), 1.0)
 
-    idx = np.where(np.isnan(column))
-    data_copy[idx] = 0.0
+    if all(item == 0 for item in modulus):
+        return True
 
-    column = np.abs(column)
-    rem = np.mod(column, 1.0)
-
-    if (np.sum(rem, axis=0)) == 0.0:
-        return "True"
-
-    return "False"
+    return False
 
 
 # def find_categorical(data, modified=np.array([])):
-def find_categorical(data, modified=np.array([])):
-    data_copy = data
-
-    # find nans
-    idxs = np.where(np.isnan(data))
-    data_copy[idxs[0], idxs[1]] = 0.0
-
-    data_copy = np.abs(data_copy)
-    rem = np.mod(data_copy, 1.0)
-
-    idx = np.argwhere(np.all(rem[..., :] == 0, axis=0))
-    # idx = np.concatenate(idx, modified)
-
-    # idx = idx.unique()
-
-    return idx
+#     data_copy = data
+#
+#     # find nans
+#     idxs = np.where(np.isnan(data))
+#     data_copy[idxs[0], idxs[1]] = 0.0
+#
+#     data_copy = np.abs(data_copy)
+#     rem = np.mod(data_copy, 1.0)
+#
+#     idx = np.argwhere(np.all(rem[..., :] == 0, axis=0))
+#     # idx = np.concatenate(idx, modified)
+#
+#     # idx = idx.unique()
+#
+#     return idx
 
 
 if __name__ == "__main__":

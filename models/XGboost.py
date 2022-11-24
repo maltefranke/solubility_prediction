@@ -103,11 +103,11 @@ if __name__ == "__main__":
     # get data and transform smiles -> morgan fingerprint
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
-    # introduce descriptores
+    # introduce descriptors
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+    # we perform standardization only on qm descriptors!
+    qm_descriptors, columns_info, standardization_data = nan_imputation(qm_descriptors, 0.5)
     all_fps = np.concatenate((qm_descriptors, all_fps), axis=1)
-    # all_fps, imputation = nan_imputation(all_fps)
-    all_fps, imputation = nan_elimination(all_fps)
 
     train_data_size = targets.shape[0]
 
@@ -152,10 +152,10 @@ if __name__ == "__main__":
     qm_descriptors_test = smiles_to_qm_descriptors(
         submission_smiles, data_dir, "test"
     )
-    X = np.concatenate((qm_descriptors_test, X), axis=1)
+    # standardization of qm descriptors for the test set
+    qm_descriptors_test = standardize_qm_test(qm_descriptors, columns_info, standardization_data)
 
-    for col in imputation:
-        X = np.delete(X, col, axis=1)
+    X = np.concatenate((qm_descriptors_test, X), axis=1)
 
     final_predictions = predict_xgb_ensemble(xgbs, X)
 
