@@ -273,7 +273,7 @@ def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
     return final_splits
 
 
-def create_subsample_train_csv(data_dir: str):
+def create_subsample_train_csv(data_dir: str, features: np.array):
     path = os.path.join(data_dir, "random_undersampling.csv")
     train_path = os.path.join(data_dir, "train.csv")
     ids, smiles, targets = load_train_data(train_path)
@@ -281,26 +281,38 @@ def create_subsample_train_csv(data_dir: str):
     p = np.random.permutation(targets.shape[0])
     smiles = np.array(smiles)[p]
     targets = targets[p]
+    features = features[p]
 
     # dividing the data in subsets depending on the class
     smiles_per_class = []
+    all_features = []
     for class_idx in range(3):
-        smiles_class_i = np.array(smiles)[
-            np.where(targets == class_idx)
-        ].tolist()
+        indices = np.where(targets == class_idx)
+        smiles_class_i = np.array(smiles)[indices].tolist()
         smiles_per_class.append(smiles_class_i)
+
+        features_class_i = features[indices]
+        all_features.append(features_class_i)
 
     min_len = min([len(i) for i in smiles_per_class])
 
+    cutoff_features = []
     with open(path, "w") as subsampling_file:
         writer = csv.writer(subsampling_file, delimiter=",")
-        writer.writerow(["smiles", "sol_category"])
+        writer.writerow(["Id", "smiles", "sol_category"])
 
         for idx, smiles_class_i in enumerate(smiles_per_class):
-            subsampled_smiles = smiles_class_i[:min_len]
+            subsampled_features = all_features[idx][:min_len]
+            cutoff_features.append(subsampled_features)
 
+            subsampled_smiles = smiles_class_i[:min_len]
             for temp_smiles in subsampled_smiles:
-                writer.writerow([temp_smiles, idx])
+                writer.writerow(["-", temp_smiles, idx])
+
+    cutoff_features = np.concatenate(cutoff_features, axis=0)
+    descriptor_file = os.path.join(data_dir, "random_undersampling_descriptors.h5")
+    with h5py.File(descriptor_file, "w") as hf:
+        hf.create_dataset("descriptors", data=cutoff_features)
 
 
 # def nan_elimination(data):
@@ -392,8 +404,8 @@ def standardize(x):
     mean, std = np.nanmean(x, axis=0), np.nanstd(x, axis=0)
     # x = (x - mean) / std
     x = x - mean
-    if std > 0:
-        x = x / std
+
+    x = x / std
 
     return x, mean, std
 
