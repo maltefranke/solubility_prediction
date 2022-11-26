@@ -106,6 +106,27 @@ def smiles_to_qm_descriptors(
     return qm_descriptors
 
 
+def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
+
+    # introduce descriptors
+    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+
+    # we perform standardization only on qm descriptors!
+    dataset, columns_info, standardization_data = nan_imputation(
+        qm_descriptors, 0.5
+    )
+
+    if degree > 1:
+        dataset = build_poly(dataset, columns_info, degree)
+
+    if fps == True:
+        # add morgan fingerprints
+        all_fps = smiles_to_morgan_fp(smiles)
+        dataset = np.concatenate((dataset, all_fps), axis=1)
+
+    return dataset, columns_info
+
+
 def up_down_sampling(y, X):
     """
     Add copies of the observations of the minority classes and remove observations from the majority class
@@ -242,7 +263,9 @@ def calculate_class_weights(
     return weights
 
 
-def indices_by_class(targets: np.array, num_classes: int = 3) -> List[np.array]:
+def indices_by_class(
+    targets: np.array, num_classes: int = 3
+) -> List[np.array]:
     class_indices = []
     for class_ in range(num_classes):
         class_idx = np.where(targets == class_)[0]
@@ -258,17 +281,24 @@ def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
     train_indices = [[[] for i in range(num_classes)] for j in range(CV)]
     test_indices = [[[] for i in range(num_classes)] for j in range(CV)]
     for idx, class_i_indices in enumerate(splitted_classes_indices):
-        for split_i, (train_split_i, test_split_i) in enumerate(kfold.split(class_i_indices)):
+        for split_i, (train_split_i, test_split_i) in enumerate(
+            kfold.split(class_i_indices)
+        ):
             train_idx_class_i = class_i_indices[train_split_i]
             train_indices[split_i][idx].append(train_idx_class_i)
 
             test_idx_class_i = class_i_indices[test_split_i]
             test_indices[split_i][idx].append(test_idx_class_i)
 
-    train_indices = [np.concatenate(i, axis=1).squeeze() for i in train_indices]
+    train_indices = [
+        np.concatenate(i, axis=1).squeeze() for i in train_indices
+    ]
     test_indices = [np.concatenate(i, axis=1).squeeze() for i in test_indices]
 
-    final_splits = [(train_i, test_i) for train_i, test_i in zip(train_indices, test_indices)]
+    final_splits = [
+        (train_i, test_i)
+        for train_i, test_i in zip(train_indices, test_indices)
+    ]
 
     return final_splits
 
@@ -310,7 +340,9 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
                 writer.writerow(["-", temp_smiles, idx])
 
     cutoff_features = np.concatenate(cutoff_features, axis=0)
-    descriptor_file = os.path.join(data_dir, "random_undersampling_descriptors.h5")
+    descriptor_file = os.path.join(
+        data_dir, "random_undersampling_descriptors.h5"
+    )
     with h5py.File(descriptor_file, "w") as hf:
         hf.create_dataset("descriptors", data=cutoff_features)
 
@@ -369,11 +401,9 @@ def nan_imputation(data, nan_tolerance=0.5):
         nan_percentage = len(np.where(np.isnan(data[:, i]))[0]) / N
 
         if nan_percentage > nan_tolerance:  # remove column
-            # data = np.delete(data, i, axis=1)
+
             modified_columns.append(0)
-            # i -= 1
-            # M -= 1
-            # check if this work, not sure!!
+
             erased.append(i)
         else:  # do not remove this column
             if check_categorical(
@@ -384,10 +414,10 @@ def nan_imputation(data, nan_tolerance=0.5):
             else:  # it needs to be standardized
                 modified_columns.append(2)
                 median = np.nanmedian(data[:, i])
-                # standardization (shouldn't affect nan values)
-                data[:, 1], mean, std = standardize(data[:, 1])
                 # replace nan with median
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+                # standardization (shouldn't affect nan values)
+                data[:, i], mean, std = standardize(data[:, i])
                 standardization_data_train[i, :] = median, mean, std
 
     data = np.delete(data, erased, axis=1)
@@ -404,27 +434,21 @@ def standardize(x):
     mean, std = np.nanmean(x, axis=0), np.nanstd(x, axis=0)
     # x = (x - mean) / std
     x = x - mean
-
-    x = x / std
+    std = np.array(std)
+    x[:, std > 0] = x[:, std > 0] / std[std > 0]
 
     return x, mean, std
 
 
-def standardize_qm_test(data, columns_info, standardization_data):
+def standardize_qm_test(data, columns_info):
 
+    data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
     N, M = data.shape
-
     for i in range(M):
-        if columns_info[i] == 0:
-            data = np.delete(data, i, axis=1)
-            i -= 1
-            M -= 1
-        elif columns_info[i] == 2:
-            median = standardization_data[i, 0]
-            mean = standardization_data[i, 1]
-            std = standardization_data[i, 2]
-            data[i, :] = (data[i, :] - mean) / std
+        if columns_info[i] == 2:
+            median = np.nanmedian(data[:, i])
             data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+            data[:, i], mean, std = standardize(data[:, i])
 
     return data
 
@@ -444,6 +468,41 @@ def check_categorical(column):
         return True
 
     return False
+
+
+def build_poly(x, columns_info, degree, pairs=False):
+    """Polynomial basis functions for input data x, for j=0 up to j=degree.
+    Optionally can add square or cube roots of x as additional features,
+    or the basis of products between the features.
+    Args:
+        x: numpy array of shape (N,), N is the number of samples
+        degree: integer
+        pairs: boolean
+    Returns:
+        poly: numpy array of shape (N,d+1)
+    """
+    # I have already removed nan columns
+    columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
+
+    poly = np.ones((len(x), 1))
+    for deg in range(1, degree + 1):
+        if deg > 1:
+            transformed, _, _ = standardize(
+                np.power(x[:, np.where(columns_info == 2)[0]], deg)
+            )
+        else:
+            # if deg==1, the standardization has already been made. Moreover, we should not loose categorical features
+            transformed = x
+        poly = np.c_[poly, transformed]
+
+    if pairs:
+        for i in range(x.shape[1]):
+            for j in range(i + 1, x.shape[1]):
+                if columns_info[i] == columns_info[j] == 2:
+                    transformed, _, _ = standardize(x[:, i] * x[:, j])
+                    poly = np.c_[poly, transformed]
+
+    return poly
 
 
 # def find_categorical(data, modified=np.array([])):
@@ -481,4 +540,3 @@ if __name__ == "__main__":
     for i, (train_idx, test_idx) in enumerate(split):
         # ... the rest stays the same
         pass
-
