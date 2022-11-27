@@ -4,6 +4,7 @@ import umap
 
 from data_preparation import *
 
+
 def quadratic_weighted_kappa(y_pred: np.array, y_true: np.array) -> float:
     """
     Function to compute the quadratic weighted kappa which is the primary metric for the competition
