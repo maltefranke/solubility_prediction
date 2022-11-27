@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from utils import *
 from data_preparation import *
 
-
+"""
 def xgb_learning(
     X: np.array,
     y: np.array,
@@ -21,12 +21,79 @@ def xgb_learning(
     sample_weights: List[float] = None,
 ) -> List[xgboost.XGBClassifier]:
 
-
     xgbs = []
 
     split = split_by_class(y, CV=CV)
 
     for i, (train_idx, test_idx) in enumerate(split):
+
+        X_train_i, X_test_i = X[train_idx], X[test_idx]
+        y_train_i, y_test_i = y[train_idx], y[test_idx]
+
+        # shuffle the elements
+        seed = 13
+        np.random.seed(seed)
+
+        p = np.random.permutation(X_train_i.shape[0])
+        X_train_i = X_train_i[p]
+        y_train_i = y_train_i[p]
+
+        sample_weights_i = None
+        if sample_weights is not None:
+            sample_weights_i = np.array(sample_weights)[train_idx]
+
+        xgb = xgboost.XGBClassifier(
+            objective="multi:softprob",
+            n_estimators=100,
+            eval_metric="auc",
+            colsample_bytree=0.5,
+            gamma=0,
+            learning_rate=0.1,
+            max_depth=3,
+            reg_lambda=0,
+            verbosity=1,
+        )
+
+        eval_set = [(dataset, targets)]  #
+        xgb.fit(
+            X_train_i,
+            y_train_i,
+            early_stopping_rounds=5,
+            eval_set=eval_set,
+            sample_weight=sample_weights_i,
+            verbose=True,
+        )
+
+        y_pred = xgb.predict(X_test_i)
+        kappa = quadratic_weighted_kappa(y_pred, y_test_i)
+        print("Kappa = ", kappa)
+
+        xgbs.append(xgb)
+
+    return xgbs
+"""
+
+
+def xgb_learning(
+    X: np.array,
+    y: np.array,
+    CV: int = 5,
+    depth: int = 20,
+    label_weights: List[float] = None,
+    seed: int = 13,
+    sample_weights: List[float] = None,
+) -> List[xgboost.XGBClassifier]:
+    label_weights = {
+        0: label_weights[0],
+        1: label_weights[1],
+        2: label_weights[2],
+    }
+
+    xgbs = []
+
+    kfold = KFold(n_splits=CV, shuffle=True)
+
+    for i, (train_idx, test_idx) in enumerate(kfold.split(X)):
 
         X_train_i, X_test_i = X[train_idx], X[test_idx]
         y_train_i, y_test_i = y[train_idx], y[test_idx]
@@ -46,7 +113,7 @@ def xgb_learning(
             verbosity=1,
         )
 
-        eval_set = [(all_fps, targets)]
+        eval_set = [(dataset, targets)]
         xgb.fit(
             X_train_i,
             y_train_i,
@@ -96,49 +163,55 @@ if __name__ == "__main__":
 
     # get data and transform smiles -> morgan fingerprint
     ids, smiles, targets = load_train_data(train_path)
-    all_fps = smiles_to_morgan_fp(smiles)
-    # introduce descriptors
-    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
 
-    # we perform standardization only on qm descriptors!
-    qm_descriptors, columns_info, standardization_data = nan_imputation(qm_descriptors, 0.5)
-    all_fps = np.concatenate((qm_descriptors, all_fps), axis=1)
-
+    # manipulation of the dataset
+    degree = 2
+    dataset, columns_info = preprocessing(ids, smiles, data_dir, degree)
     train_data_size = targets.shape[0]
-
     # we permute/shuffle our data first
     seed = 13
     np.random.seed(seed)
-
     p = np.random.permutation(targets.shape[0])
-    all_fps = all_fps[p]
+    dataset = dataset[p]
     targets = targets[p]
 
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 
+    #    xgbs = xgb_learning(
+    #        dataset,
+    #        targets,
+    #        CV=5,
+    #        sample_weights=sample_weights,
+    #        seed=seed,
+    #   )
+
     xgbs = xgb_learning(
-        all_fps,
+        dataset,
         targets,
         CV=5,
+        label_weights=weights,
         sample_weights=sample_weights,
         seed=seed,
     )
-
+    # load test set
     submission_ids, submission_smiles = load_test_data(test_path)
-    X = smiles_to_morgan_fp(submission_smiles)
+    # X = smiles_to_morgan_fp(submission_smiles)
     # descriptors
     qm_descriptors_test = smiles_to_qm_descriptors(
         submission_smiles, data_dir, "test"
     )
     # standardization of qm descriptors for the test set
-    qm_descriptors_test = standardize_qm_test(qm_descriptors, columns_info, standardization_data)
+    qm_descriptors_test = standardize_qm_test(
+        qm_descriptors_test, columns_info
+    )
+    qm_descriptors_test = build_poly(qm_descriptors_test, columns_info, degree)
 
-    X = np.concatenate((qm_descriptors_test, X), axis=1)
+    # X = np.concatenate((qm_descriptors_test, X), axis=1)
 
-    final_predictions = predict_xgb_ensemble(xgbs, X)
+    final_predictions = predict_xgb_ensemble(xgbs, qm_descriptors_test)
 
     submission_file = os.path.join(
-        this_dir, "xg_boost_predictions_descriptors_weights_nonan.csv"
+        this_dir, "xg_boost_splitted_augmented_2.csv"
     )
     create_submission_file(submission_ids, final_predictions, submission_file)

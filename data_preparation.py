@@ -12,6 +12,11 @@ from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
 from sklearn.utils import resample
 from mordred import Calculator, descriptors
 from imblearn.over_sampling import SMOTE
+import random
+import math
+
+# from rxn_yields.data import generate_buchwald_hartwig_rxns
+
 
 from models.ANN import *
 
@@ -80,6 +85,12 @@ def smiles_to_qm_descriptors(
         qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
     elif type_ == "test":
         qm_descriptor_file = os.path.join(data_dir, "test_qm_descriptors.h5")
+    elif type_ == "train_2":
+        qm_descriptor_file = os.path.join(
+            data_dir, "train_2_qm_descriptors.h5"
+        )
+    elif type_ == "test_2":
+        qm_descriptor_file = os.path.join(data_dir, "test_2_qm_descriptors.h5")
     else:
         qm_descriptor_file = os.path.join(
             data_dir, "descriptors_collection.h5"
@@ -104,6 +115,27 @@ def smiles_to_qm_descriptors(
         # qm_descriptors = np.load(qm_descriptor_file, allow_pickle=True)
 
     return qm_descriptors
+
+
+def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
+
+    # introduce descriptors
+    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+
+    # we perform standardization only on qm descriptors!
+    dataset, columns_info, standardization_data = nan_imputation(
+        qm_descriptors, 0.5
+    )
+
+    if degree > 1:
+        dataset = build_poly(dataset, columns_info, degree)
+
+    if fps == True:
+        # add morgan fingerprints
+        all_fps = smiles_to_morgan_fp(smiles)
+        dataset = np.concatenate((dataset, all_fps), axis=1)
+
+    return dataset, columns_info
 
 
 def up_down_sampling(y, X):
@@ -242,7 +274,9 @@ def calculate_class_weights(
     return weights
 
 
-def indices_by_class(targets: np.array, num_classes: int = 3) -> List[np.array]:
+def indices_by_class(
+    targets: np.array, num_classes: int = 3
+) -> List[np.array]:
     class_indices = []
     for class_ in range(num_classes):
         class_idx = np.where(targets == class_)[0]
@@ -258,17 +292,24 @@ def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
     train_indices = [[[] for i in range(num_classes)] for j in range(CV)]
     test_indices = [[[] for i in range(num_classes)] for j in range(CV)]
     for idx, class_i_indices in enumerate(splitted_classes_indices):
-        for split_i, (train_split_i, test_split_i) in enumerate(kfold.split(class_i_indices)):
+        for split_i, (train_split_i, test_split_i) in enumerate(
+            kfold.split(class_i_indices)
+        ):
             train_idx_class_i = class_i_indices[train_split_i]
             train_indices[split_i][idx].append(train_idx_class_i)
 
             test_idx_class_i = class_i_indices[test_split_i]
             test_indices[split_i][idx].append(test_idx_class_i)
 
-    train_indices = [np.concatenate(i, axis=1).squeeze() for i in train_indices]
+    train_indices = [
+        np.concatenate(i, axis=1).squeeze() for i in train_indices
+    ]
     test_indices = [np.concatenate(i, axis=1).squeeze() for i in test_indices]
 
-    final_splits = [(train_i, test_i) for train_i, test_i in zip(train_indices, test_indices)]
+    final_splits = [
+        (train_i, test_i)
+        for train_i, test_i in zip(train_indices, test_indices)
+    ]
 
     return final_splits
 
@@ -310,7 +351,9 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
                 writer.writerow(["-", temp_smiles, idx])
 
     cutoff_features = np.concatenate(cutoff_features, axis=0)
-    descriptor_file = os.path.join(data_dir, "random_undersampling_descriptors.h5")
+    descriptor_file = os.path.join(
+        data_dir, "random_undersampling_descriptors.h5"
+    )
     with h5py.File(descriptor_file, "w") as hf:
         hf.create_dataset("descriptors", data=cutoff_features)
 
@@ -369,25 +412,23 @@ def nan_imputation(data, nan_tolerance=0.5):
         nan_percentage = len(np.where(np.isnan(data[:, i]))[0]) / N
 
         if nan_percentage > nan_tolerance:  # remove column
-            # data = np.delete(data, i, axis=1)
+
             modified_columns.append(0)
-            # i -= 1
-            # M -= 1
-            # check if this work, not sure!!
+
             erased.append(i)
         else:  # do not remove this column
             if check_categorical(
                 data[:, i]
             ):  # if it is categorical, don't do anything
                 modified_columns.append(1)
-
+                #### attempt to eliminate categorical features
             else:  # it needs to be standardized
                 modified_columns.append(2)
                 median = np.nanmedian(data[:, i])
-                # standardization (shouldn't affect nan values)
-                data[:, 1], mean, std = standardize(data[:, 1])
                 # replace nan with median
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+                # standardization (shouldn't affect nan values)
+                data[:, i], mean, std = standardize(data[:, i])
                 standardization_data_train[i, :] = median, mean, std
 
     data = np.delete(data, erased, axis=1)
@@ -404,27 +445,21 @@ def standardize(x):
     mean, std = np.nanmean(x, axis=0), np.nanstd(x, axis=0)
     # x = (x - mean) / std
     x = x - mean
-
-    x = x / std
+    std = np.array(std)
+    x[:, std > 0] = x[:, std > 0] / std[std > 0]
 
     return x, mean, std
 
 
-def standardize_qm_test(data, columns_info, standardization_data):
+def standardize_qm_test(data, columns_info):
 
+    data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
     N, M = data.shape
-
     for i in range(M):
-        if columns_info[i] == 0:
-            data = np.delete(data, i, axis=1)
-            i -= 1
-            M -= 1
-        elif columns_info[i] == 2:
-            median = standardization_data[i, 0]
-            mean = standardization_data[i, 1]
-            std = standardization_data[i, 2]
-            data[i, :] = (data[i, :] - mean) / std
+        if columns_info[i] == 2:
+            median = np.nanmedian(data[:, i])
             data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+            data[:, i], mean, std = standardize(data[:, i])
 
     return data
 
@@ -446,6 +481,41 @@ def check_categorical(column):
     return False
 
 
+def build_poly(x, columns_info, degree, pairs=False):
+    """Polynomial basis functions for input data x, for j=0 up to j=degree.
+    Optionally can add square or cube roots of x as additional features,
+    or the basis of products between the features.
+    Args:
+        x: numpy array of shape (N,), N is the number of samples
+        degree: integer
+        pairs: boolean
+    Returns:
+        poly: numpy array of shape (N,d+1)
+    """
+    # I have already removed nan columns
+    columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
+
+    poly = np.ones((len(x), 1))
+    for deg in range(1, degree + 1):
+        if deg > 1:
+            transformed, _, _ = standardize(
+                np.power(x[:, np.where(columns_info == 2)[0]], deg)
+            )
+        else:
+            # if deg==1, the standardization has already been made. Moreover, we should not loose categorical features
+            transformed = x
+        poly = np.c_[poly, transformed]
+
+    if pairs:
+        for i in range(x.shape[1]):
+            for j in range(i + 1, x.shape[1]):
+                if columns_info[i] == columns_info[j] == 2:
+                    transformed, _, _ = standardize(x[:, i] * x[:, j])
+                    poly = np.c_[poly, transformed]
+
+    return poly
+
+
 # def find_categorical(data, modified=np.array([])):
 #     data_copy = data
 #
@@ -462,6 +532,43 @@ def check_categorical(column):
 #     # idx = idx.unique()
 #
 #     return idx
+# export
+def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
+    """
+    From: https://github.com/undeadpixel/reinvent-randomized and https://github.com/GLambard/SMILES-X
+    Returns a random SMILES given a SMILES of a molecule.
+    :param mol: A Mol object
+    :param random_type: The type (unrestricted, restricted, rotated) of randomization performed.
+    :return : A random SMILES string of the same molecule or None if the molecule is invalid.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if not mol:
+        return None
+
+    if random_type == "unrestricted":
+        return Chem.MolToSmiles(
+            mol, canonical=False, doRandom=True, isomericSmiles=isomericSmiles
+        )
+    elif random_type == "restricted":
+        new_atom_order = list(range(mol.GetNumAtoms()))
+        random.shuffle(new_atom_order)
+        random_mol = Chem.RenumberAtoms(mol, newOrder=new_atom_order)
+        return Chem.MolToSmiles(
+            random_mol, canonical=False, isomericSmiles=isomericSmiles
+        )
+    elif random_type == "rotated":
+        n_atoms = mol.GetNumAtoms()
+        rotation_index = random.randint(0, n_atoms - 1)
+        atoms = list(range(n_atoms))
+        new_atoms_order = (
+            atoms[rotation_index % len(atoms) :]
+            + atoms[: rotation_index % len(atoms)]
+        )
+        rotated_mol = Chem.RenumberAtoms(mol, new_atoms_order)
+        return Chem.MolToSmiles(
+            rotated_mol, canonical=False, isomericSmiles=isomericSmiles
+        )
+    raise ValueError("Type '{}' is not valid".format(random_type))
 
 
 if __name__ == "__main__":
@@ -473,12 +580,42 @@ if __name__ == "__main__":
     test_path = os.path.join(data_dir, "test.csv")
 
     ids, smiles, targets = load_train_data(train_path)
-    X = smiles_to_morgan_fp(smiles)
+
+    submission_ids, submission_smiles = load_test_data(test_path)
 
     # add new splitting like this:
-    split = split_by_class(targets)
+    # split = split_by_class(targets)
 
-    for i, (train_idx, test_idx) in enumerate(split):
-        # ... the rest stays the same
-        pass
+    # DATA AUGMENTATION
 
+    for j in range(len(smiles)):
+        rotated_random_smiles = []
+        if targets[j] == 2:
+            for i in range(3):
+                rotated_random_smiles.append(randomize_smiles(smiles[j]))
+            smiles = smiles + rotated_random_smiles
+
+        else:
+            for i in range(30):
+                rotated_random_smiles.append(randomize_smiles(smiles[j]))
+            smiles = smiles + rotated_random_smiles
+
+    qm_descriptors_train_2 = smiles_to_qm_descriptors(
+        smiles, data_dir, "train_2"
+    )
+
+    # rotated_random_smiles_test = []
+    # for i in range(500):
+    #    for j in range(len(submission_smiles)):
+    #       rotated_random_smiles_test.append(
+    #          randomize_smiles(submission_smiles[j])
+    #      )
+    # submission_smiles = submission_smiles + rotated_random_smiles_test
+
+# qm_descriptors_test_2 = smiles_to_qm_descriptors(
+#    submission_smiles, data_dir, "test_2"
+# )
+
+# for i, (train_idx, test_idx) in enumerate(split):
+#    # ... the rest stays the same
+#    pass
