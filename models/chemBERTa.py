@@ -30,8 +30,6 @@ import logging
 
 from data_preparation import *
 
-# tasks, (train_df, valid_df, test_df), transformers = load_molnet_dataset("clintox", tasks_wanted=None)
-
 from simpletransformers.classification import ClassificationModel, ClassificationArgs
 import sklearn
 
@@ -46,13 +44,22 @@ def load_our_dataset(path: str, flag_test=False) -> Tuple[List[str], List[str], 
         return df
     else:
         df.rename(columns={'smiles': 'text', 'sol_category': 'labels'}, inplace=True)
-        df_train = df[0:int(0.8*df.shape[0])]
-        df_valid = df[int(0.8*df.shape[0]):int(0.9*df.shape[0])]
-        df_test = df[int(0.9*df.shape[0])+1:df.shape[0]]
+        ind_0 = np.array(df[df['labels'] == 0].index)
+        ind_1 = np.array(df[df['labels'] == 1].index)
+        ind_2 = np.array(df[df['labels'] == 2].index)
+        print(ind_0)
+        ind_train = np.hstack([ind_0[0:int(0.9*ind_0.shape[0])],
+                          ind_1[0:int(0.9*ind_1.shape[0])],
+                          ind_2[0:int(0.9*ind_2.shape[0])]])
+        ind_valid = np.hstack([ind_0[int(0.9*ind_0.shape[0]):ind_0.shape[0]],
+                          ind_1[int(0.9*ind_1.shape[0]):ind_1.shape[0]],
+                          ind_2[int(0.9*ind_2.shape[0]):ind_2.shape[0]]])
+        df_train = df.iloc[ind_train]
+        df_valid = df.iloc[ind_valid]
+
         print(df_train.head())
         print(df_valid.head())
-        print(df_test.head())
-        return df_train, df_valid, df_test
+        return df_train, df_valid
 
 
 if __name__ == "__main__":
@@ -62,51 +69,39 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    ids, smiles, targets = load_train_data(train_path)
-
-    weights = calculate_class_weights(targets)
-    sample_weights = [weights[i] for i in targets]
-
     # set up a logger to record if any issues occur
     # and notify us if there are any problems with the arguments we've set for the model.
     logging.basicConfig(level=logging.INFO)
     transformers_logger = logging.getLogger("transformers")
     transformers_logger.setLevel(logging.WARNING)
 
-    model = ClassificationModel('roberta', 'seyonec/PubChem10M_SMILES_BPE_396_250', num_labels=4,
+    model = ClassificationModel('roberta', 'seyonec/PubChem10M_SMILES_BPE_396_250', num_labels=3,
                                 # weight=sample_weights[0:int(0.8*train_data_size)],
                                 args={'evaluate_each_epoch': True,
                                       'evaluate_during_training_verbose': True,
                                       'no_save': True, 'num_train_epochs': 10,
                                       'auto_weights': True}, use_cuda=False)
 
-
-    train_df, valid_df, test_df = load_our_dataset(train_path, flag_test=False)
-
+    train_df, valid_df = load_our_dataset(train_path, flag_test=False)
 
     model.train_model(train_df, eval_df=valid_df, output_dir='outputs', multi_label=True, num_labels=3, use_cuda=False,
                       args={'wandb_project': 'project-name'})
 
 
-    # # Test set
-    # submission_ids, submission_smiles = load_test_data(test_path)
-    # # X = smiles_to_morgan_fp(submission_smiles)
-    #
-    # submission_ids, submission_smiles = load_test_data(test_path)
-    # X = smiles_to_morgan_fp(submission_smiles)
-    # # descriptors
-    # # qm_descriptors_test = smiles_to_qm_descriptors(submission_smiles, data_dir, "test")
-    #
-    # # accuracy
-    # result, model_outputs, wrong_predictions = model.eval_model(test_df, acc=sklearn.metrics.accuracy_score)
-    #
-    # # ROC-PRC
-    # result, model_outputs, wrong_predictions = model.eval_model(test_df, acc=sklearn.metrics.average_precision_score)
-    #
-    # final_predictions, raw_outputs = model.predict(test_df)
-    #
-    # submission_file = os.path.join(this_dir, "chemberta_submission1.csv")
-    # create_submission_file(submission_ids, final_predictions, submission_file)
+    # Test set
+    test_df = load_our_dataset(test_path, flag_test=True)
+    submission_ids, submission_smiles = load_test_data(test_path)
+
+    # accuracy
+    result, model_outputs, wrong_predictions = model.eval_model(test_df, acc=sklearn.metrics.accuracy_score)
+
+    # ROC-PRC
+    result, model_outputs, wrong_predictions = model.eval_model(test_df, acc=sklearn.metrics.average_precision_score)
+
+    final_predictions, raw_outputs = model.predict(test_df)
+
+    submission_file = os.path.join(this_dir, "chemberta_submission1.csv")
+    create_submission_file(submission_ids, final_predictions, submission_file)
 
 
 
