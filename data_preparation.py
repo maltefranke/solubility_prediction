@@ -12,6 +12,11 @@ from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
 from sklearn.utils import resample
 from mordred import Calculator, descriptors
 from imblearn.over_sampling import SMOTE
+import random
+import math
+
+# from rxn_yields.data import generate_buchwald_hartwig_rxns
+
 
 from models.ANN import *
 
@@ -80,6 +85,12 @@ def smiles_to_qm_descriptors(
         qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
     elif type_ == "test":
         qm_descriptor_file = os.path.join(data_dir, "test_qm_descriptors.h5")
+    elif type_ == "train_2":
+        qm_descriptor_file = os.path.join(
+            data_dir, "train_2_qm_descriptors.h5"
+        )
+    elif type_ == "test_2":
+        qm_descriptor_file = os.path.join(data_dir, "test_2_qm_descriptors.h5")
     else:
         qm_descriptor_file = os.path.join(
             data_dir, "descriptors_collection.h5"
@@ -410,7 +421,7 @@ def nan_imputation(data, nan_tolerance=0.5):
                 data[:, i]
             ):  # if it is categorical, don't do anything
                 modified_columns.append(1)
-
+                #### attempt to eliminate categorical features
             else:  # it needs to be standardized
                 modified_columns.append(2)
                 median = np.nanmedian(data[:, i])
@@ -521,6 +532,43 @@ def build_poly(x, columns_info, degree, pairs=False):
 #     # idx = idx.unique()
 #
 #     return idx
+# export
+def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
+    """
+    From: https://github.com/undeadpixel/reinvent-randomized and https://github.com/GLambard/SMILES-X
+    Returns a random SMILES given a SMILES of a molecule.
+    :param mol: A Mol object
+    :param random_type: The type (unrestricted, restricted, rotated) of randomization performed.
+    :return : A random SMILES string of the same molecule or None if the molecule is invalid.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if not mol:
+        return None
+
+    if random_type == "unrestricted":
+        return Chem.MolToSmiles(
+            mol, canonical=False, doRandom=True, isomericSmiles=isomericSmiles
+        )
+    elif random_type == "restricted":
+        new_atom_order = list(range(mol.GetNumAtoms()))
+        random.shuffle(new_atom_order)
+        random_mol = Chem.RenumberAtoms(mol, newOrder=new_atom_order)
+        return Chem.MolToSmiles(
+            random_mol, canonical=False, isomericSmiles=isomericSmiles
+        )
+    elif random_type == "rotated":
+        n_atoms = mol.GetNumAtoms()
+        rotation_index = random.randint(0, n_atoms - 1)
+        atoms = list(range(n_atoms))
+        new_atoms_order = (
+            atoms[rotation_index % len(atoms) :]
+            + atoms[: rotation_index % len(atoms)]
+        )
+        rotated_mol = Chem.RenumberAtoms(mol, new_atoms_order)
+        return Chem.MolToSmiles(
+            rotated_mol, canonical=False, isomericSmiles=isomericSmiles
+        )
+    raise ValueError("Type '{}' is not valid".format(random_type))
 
 
 if __name__ == "__main__":
@@ -532,11 +580,42 @@ if __name__ == "__main__":
     test_path = os.path.join(data_dir, "test.csv")
 
     ids, smiles, targets = load_train_data(train_path)
-    X = smiles_to_morgan_fp(smiles)
+
+    submission_ids, submission_smiles = load_test_data(test_path)
 
     # add new splitting like this:
-    split = split_by_class(targets)
+    # split = split_by_class(targets)
 
-    for i, (train_idx, test_idx) in enumerate(split):
-        # ... the rest stays the same
-        pass
+    # DATA AUGMENTATION
+
+    for j in range(len(smiles)):
+        rotated_random_smiles = []
+        if targets[j] == 2:
+            for i in range(3):
+                rotated_random_smiles.append(randomize_smiles(smiles[j]))
+            smiles = smiles + rotated_random_smiles
+
+        else:
+            for i in range(30):
+                rotated_random_smiles.append(randomize_smiles(smiles[j]))
+            smiles = smiles + rotated_random_smiles
+
+    qm_descriptors_train_2 = smiles_to_qm_descriptors(
+        smiles, data_dir, "train_2"
+    )
+
+    # rotated_random_smiles_test = []
+    # for i in range(500):
+    #    for j in range(len(submission_smiles)):
+    #       rotated_random_smiles_test.append(
+    #          randomize_smiles(submission_smiles[j])
+    #      )
+    # submission_smiles = submission_smiles + rotated_random_smiles_test
+
+# qm_descriptors_test_2 = smiles_to_qm_descriptors(
+#    submission_smiles, data_dir, "test_2"
+# )
+
+# for i, (train_idx, test_idx) in enumerate(split):
+#    # ... the rest stays the same
+#    pass
