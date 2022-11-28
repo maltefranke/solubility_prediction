@@ -1,25 +1,25 @@
 import os
 import csv
-from typing import Tuple, List
 import numpy as np
 import pandas as pd
 import rdkit
 import h5py
+import random
+
+from typing import Tuple, List
+
 from rdkit import Chem as Chem
 from rdkit.Chem import AllChem as AllChem
 from rdkit.Chem import rdFingerprintGenerator
-from rdkit.DataStructs.cDataStructs import ConvertToNumpyArray
+
+from sklearn.preprocessing import StandardScaler
 from sklearn.utils import resample
+
 from mordred import Calculator, descriptors
+
 from imblearn.over_sampling import SMOTE
-import random
-import math
+
 from utils import *
-
-# from rxn_yields.data import generate_buchwald_hartwig_rxns
-
-
-from models.ANN import *
 
 
 def load_train_data(train_path: str) -> Tuple[List[str], List[str], np.array]:
@@ -46,7 +46,9 @@ def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
 
 def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     fp_generator = rdFingerprintGenerator.GetMorganGenerator()
-
+    """
+    Creation of morgan_fingerprints starting from the smiles of the molecules
+    """
     all_fps = []
     for molecule in smiles:
         molecule = Chem.MolFromSmiles(molecule)
@@ -58,45 +60,24 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     return all_fps
 
 
-"""
-def smiles_to_qm_descriptors(smiles: List[str], data_dir: str) -> np.array:
-    qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.npy")
-    if not os.path.exists(qm_descriptor_file):
-        calc = Calculator(descriptors, ignore_3D=True)
-
-        mols = [Chem.MolFromSmiles(s) for s in smiles]
-
-        df = calc.pandas(mols)
-
-        qm_descriptors = df.to_numpy()
-        np.save(qm_descriptor_file, qm_descriptors)
-
-    else:
-        qm_descriptors = np.load(qm_descriptor_file, allow_pickle=True)
-
-    return qm_descriptors
-"""
-
-
 def smiles_to_qm_descriptors(
     smiles: List[str], data_dir: str, type_="train"
 ) -> np.array:
+    """
+    Creation or loading of the dataset containing features which denote physical/chemical quantities of the molecules
+    """
 
+    # paths to the datasets
     if type_ == "train":
         qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
     elif type_ == "test":
         qm_descriptor_file = os.path.join(data_dir, "test_qm_descriptors.h5")
-    elif type_ == "train_2":
-        qm_descriptor_file = os.path.join(
-            data_dir, "train_2_qm_descriptors.h5"
-        )
-    elif type_ == "test_2":
-        qm_descriptor_file = os.path.join(data_dir, "test_2_qm_descriptors.h5")
     else:
         qm_descriptor_file = os.path.join(
             data_dir, "descriptors_collection.h5"
         )
 
+    # creation of the dataset containing the descriptors
     if not os.path.exists(qm_descriptor_file):
         calc = Calculator(descriptors, ignore_3D=True)
 
@@ -109,24 +90,24 @@ def smiles_to_qm_descriptors(
         qm_descriptors = qm_descriptors.astype(np.float64)
         with h5py.File(qm_descriptor_file, "w") as hf:
             hf.create_dataset("descriptors", data=qm_descriptors)
-
+    # loading of the dataset
     else:
         with h5py.File(qm_descriptor_file, "r") as hf:
             qm_descriptors = hf["descriptors"][:]
-        # qm_descriptors = np.load(qm_descriptor_file, allow_pickle=True)
 
     return qm_descriptors
 
 
 def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
+    """
+    Sequence of functions to transform the dataset
+    """
 
     # introduce descriptors
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
 
     # we perform standardization only on qm descriptors!
-    dataset, columns_info, standardization_data = nan_imputation(
-        qm_descriptors, 0.0, cat_del=True
-    )
+    dataset, columns_info = nan_imputation(qm_descriptors, 0.0, cat_del=True)
 
     if degree > 1:
         dataset = build_poly(dataset, columns_info, degree)
@@ -263,6 +244,9 @@ def create_submission_file(
 def calculate_class_weights(
     targets: np.array, num_classes: int = 3
 ) -> List[float]:
+    """
+    computation of the weights to eal with the umbalanceness of the dataset
+    """
 
     # see how balanced the data is and assign weights
     train_data_size = targets.shape[0]
@@ -278,6 +262,9 @@ def calculate_class_weights(
 def indices_by_class(
     targets: np.array, num_classes: int = 3
 ) -> List[np.array]:
+    """
+    returns the indices divided following the 3 different solubility classes
+    """
     class_indices = []
     for class_ in range(num_classes):
         class_idx = np.where(targets == class_)[0]
@@ -359,35 +346,6 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
         hf.create_dataset("descriptors", data=cutoff_features)
 
 
-# def nan_elimination(data):
-#     """
-#
-#     Parameters
-#     ----------
-#     data : dataset to be checked
-#
-#     Returns
-#     -------
-#     data : dataset without nan values
-#
-#     """
-#
-#     N, M = data.shape
-#     columns = []
-#     list_of_counts = []
-#     modified_columns = []
-#     missing = np.zeros(M)
-#     for i in range(M):
-#         missing[i] = len(np.where(np.isnan(data[:, i]))[0]) / N
-#
-#         if missing[i] > 0.0:
-#             columns.append(i)
-#
-#     data = np.delete(data, columns, axis=1)
-#
-#     return data, columns
-
-
 def nan_imputation(
     data, nan_tolerance=0.5, standardization=True, cat_del=False
 ):
@@ -396,80 +354,64 @@ def nan_imputation(
     the data substituting the median to the nan values.
     It doesn't touch the categorical features.
     :param nan_tolerance: percentage of nan we want to accept for each column
-    :param data: list with only qm_descriptors!!!!!!!!
+    :param data: list with only qm_descriptors
     :return:
     """
 
     N, M = data.shape
 
-    modified_columns = []
+    columns_info = []
     # list that contains 0 if the col is removed, 1 if it is categorical, # 2 if it needs to be standardized
 
     standardization_data_train = np.empty((M, 3))
     # matrix that contains median, mean and std for each column that has been standardized
-
-    erased = []
-    # list of erased column (to substitute the necessary reduction of i and M in the for loop)
-
     for i in range(M):
         nan_percentage = len(np.where(np.isnan(data[:, i]))[0]) / N
 
         if nan_percentage > nan_tolerance:  # remove column
+            columns_info.append(0)
 
-            modified_columns.append(0)
-
-            erased.append(i)
-        else:  # do not remove this column
+        else:
             if check_categorical(
                 data[:, i]
-            ):  # if it is categorical, don't do anything
+            ):  # if it is categorical, don't do anything or delete
                 if cat_del == True:
-                    erased.append(i)
-                    modified_columns.append(0)
+                    columns_info.append(0)
                 else:
-                    modified_columns.append(1)
+                    columns_info.append(1)
 
             else:  # it needs to be standardized
-                modified_columns.append(2)
+                columns_info.append(2)
                 median = np.nanmedian(data[:, i])
                 # replace nan with median
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-                if standardization == True:
-                    # standardization (shouldn't affect nan values)
-                    data[:, i], mean, std = standardize(data[:, i])
-                    standardization_data_train[i, :] = median, mean, std
+                # if standardization == True:
+                # standardization
+                # data[:, i], mean, std = standardize(data[:, i])
+                # standardization_data_train[i, :] = median, mean, std
 
-    data = np.delete(data, erased, axis=1)
-
-    return data, np.array(modified_columns), standardization_data_train
-
-
-def standardize(x):
-    """
-    Given a column x, it calculates mean and std ignoring nan values and applies standardization
-    :param x:
-    :return: standardized x, mean, std
-    """
-    mean, std = np.nanmean(x, axis=0), np.nanstd(x, axis=0)
-    # x = (x - mean) / std
-    x = x - mean
-    std = np.array(std)
-    x[:, std > 0] = x[:, std > 0] / std[std > 0]
-
-    return x, mean, std
+    data = transformation(data, columns_info, standardization)
+    return data, np.array(columns_info)
 
 
-def standardize_qm_test(data, columns_info, standardization=True):
+def transformation(data, columns_info, standardization=True, test=False):
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
     columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
-    N, M = data.shape
-    for i in range(M):
-        if columns_info[i] == 2:
-            median = np.nanmedian(data[:, i])
-            data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-            if standardization == True:
-                data[:, i], mean, std = standardize(data[:, i])
+
+    if test == True:
+        N, M = data.shape
+        for i in range(M):
+            if columns_info[i] == 2:
+                median = np.nanmedian(data[:, i])
+                data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+
+    if standardization == True:
+        data[
+            :, np.where(columns_info == 2)[0]
+        ] = StandardScaler().fit_transform(
+            data[:, np.where(columns_info == 2)[0]]
+        )
 
     return data
 
@@ -526,23 +468,6 @@ def build_poly(x, columns_info, degree, pairs=False):
     return poly
 
 
-# def find_categorical(data, modified=np.array([])):
-#     data_copy = data
-#
-#     # find nans
-#     idxs = np.where(np.isnan(data))
-#     data_copy[idxs[0], idxs[1]] = 0.0
-#
-#     data_copy = np.abs(data_copy)
-#     rem = np.mod(data_copy, 1.0)
-#
-#     idx = np.argwhere(np.all(rem[..., :] == 0, axis=0))
-#     # idx = np.concatenate(idx, modified)
-#
-#     # idx = idx.unique()
-#
-#     return idx
-# export
 def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     """
     From: https://github.com/undeadpixel/reinvent-randomized and https://github.com/GLambard/SMILES-X
@@ -581,7 +506,9 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     raise ValueError("Type '{}' is not valid".format(random_type))
 
 
-def augment_smiles(smiles: List[str], targets: np.array, data_dir: str) -> Tuple[List[str], np.array]:
+def augment_smiles(
+    smiles: List[str], targets: np.array, data_dir: str
+) -> Tuple[List[str], np.array]:
     augmentations_path = os.path.join(data_dir, "augmented_smiles.csv")
     if not os.path.exists(augmentations_path):
         class_indices = indices_by_class(targets)
@@ -591,14 +518,23 @@ def augment_smiles(smiles: List[str], targets: np.array, data_dir: str) -> Tuple
             smiles_class_i = np.array(smiles)[class_idx].tolist()
 
             if iteration == 0 or iteration == 1:
-                augmentations_by_class = [list(set([randomize_smiles(i) for j in range(200)])) for i in smiles_class_i]
+                augmentations_by_class = [
+                    list(set([randomize_smiles(i) for j in range(200)]))
+                    for i in smiles_class_i
+                ]
             else:
-                augmentations_by_class = [list(set([randomize_smiles(i) for j in range(5)])) for i in smiles_class_i]
+                augmentations_by_class = [
+                    list(set([randomize_smiles(i) for j in range(5)]))
+                    for i in smiles_class_i
+                ]
 
             augmentations.append(augmentations_by_class)
 
         augmentations = [np.concatenate(i) for i in augmentations]
-        augmentations_targets = [np.array([idx for i in augmentation]) for idx, augmentation in enumerate(augmentations)]
+        augmentations_targets = [
+            np.array([idx for i in augmentation])
+            for idx, augmentation in enumerate(augmentations)
+        ]
 
         augmentations = np.concatenate(augmentations).tolist()
         augmentations_targets = np.concatenate(augmentations_targets)
