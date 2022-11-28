@@ -14,6 +14,7 @@ from mordred import Calculator, descriptors
 from imblearn.over_sampling import SMOTE
 import random
 import math
+from utils import *
 
 # from rxn_yields.data import generate_buchwald_hartwig_rxns
 
@@ -124,7 +125,7 @@ def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
 
     # we perform standardization only on qm descriptors!
     dataset, columns_info, standardization_data = nan_imputation(
-        qm_descriptors, 0.5
+        qm_descriptors, 0.0, cat_del=True
     )
 
     if degree > 1:
@@ -181,7 +182,7 @@ def up_down_sampling(y, X):
     return y_balanced, X_balanced
 
 
-def smote_algorithm(y, X):
+def smote_algorithm(y, X, seed: int):
     """
     Up-sample the minority class
     Args:
@@ -387,7 +388,9 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
 #     return data, columns
 
 
-def nan_imputation(data, nan_tolerance=0.5):
+def nan_imputation(
+    data, nan_tolerance=0.5, standardization=True, cat_del=False
+):
     """
     Function that removes columns with too many nan values (depending on the tolerance) and standardizes
     the data substituting the median to the nan values.
@@ -420,16 +423,21 @@ def nan_imputation(data, nan_tolerance=0.5):
             if check_categorical(
                 data[:, i]
             ):  # if it is categorical, don't do anything
-                modified_columns.append(1)
-                #### attempt to eliminate categorical features
+                if cat_del == True:
+                    erased.append(i)
+                    modified_columns.append(0)
+                else:
+                    modified_columns.append(1)
+
             else:  # it needs to be standardized
                 modified_columns.append(2)
                 median = np.nanmedian(data[:, i])
                 # replace nan with median
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-                # standardization (shouldn't affect nan values)
-                data[:, i], mean, std = standardize(data[:, i])
-                standardization_data_train[i, :] = median, mean, std
+                if standardization == True:
+                    # standardization (shouldn't affect nan values)
+                    data[:, i], mean, std = standardize(data[:, i])
+                    standardization_data_train[i, :] = median, mean, std
 
     data = np.delete(data, erased, axis=1)
 
@@ -451,15 +459,17 @@ def standardize(x):
     return x, mean, std
 
 
-def standardize_qm_test(data, columns_info):
+def standardize_qm_test(data, columns_info, standardization=True):
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
+    columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
     N, M = data.shape
     for i in range(M):
         if columns_info[i] == 2:
             median = np.nanmedian(data[:, i])
             data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-            data[:, i], mean, std = standardize(data[:, i])
+            if standardization == True:
+                data[:, i], mean, std = standardize(data[:, i])
 
     return data
 
@@ -616,44 +626,15 @@ if __name__ == "__main__":
 
     ids, smiles, targets = load_train_data(train_path)
 
-    augmented_smiles, augmented_targets = augment_smiles(smiles, targets, data_dir)
+    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+    dataset, columns_info, standardization_data = nan_imputation(
+        qm_descriptors, 0.0, False
+    )
 
-
-    submission_ids, submission_smiles = load_test_data(test_path)
+    make_umap(dataset, targets)
+    # submission_ids, submission_smiles = load_test_data(test_path)
 
     # add new splitting like this:
     # split = split_by_class(targets)
 
     # DATA AUGMENTATION
-
-    for j in range(len(smiles)):
-        rotated_random_smiles = []
-        if targets[j] == 2:
-            for i in range(3):
-                rotated_random_smiles.append(randomize_smiles(smiles[j]))
-            smiles = smiles + rotated_random_smiles
-
-        else:
-            for i in range(30):
-                rotated_random_smiles.append(randomize_smiles(smiles[j]))
-            smiles = smiles + rotated_random_smiles
-
-    qm_descriptors_train_2 = smiles_to_qm_descriptors(
-        smiles, data_dir, "train_2"
-    )
-
-    # rotated_random_smiles_test = []
-    # for i in range(500):
-    #    for j in range(len(submission_smiles)):
-    #       rotated_random_smiles_test.append(
-    #          randomize_smiles(submission_smiles[j])
-    #      )
-    # submission_smiles = submission_smiles + rotated_random_smiles_test
-
-# qm_descriptors_test_2 = smiles_to_qm_descriptors(
-#    submission_smiles, data_dir, "test_2"
-# )
-
-# for i, (train_idx, test_idx) in enumerate(split):
-#    # ... the rest stays the same
-#    pass
