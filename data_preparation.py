@@ -182,7 +182,7 @@ def up_down_sampling(y, X):
     return y_balanced, X_balanced
 
 
-def smote_algorithm(y, X):
+def smote_algorithm(y, X, seed: int):
     """
     Up-sample the minority class
     Args:
@@ -579,6 +579,41 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
             rotated_mol, canonical=False, isomericSmiles=isomericSmiles
         )
     raise ValueError("Type '{}' is not valid".format(random_type))
+
+
+def augment_smiles(smiles: List[str], targets: np.array, data_dir: str) -> Tuple[List[str], np.array]:
+    augmentations_path = os.path.join(data_dir, "augmented_smiles.csv")
+    if not os.path.exists(augmentations_path):
+        class_indices = indices_by_class(targets)
+
+        augmentations = []
+        for iteration, class_idx in enumerate(class_indices):
+            smiles_class_i = np.array(smiles)[class_idx].tolist()
+
+            if iteration == 0 or iteration == 1:
+                augmentations_by_class = [list(set([randomize_smiles(i) for j in range(200)])) for i in smiles_class_i]
+            else:
+                augmentations_by_class = [list(set([randomize_smiles(i) for j in range(5)])) for i in smiles_class_i]
+
+            augmentations.append(augmentations_by_class)
+
+        augmentations = [np.concatenate(i) for i in augmentations]
+        augmentations_targets = [np.array([idx for i in augmentation]) for idx, augmentation in enumerate(augmentations)]
+
+        augmentations = np.concatenate(augmentations).tolist()
+        augmentations_targets = np.concatenate(augmentations_targets)
+
+        data = {"smiles": augmentations, "sol_category": augmentations_targets}
+
+        df = pd.DataFrame(data=data)
+        df.to_csv(augmentations_path, index=False)
+
+    final_df = pd.read_csv(augmentations_path)
+
+    final_smiles = final_df["smiles"].tolist()
+    final_targets = final_df["sol_category"].to_numpy()
+
+    return final_smiles, final_targets
 
 
 if __name__ == "__main__":
