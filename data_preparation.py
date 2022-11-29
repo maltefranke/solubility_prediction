@@ -5,6 +5,7 @@ import pandas as pd
 import rdkit
 import h5py
 import random
+import matplotlib.pyplot as plt
 
 from typing import Tuple, List
 
@@ -13,6 +14,8 @@ from rdkit.Chem import AllChem as AllChem
 from rdkit.Chem import rdFingerprintGenerator
 
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 from sklearn.utils import resample
 
 from mordred import Calculator, descriptors
@@ -346,6 +349,29 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
         hf.create_dataset("descriptors", data=cutoff_features)
 
 
+def transformation(data, columns_info, standardization=True, test=False):
+
+    data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
+
+    columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
+
+    if test == True:
+        N, M = data.shape
+        for i in range(M):
+            if columns_info[i] == 2:
+                median = np.nanmedian(data[:, i])
+                data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+
+    if standardization == True:
+        data[
+            :, np.where(columns_info == 2)[0]
+        ] = StandardScaler().fit_transform(
+            data[:, np.where(columns_info == 2)[0]]
+        )
+
+    return data
+
+
 def nan_imputation(
     data, nan_tolerance=0.5, standardization=True, cat_del=False
 ):
@@ -363,8 +389,6 @@ def nan_imputation(
     columns_info = []
     # list that contains 0 if the col is removed, 1 if it is categorical, # 2 if it needs to be standardized
 
-    standardization_data_train = np.empty((M, 3))
-    # matrix that contains median, mean and std for each column that has been standardized
     for i in range(M):
         nan_percentage = len(np.where(np.isnan(data[:, i]))[0]) / N
 
@@ -390,30 +414,9 @@ def nan_imputation(
                 # data[:, i], mean, std = standardize(data[:, i])
                 # standardization_data_train[i, :] = median, mean, std
 
+    columns_info = np.array(columns_info)
     data = transformation(data, columns_info, standardization)
-    return data, np.array(columns_info)
-
-
-def transformation(data, columns_info, standardization=True, test=False):
-
-    data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
-    columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
-
-    if test == True:
-        N, M = data.shape
-        for i in range(M):
-            if columns_info[i] == 2:
-                median = np.nanmedian(data[:, i])
-                data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-
-    if standardization == True:
-        data[
-            :, np.where(columns_info == 2)[0]
-        ] = StandardScaler().fit_transform(
-            data[:, np.where(columns_info == 2)[0]]
-        )
-
-    return data
+    return data, columns_info
 
 
 def check_categorical(column):
@@ -552,6 +555,41 @@ def augment_smiles(
     return final_smiles, final_targets
 
 
+def PCA_application(dataset, targets):
+
+    X = pd.DataFrame(dataset)
+    y = pd.DataFrame(targets)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+    std = StandardScaler()
+    X_train_std = std.fit_transform(X_train)
+    X_test_std = std.transform(X_test)
+
+    pca = PCA(n_components=X_train_std.shape[1])
+    pca_data = pca.fit_transform(X_train_std)
+
+    percent_var_explained = pca.explained_variance_ / (
+        np.sum(pca.explained_variance_)
+    )
+    cumm_var_explained = np.cumsum(percent_var_explained)
+
+    plt.plot(cumm_var_explained)
+    plt.grid()
+    plt.xlabel("n_components")
+    plt.ylabel("% variance explained")
+    plt.show()
+
+    cum = cumm_var_explained
+    var = pca.explained_variance_
+    value = pca.explained_variance_ratio_
+    index = np.where(cum >= value)[0][0]
+
+    pca = PCA(n_components=index)
+    pca_train_data = pca.fit_transform(X_train_std)
+    pca_test_data = pca.transform(X_test_std)
+
+
 if __name__ == "__main__":
 
     this_dir = os.getcwd()
@@ -563,11 +601,12 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
 
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-    dataset, columns_info, standardization_data = nan_imputation(
-        qm_descriptors, 0.0, False
-    )
+    (
+        dataset,
+        columns_info,
+    ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
 
-    make_umap(dataset, targets)
+    # make_umap(dataset, targets)
     # submission_ids, submission_smiles = load_test_data(test_path)
 
     # add new splitting like this:
