@@ -120,7 +120,7 @@ if __name__ == "__main__":
     """weight = [1 - len(train_df[train_df['labels'] == i])/len(train_df['labels']) for i in range(3)]
     print(weight)"""
 
-    model = ClassificationModel('roberta', 'seyonec/PubChem10M_SMILES_BPE_396_250', num_labels=3,
+    model = ClassificationModel('roberta', 'DeepChem/ChemBERTa-10M-MTR', num_labels=3,
                                 # weight=sample_weights[0:int(0.8*train_data_size)],
                                 args={'evaluate_each_epoch': True,
                                       'evaluate_during_training_verbose': False,
