@@ -112,8 +112,8 @@ def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
     # we perform standardization only on qm descriptors!
     dataset, columns_info = nan_imputation(qm_descriptors, 0.0, cat_del=True)
 
-    if degree > 1:
-        dataset = build_poly(dataset, columns_info, degree)
+    # if degree > 1:
+    #    dataset = build_poly(dataset, columns_info, degree) # included in transformations
 
     if fps == True:
         # add morgan fingerprints
@@ -349,11 +349,52 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
         hf.create_dataset("descriptors", data=cutoff_features)
 
 
-def transformation(data, columns_info, standardization=True, test=False):
+def build_poly(x, columns_info, degree, pairs=False):
+    """Polynomial basis functions for input data x, for j=0 up to j=degree.
+    Optionally can add square or cube roots of x as additional features,
+    or the basis of products between the features.
+    Args:
+        x: numpy array of shape (N,), N is the number of samples
+        degree: integer
+        pairs: boolean
+    Returns:
+        poly: numpy array of shape (N,d+1)
+    """
+    # I have already removed nan columns
+    # columns_info = np.delete(columns_info, np.where(columns_info == 0)[0]) # already done in transformation
+
+    poly = np.ones((len(x), 1))
+    for deg in range(1, degree + 1):
+        if deg > 1:
+            transformed = np.power(x[:, np.where(columns_info == 2)[0]], deg)
+        else:
+            # if deg==1, the standardization has already been made. Moreover, we should not loose categorical features
+            transformed = x
+        poly = np.c_[poly, transformed]
+        new_cols = 2 * np.ones(tranformed.shape[1], dtype=int)
+        columns_info = np.concatenate((columns_info, new_cols))
+
+    if pairs:
+        for i in range(x.shape[1]):
+            for j in range(i + 1, x.shape[1]):
+                if columns_info[i] == columns_info[j] == 2:
+                    transformed = x[:, i] * x[:, j]
+                    poly = np.c_[poly, transformed]
+                    new_cols = 2 * np.ones(tranformed.shape[1], dtype=int)
+                    columns_info = np.concatenate((columns_info, new_cols))
+
+    return poly, columns_info
+
+
+def transformation(
+    data, columns_info, standardization=True, test=False, degree=1, pairs=False
+):
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
-
+    # now eliminated both in test and training
     columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
+
+    # correct nans in test
 
     if test == True:
         N, M = data.shape
@@ -361,6 +402,10 @@ def transformation(data, columns_info, standardization=True, test=False):
             if columns_info[i] == 2:
                 median = np.nanmedian(data[:, i])
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+
+    # build poly
+    if degree > 1 or pairs == True:
+        data, columns_info = build_poly(data, columns_info, degree, pairs)
 
     if standardization == True:
         data[
@@ -373,7 +418,12 @@ def transformation(data, columns_info, standardization=True, test=False):
 
 
 def nan_imputation(
-    data, nan_tolerance=0.5, standardization=True, cat_del=False
+    data,
+    nan_tolerance=0.5,
+    standardization=True,
+    cat_del=False,
+    degree=1,
+    pairs=False,
 ):
     """
     Function that removes columns with too many nan values (depending on the tolerance) and standardizes
@@ -415,7 +465,7 @@ def nan_imputation(
                 # standardization_data_train[i, :] = median, mean, std
 
     columns_info = np.array(columns_info)
-    data = transformation(data, columns_info, standardization)
+    data = transformation(data, columns_info, standardization, degree, pairs)
     return data, columns_info
 
 
@@ -434,41 +484,6 @@ def check_categorical(column):
         return True
 
     return False
-
-
-def build_poly(x, columns_info, degree, pairs=False):
-    """Polynomial basis functions for input data x, for j=0 up to j=degree.
-    Optionally can add square or cube roots of x as additional features,
-    or the basis of products between the features.
-    Args:
-        x: numpy array of shape (N,), N is the number of samples
-        degree: integer
-        pairs: boolean
-    Returns:
-        poly: numpy array of shape (N,d+1)
-    """
-    # I have already removed nan columns
-    columns_info = np.delete(columns_info, np.where(columns_info == 0)[0])
-
-    poly = np.ones((len(x), 1))
-    for deg in range(1, degree + 1):
-        if deg > 1:
-            transformed, _, _ = standardize(
-                np.power(x[:, np.where(columns_info == 2)[0]], deg)
-            )
-        else:
-            # if deg==1, the standardization has already been made. Moreover, we should not loose categorical features
-            transformed = x
-        poly = np.c_[poly, transformed]
-
-    if pairs:
-        for i in range(x.shape[1]):
-            for j in range(i + 1, x.shape[1]):
-                if columns_info[i] == columns_info[j] == 2:
-                    transformed, _, _ = standardize(x[:, i] * x[:, j])
-                    poly = np.c_[poly, transformed]
-
-    return poly
 
 
 def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
@@ -606,7 +621,7 @@ if __name__ == "__main__":
         columns_info,
     ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
 
-    # make_umap(dataset, targets)
+    make_umap(dataset, targets)
     # submission_ids, submission_smiles = load_test_data(test_path)
 
     # add new splitting like this:
