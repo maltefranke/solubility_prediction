@@ -101,7 +101,7 @@ def load_data_chemberta(path, augmentation=False, flag_test=False):
 
     df = pd.read_csv(path)
 
-    if not augmentation:
+    if 'Id' in df.columns:
         del df['Id']  # delete id column
 
     if flag_test:
@@ -122,9 +122,9 @@ if __name__ == "__main__":
     test_path = os.path.join(data_dir, "test.csv")
 
     # load the data
-    train_df = load_data_chemberta(os.path.join(data_dir, 'split_train.csv'))
-    valid_df = load_data_chemberta(os.path.join(data_dir, 'split_valid.csv'))
-    test_df = load_data_chemberta(os.path.join(data_dir, 'split_test.csv'))
+    train_df = load_data_chemberta(os.path.join(data_dir, 'augmented_split_train.csv'))
+    valid_df = load_data_chemberta(os.path.join(data_dir, 'augmented_split_valid.csv'))
+    test_df = load_data_chemberta(os.path.join(data_dir, 'augmented_split_test.csv'))
 
     # set up a logger to record if any issues occur
     # and notify us if there are any problems with the arguments we've set for the model.

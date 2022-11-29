@@ -26,7 +26,7 @@ import sklearn
 from utils import *
 
 
-def load_train_data(train_path: str) -> Tuple[List[str], List[str], np.array]:
+def load_train_data(train_path: str):
 
     df = pd.read_csv(train_path)
 
@@ -693,23 +693,27 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    # CREATION SPLIT DATASETS - new .csv files
-    name_tr, name_val, name_te = create_split_csv(data_dir, "train.csv", downsampling_class2=True, p=0.6)
+    # # CREATION SPLIT DATASETS - new .csv files
+    # name_tr, name_val, name_te = create_split_csv(data_dir, "train.csv", downsampling_class2=True, p=0.6)
+    #
+    # # AUGMENTATION OF EACH DATASET SEPARATELY - creation of new .csv files
+    # ids_train, smiles_train, targets_train = load_train_data(os.path.join(data_dir, name_tr))
+    # aug_smiles_train, aug_targets_train = augment_smiles(smiles_train, targets_train, data_dir, 'augmented_'+name_tr)
+    #
+    # ids_valid, smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, name_val))
+    # aug_smiles_valid, aug_targets_valid = augment_smiles(smiles_valid, targets_valid, data_dir, 'augmented_'+name_val)
+    #
+    # ids_test, smiles_test, targets_test = load_train_data(os.path.join(data_dir, name_te))
+    # aug_smiles_test, aug_targets_test = augment_smiles(smiles_test, targets_test, data_dir, 'augmented_' + name_te)
 
-    # AUGMENTATION OF EACH DATASET SEPARATELY - creation of new .csv files
-    ids_train, smiles_train, targets_train = load_train_data(os.path.join(data_dir, name_tr))
-    aug_smiles_train, aug_targets_train = augment_smiles(smiles_train, targets_train, data_dir, 'augmented_'+name_tr)
+    # CHECK THE NUMBER OF DATAPOINTS PER CLASS IN EACH SPLIT
+    ids_train, smiles_train, targets_train = load_train_data(os.path.join(data_dir, 'split_train.csv'))
+    ids_valid, smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, 'split_valid.csv'))
+    ids_test, smiles_test, targets_test = load_train_data(os.path.join(data_dir, 'split_test.csv'))
 
-    ids_valid, smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, name_val))
-    aug_smiles_valid, aug_targets_valid = augment_smiles(smiles_valid, targets_valid, data_dir, 'augmented_'+name_val)
-
-    ids_test, smiles_test, targets_test = load_train_data(os.path.join(data_dir, name_te))
-    aug_smiles_test, aug_targets_test = augment_smiles(smiles_test, targets_test, data_dir, 'augmented_' + name_te)
-
-    # # CHECK THE NUMBER OF DATAPOINTS PER CLASS IN EACH SPLIT
-    # smiles_train, targets_train = load_train_data(os.path.join(data_dir, 'augmented_split_train.csv'))
-    # smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, 'augmented_split_valid.csv'))
-    # smiles_test, targets_test = load_train_data(os.path.join(data_dir, 'augmented_split_test.csv'))
+    aug_smiles_train, aug_targets_train = load_train_data(os.path.join(data_dir, 'augmented_split_train.csv'))
+    aug_smiles_valid, aug_targets_valid = load_train_data(os.path.join(data_dir, 'augmented_split_valid.csv'))
+    aug_smiles_test, aug_targets_test = load_train_data(os.path.join(data_dir, 'augmented_split_test.csv'))
 
     print('TRAIN SPLIT SET')
     print('Tot datapoints = ', targets_train.shape[0])
