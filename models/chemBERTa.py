@@ -154,11 +154,16 @@ if __name__ == "__main__":
     print('Accuracy score')
     result, model_outputs, wrong_predictions = model.eval_model(test_df, acc=sklearn.metrics.accuracy_score)
 
+
     # Cohen-kappa evaluation
-    print('Cohen-kappa metrics')
+
     test_df_predictions, raw_test_df_outputs = model.predict(test_df['text'].tolist())
     kappa = sklearn.metrics.cohen_kappa_score(test_df_predictions, test_df['labels'].tolist(), weights='quadratic')
-    print(kappa)
+    print("Quadratic Cohen kappa: ", kappa)
+    confusion_matrix = sklearn.metrics.confusion_matrix(test_df['labels'].tolist(), test_df_predictions)
+    print("Confusion matrix: ", confusion_matrix)
+    f1_score = sklearn.metrics.f1_score(test_df['labels'].tolist(), test_df_predictions, average='weighted')
+    print("F1 score: ", f1_score)
 
     # TEST SET
     # Loading the test set
