@@ -14,13 +14,14 @@ from rdkit.Chem import AllChem as AllChem
 from rdkit.Chem import rdFingerprintGenerator
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.decomposition import PCA
 from sklearn.utils import resample
 
 from mordred import Calculator, descriptors
 
 from imblearn.over_sampling import SMOTE
+import sklearn
 
 from utils import *
 
@@ -29,12 +30,15 @@ def load_train_data(train_path: str) -> Tuple[List[str], List[str], np.array]:
 
     df = pd.read_csv(train_path)
 
-    ids = df["Id"].values.tolist()
     smiles = df["smiles"].values.tolist()
     targets = df["sol_category"].values.tolist()
     targets = np.array(targets)
 
-    return ids, smiles, targets
+    if 'Id' in df.columns:
+        ids = df["Id"].values.tolist()
+        return ids, smiles, targets
+    else:
+        return smiles, targets
 
 
 def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
@@ -371,7 +375,7 @@ def build_poly(x, columns_info, degree, pairs=False):
             # if deg==1, the standardization has already been made. Moreover, we should not loose categorical features
             transformed = x
         poly = np.c_[poly, transformed]
-        new_cols = 2 * np.ones(tranformed.shape[1], dtype=int)
+        new_cols = 2 * np.ones(transformed.shape[1], dtype=int)
         columns_info = np.concatenate((columns_info, new_cols))
 
     if pairs:
@@ -380,7 +384,7 @@ def build_poly(x, columns_info, degree, pairs=False):
                 if columns_info[i] == columns_info[j] == 2:
                     transformed = x[:, i] * x[:, j]
                     poly = np.c_[poly, transformed]
-                    new_cols = 2 * np.ones(tranformed.shape[1], dtype=int)
+                    new_cols = 2 * np.ones(transformed.shape[1], dtype=int)
                     columns_info = np.concatenate((columns_info, new_cols))
 
     return poly, columns_info
@@ -524,10 +528,16 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     raise ValueError("Type '{}' is not valid".format(random_type))
 
 
-def augment_smiles(
-    smiles: List[str], targets: np.array, data_dir: str
-) -> Tuple[List[str], np.array]:
-    augmentations_path = os.path.join(data_dir, "augmented_smiles.csv")
+def augment_smiles(smiles: List[str], targets: np.array, data_dir: str, name_file: str) -> Tuple[List[str], np.array]:
+    """
+    Addition of the rotations of a molecule depending on the class it belongs to.
+    :param smiles: of the dataset we want to augment
+    :param targets: of the dataset we want to augment
+    :param data_dir: where we want to save the new file
+    :param name_file: name of the file we want to save (augmented smiles)
+    :return: augmented_smiles, augmented_targets
+    """
+    augmentations_path = os.path.join(data_dir, name_file)
     if not os.path.exists(augmentations_path):
         class_indices = indices_by_class(targets)
 
@@ -568,6 +578,76 @@ def augment_smiles(
     final_targets = final_df["sol_category"].to_numpy()
 
     return final_smiles, final_targets
+
+
+def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
+    """
+    It creates 3 .csv files containing a random split of the given dataset into a train (80%),
+    validation (10%) and test (10%) set.
+    :param downsampling_class2:
+    :param data_dir:
+    :param file_name:
+    :param p: percentage of datapoints in class 2 to keep
+    :return:
+    """
+    data_path = os.path.join(data_dir, file_name)
+    df = pd.read_csv(data_path)
+    # random shuffle
+    df = sklearn.utils.shuffle(df)
+    # read ids, smiles, targets
+    ids = df["Id"].values.tolist()
+    smiles = df["smiles"].values.tolist()
+    targets = df["sol_category"].values.tolist()
+    targets = np.array(targets)
+
+    if downsampling_class2:
+        ind_2 = np.where(targets == 2)[0]
+        ind_2_to_delete = ind_2[int(p*ind_2.shape[0]):ind_2.shape[0]]
+        df.drop(df.index[ind_2_to_delete], inplace=True)
+        # re-acquiring data from the down-sampled dataset
+        ids = df["Id"].values.tolist()
+        smiles = df["smiles"].values.tolist()
+        targets = df["sol_category"].values.tolist()
+        targets = np.array(targets)
+
+    # assign 80% - 10% - 10% of the data to train - validation - test
+    # (it is random, it doesn't depend on the classes)
+    N = targets.shape[0]
+    ind_train = np.arange(int(N*0.8))
+    ind_valid = np.arange(int(N*0.8), int(N*0.9))
+    ind_test = np.arange(int(N*0.9), N)
+    ids_train = np.array(ids)[ind_train]
+    ids_valid = np.array(ids)[ind_valid]
+    ids_test = np.array(ids)[ind_test]
+    smiles_train = np.array(smiles)[ind_train]
+    smiles_valid = np.array(smiles)[ind_valid]
+    smiles_test = np.array(smiles)[ind_test]
+    targets_train = targets[ind_train]
+    targets_valid = targets[ind_valid]
+    targets_test = targets[ind_test]
+
+    # creation csv files
+    dataset_train = {"Id": ids_train, "smiles": smiles_train, "sol_category": targets_train}
+    dataset_valid = {"Id": ids_valid, "smiles": smiles_valid, "sol_category": targets_valid}
+    dataset_test = {"Id": ids_test, "smiles": smiles_test, "sol_category": targets_test}
+
+    name_train_file = 'split_train.csv'
+    name_valid_file = 'split_valid.csv'
+    name_test_file = 'split_test.csv'
+
+    if downsampling_class2:
+        name_train_file = 'downsampled2_' + name_train_file
+        name_valid_file = 'downsampled2_' + name_valid_file
+        name_test_file = 'downsampled2_' + name_test_file
+
+    df_train = pd.DataFrame(data=dataset_train)
+    df_train.to_csv(os.path.join(data_dir, name_train_file), index=False)
+    df_valid = pd.DataFrame(data=dataset_valid)
+    df_valid.to_csv(os.path.join(data_dir, name_valid_file), index=False)
+    df_test = pd.DataFrame(data=dataset_test)
+    df_test.to_csv(os.path.join(data_dir, name_test_file), index=False)
+
+    return name_train_file, name_valid_file, name_test_file
 
 
 def PCA_application(dataset, targets):
@@ -613,15 +693,72 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    ids, smiles, targets = load_train_data(train_path)
+    # CREATION SPLIT DATASETS - new .csv files
+    name_tr, name_val, name_te = create_split_csv(data_dir, "train.csv", downsampling_class2=True, p=0.6)
 
-    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-    (
-        dataset,
-        columns_info,
-    ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
+    # AUGMENTATION OF EACH DATASET SEPARATELY - creation of new .csv files
+    ids_train, smiles_train, targets_train = load_train_data(os.path.join(data_dir, name_tr))
+    aug_smiles_train, aug_targets_train = augment_smiles(smiles_train, targets_train, data_dir, 'augmented_'+name_tr)
 
-    make_umap(dataset, targets)
+    ids_valid, smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, name_val))
+    aug_smiles_valid, aug_targets_valid = augment_smiles(smiles_valid, targets_valid, data_dir, 'augmented_'+name_val)
+
+    ids_test, smiles_test, targets_test = load_train_data(os.path.join(data_dir, name_te))
+    aug_smiles_test, aug_targets_test = augment_smiles(smiles_test, targets_test, data_dir, 'augmented_' + name_te)
+
+    # # CHECK THE NUMBER OF DATAPOINTS PER CLASS IN EACH SPLIT
+    # smiles_train, targets_train = load_train_data(os.path.join(data_dir, 'augmented_split_train.csv'))
+    # smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, 'augmented_split_valid.csv'))
+    # smiles_test, targets_test = load_train_data(os.path.join(data_dir, 'augmented_split_test.csv'))
+
+    print('TRAIN SPLIT SET')
+    print('Tot datapoints = ', targets_train.shape[0])
+    print('Class 0 = ', sum(np.where(targets_train == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(targets_train == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(targets_train == 2, 1, 0)))
+
+    print('VALIDATION SPLIT SET')
+    print('Tot datapoints = ', targets_valid.shape[0])
+    print('Class 0 = ', sum(np.where(targets_valid == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(targets_valid == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(targets_valid == 2, 1, 0)))
+
+    print('TEST SPLIT SET')
+    print('Tot datapoints = ', targets_test.shape[0])
+    print('Class 0 = ', sum(np.where(targets_test == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(targets_test == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(targets_test == 2, 1, 0)))
+
+    print('************ AFTER AUGMENTATION ************')
+    print('TRAIN SPLIT SET')
+    print('Tot datapoints = ', aug_targets_train.shape[0])
+    print('Class 0 = ', sum(np.where(aug_targets_train == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(aug_targets_train == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(aug_targets_train == 2, 1, 0)))
+
+    print('VALIDATION SPLIT SET')
+    print('Tot datapoints = ', aug_targets_valid.shape[0])
+    print('Class 0 = ', sum(np.where(aug_targets_valid == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(aug_targets_valid == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(aug_targets_valid == 2, 1, 0)))
+
+    print('TEST SPLIT SET')
+    print('Tot datapoints = ', aug_targets_test.shape[0])
+    print('Class 0 = ', sum(np.where(aug_targets_test == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(aug_targets_test == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(aug_targets_test == 2, 1, 0)))
+
+
+    # ids, smiles, targets = load_train_data(train_path)
+    #
+    # qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+    # (
+    #     dataset,
+    #     columns_info,
+    # ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
+    #
+    # make_umap(dataset, targets)
+
     # submission_ids, submission_smiles = load_test_data(test_path)
 
     # add new splitting like this:

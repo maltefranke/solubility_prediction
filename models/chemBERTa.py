@@ -97,15 +97,34 @@ def load_subsampled_data(path: str, flag_test=False, augmented=False):
         return train_df, val_df, test_df
 
 
+def load_data_chemberta(path, augmentation=False, flag_test=False):
+
+    df = pd.read_csv(path)
+
+    if not augmentation:
+        del df['Id']  # delete id column
+
+    if flag_test:
+        df.rename(columns={'smiles': 'text'}, inplace=True)
+        return df
+    else:
+        df.rename(columns={'smiles': 'text', 'sol_category': 'labels'}, inplace=True)
+        df = sklearn.utils.shuffle(df)
+
+    return df
+
+
 if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
     data_dir = os.path.join(this_dir, "data")
-    # we use the augmented dataset
-    train_path = os.path.join(data_dir, "augmented_smiles.csv")
+    train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    train_df, valid_df, test_df = load_subsampled_data(train_path, flag_test=False, augmented=True)
+    # load the data
+    train_df = load_data_chemberta(os.path.join(data_dir, 'split_train.csv'))
+    valid_df = load_data_chemberta(os.path.join(data_dir, 'split_valid.csv'))
+    test_df = load_data_chemberta(os.path.join(data_dir, 'split_test.csv'))
 
     # set up a logger to record if any issues occur
     # and notify us if there are any problems with the arguments we've set for the model.
@@ -121,7 +140,6 @@ if __name__ == "__main__":
     print(weight)"""
 
     model = ClassificationModel('roberta', 'DeepChem/ChemBERTa-10M-MTR', num_labels=3,
-                                # weight=sample_weights[0:int(0.8*train_data_size)],
                                 args={'evaluate_each_epoch': True,
                                       'evaluate_during_training_verbose': False,
                                       'no_save': True, 'num_train_epochs': 10,
@@ -137,9 +155,7 @@ if __name__ == "__main__":
 
     # Cohen-kappa evaluation
     print('Cohen-kappa metrics')
-
     test_df_predictions, raw_test_df_outputs = model.predict(test_df['text'].tolist())
-
     kappa = sklearn.metrics.cohen_kappa_score(test_df_predictions, test_df['labels'].tolist(), weights='quadratic')
     print(kappa)
 
