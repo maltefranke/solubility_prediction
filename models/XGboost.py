@@ -136,8 +136,14 @@ if __name__ == "__main__":
     qm_descriptors_test = smiles_to_qm_descriptors(
         submission_smiles, data_dir, "test"
     )
+
     qm_descriptors_test = transformation(
-        qm_descriptors_test, columns_info, standardization=True, test=True
+        qm_descriptors_test,
+        columns_info,
+        standardization=True,
+        test=True,
+        degree=1,
+        pairs=False,
     )
     # qm_descriptors_test = build_poly(qm_descriptors_test, columns_info, degree)
 
