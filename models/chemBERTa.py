@@ -143,7 +143,10 @@ if __name__ == "__main__":
 
                                 args={'evaluate_each_epoch': True,
                                       'evaluate_during_training_verbose': False,
-                                      'no_save': True, 'num_train_epochs': 10,
+                                      'no_save': True, 'num_train_epochs': 30,
+                                      'use_early_stopping': True, 'early_stopping_patience': 5,
+                                      'early_stopping_delta': 0.01, 'early_stopping_metric': "mcc",
+                                      'early_stopping_metric_minimize': False,
                                       'auto_weights': True}, use_cuda=use_cuda)
 
     model.train_model(train_df, eval_df=valid_df, output_dir='chemBERTa_model', multi_label=True, num_labels=3,
@@ -173,7 +176,7 @@ if __name__ == "__main__":
     # PREDICTIONS
     final_predictions, raw_outputs = model.predict(test_dataset['text'].tolist())
 
-    submission_file = os.path.join(this_dir, "chemberta_augmented_predictions_downsampling.csv")
+    submission_file = os.path.join(this_dir, "chemberta_augmented_30_epochs_es.csv")
     create_submission_file(submission_ids, final_predictions, submission_file)
 
 
