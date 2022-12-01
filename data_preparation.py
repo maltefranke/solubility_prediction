@@ -6,6 +6,8 @@ import rdkit
 import h5py
 import random
 import matplotlib.pyplot as plt
+import math
+import scipy as sc
 
 from typing import Tuple, List
 
@@ -34,7 +36,7 @@ def load_train_data(train_path: str):
     targets = df["sol_category"].values.tolist()
     targets = np.array(targets)
 
-    if 'Id' in df.columns:
+    if "Id" in df.columns:
         ids = df["Id"].values.tolist()
         return ids, smiles, targets
     else:
@@ -114,10 +116,14 @@ def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
 
     # we perform standardization only on qm descriptors!
-    dataset, columns_info = nan_imputation(qm_descriptors, 0.0, cat_del=True)
+    dataset, columns_info = nan_imputation(
+        qm_descriptors, 0.0, standardization=True, cat_del=True
+    )
 
-    # if degree > 1:
-    #    dataset = build_poly(dataset, columns_info, degree) # included in transformations
+    if degree > 1:
+        dataset = build_poly(
+            dataset, columns_info, degree, pairs=False
+        )  # included in transformations
 
     if fps == True:
         # add morgan fingerprints
@@ -390,6 +396,23 @@ def build_poly(x, columns_info, degree, pairs=False):
     return poly, columns_info
 
 
+def logarithm(dataset, columns_info):
+    skewness = []
+    to_transform = []
+    for i in range(dataset.shape[1]):
+        if (
+            columns_info[i] == 2
+            and len(np.where(np.sign(dataset[:, i]) == -1.0)[0]) == 0
+        ):
+            skewness.append(sc.stats.skew(dataset[:, i]))
+            if np.abs(skewness[-1]) >= 1:
+                to_transform.append(i)
+    print(len(to_transform))
+    dataset[:, to_transform] = np.log1p(dataset[:, to_transform])
+
+    return dataset
+
+
 def transformation(
     data, columns_info, standardization=True, test=False, degree=1, pairs=False
 ):
@@ -407,6 +430,7 @@ def transformation(
                 median = np.nanmedian(data[:, i])
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
 
+    data = logarithm(data, columns_info)
     # build poly
     if degree > 1 or pairs == True:
         data, columns_info = build_poly(data, columns_info, degree, pairs)
@@ -528,7 +552,9 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     raise ValueError("Type '{}' is not valid".format(random_type))
 
 
-def augment_smiles(smiles: List[str], targets: np.array, data_dir: str, name_file: str) -> Tuple[List[str], np.array]:
+def augment_smiles(
+    smiles: List[str], targets: np.array, data_dir: str, name_file: str
+) -> Tuple[List[str], np.array]:
     """
     Addition of the rotations of a molecule depending on the class it belongs to.
     :param smiles: of the dataset we want to augment
@@ -602,7 +628,7 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
 
     if downsampling_class2:
         ind_2 = np.where(targets == 2)[0]
-        ind_2_to_delete = ind_2[int(p*ind_2.shape[0]):ind_2.shape[0]]
+        ind_2_to_delete = ind_2[int(p * ind_2.shape[0]) : ind_2.shape[0]]
         df.drop(df.index[ind_2_to_delete], inplace=True)
         # re-acquiring data from the down-sampled dataset
         ids = df["Id"].values.tolist()
@@ -613,9 +639,9 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
     # assign 80% - 10% - 10% of the data to train - validation - test
     # (it is random, it doesn't depend on the classes)
     N = targets.shape[0]
-    ind_train = np.arange(int(N*0.8))
-    ind_valid = np.arange(int(N*0.8), int(N*0.9))
-    ind_test = np.arange(int(N*0.9), N)
+    ind_train = np.arange(int(N * 0.8))
+    ind_valid = np.arange(int(N * 0.8), int(N * 0.9))
+    ind_test = np.arange(int(N * 0.9), N)
     ids_train = np.array(ids)[ind_train]
     ids_valid = np.array(ids)[ind_valid]
     ids_test = np.array(ids)[ind_test]
@@ -627,18 +653,30 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
     targets_test = targets[ind_test]
 
     # creation csv files
-    dataset_train = {"Id": ids_train, "smiles": smiles_train, "sol_category": targets_train}
-    dataset_valid = {"Id": ids_valid, "smiles": smiles_valid, "sol_category": targets_valid}
-    dataset_test = {"Id": ids_test, "smiles": smiles_test, "sol_category": targets_test}
+    dataset_train = {
+        "Id": ids_train,
+        "smiles": smiles_train,
+        "sol_category": targets_train,
+    }
+    dataset_valid = {
+        "Id": ids_valid,
+        "smiles": smiles_valid,
+        "sol_category": targets_valid,
+    }
+    dataset_test = {
+        "Id": ids_test,
+        "smiles": smiles_test,
+        "sol_category": targets_test,
+    }
 
-    name_train_file = 'split_train.csv'
-    name_valid_file = 'split_valid.csv'
-    name_test_file = 'split_test.csv'
+    name_train_file = "split_train.csv"
+    name_valid_file = "split_valid.csv"
+    name_test_file = "split_test.csv"
 
     if downsampling_class2:
-        name_train_file = 'downsampled2_' + name_train_file
-        name_valid_file = 'downsampled2_' + name_valid_file
-        name_test_file = 'downsampled2_' + name_test_file
+        name_train_file = "downsampled2_" + name_train_file
+        name_valid_file = "downsampled2_" + name_valid_file
+        name_test_file = "downsampled2_" + name_test_file
 
     df_train = pd.DataFrame(data=dataset_train)
     df_train.to_csv(os.path.join(data_dir, name_train_file), index=False)
@@ -650,16 +688,21 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
     return name_train_file, name_valid_file, name_test_file
 
 
-def PCA_application(dataset, targets):
+"""
+def PCA_application(dataset, targets, dataset_test,targets_test):
 
     X = pd.DataFrame(dataset)
     y = pd.DataFrame(targets)
+    
+    X_output = pd.DataFrame(dataset_test)
+    y_output = pd.DataFrame(targets_test)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
     std = StandardScaler()
     X_train_std = std.fit_transform(X_train)
     X_test_std = std.transform(X_test)
+    X_output_std = std.transform(X_output)
 
     pca = PCA(n_components=X_train_std.shape[1])
     pca_data = pca.fit_transform(X_train_std)
@@ -683,6 +726,44 @@ def PCA_application(dataset, targets):
     pca = PCA(n_components=index)
     pca_train_data = pca.fit_transform(X_train_std)
     pca_test_data = pca.transform(X_test_std)
+    pca_output_data = pca.transform(X_output_std)
+    return pca_train_data,pca_test_data,pca_output_data
+"""
+
+
+def PCA_application(dataset, dataset_test):
+
+    X_train = pd.DataFrame(dataset)
+
+    X_output = pd.DataFrame(dataset_test)
+
+    std = StandardScaler()
+    X_train_std = std.fit_transform(X_train)
+    X_output_std = std.transform(X_output)
+
+    pca = PCA(n_components=X_train_std.shape[1])
+    pca_data = pca.fit_transform(X_train_std)
+
+    percent_var_explained = pca.explained_variance_ / (
+        np.sum(pca.explained_variance_)
+    )
+    cumm_var_explained = np.cumsum(percent_var_explained)
+
+    plt.plot(cumm_var_explained)
+    plt.grid()
+    plt.xlabel("n_components")
+    plt.ylabel("% variance explained")
+    plt.show()
+
+    cum = cumm_var_explained
+    var = pca.explained_variance_
+    value = pca.explained_variance_ratio_
+    index = np.where(cum >= 0.99)[0][0]
+    pca = PCA(n_components=index)
+    pca_train_data = pca.fit_transform(X_train_std)
+    pca_output_data = pca.transform(X_output_std)
+    print(pca_train_data)
+    return pca_train_data, pca_output_data
 
 
 if __name__ == "__main__":
@@ -692,7 +773,7 @@ if __name__ == "__main__":
     data_dir = os.path.join(this_dir, "data")
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
-
+    """
     # # CREATION SPLIT DATASETS - new .csv files
     # name_tr, name_val, name_te = create_split_csv(data_dir, "train.csv", downsampling_class2=True, p=0.6)
     #
@@ -774,19 +855,29 @@ if __name__ == "__main__":
     print('Class 0 = ', sum(np.where(down_targets_test == 0, 1, 0)))
     print('Class 1 = ', sum(np.where(down_targets_test == 1, 1, 0)))
     print('Class 2 = ', sum(np.where(down_targets_test == 2, 1, 0)))
+    """
+    ids, smiles, targets = load_train_data(train_path)
 
-    # ids, smiles, targets = load_train_data(train_path)
-    #
-    # qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-    # (
-    #     dataset,
-    #     columns_info,
-    # ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
-    #
-    # make_umap(dataset, targets)
+    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+    (
+        dataset,
+        columns_info,
+    ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
 
+    p = np.random.permutation(len(targets))
+    targets_shuffled = targets[p]
+    dataset_shuffled = dataset[p, :]
+    make_umap(
+        dataset_shuffled[0 : int(math.modf(len(targets) * 0.6)[1]), :],
+        targets_shuffled[0 : int(math.modf(len(targets) * 0.6)[1])],
+    )
+    submission_ids, submission_smiles = load_test_data(test_path)
+
+    make_umap(
+        dataset_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1, :],
+        targets_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1],
+    )
     # submission_ids, submission_smiles = load_test_data(test_path)
-
     # add new splitting like this:
     # split = split_by_class(targets)
 

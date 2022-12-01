@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from utils import *
 from data_preparation import *
 
-
+# IMPORTANT https://www.kaggle.com/code/prashant111/xgboost-k-fold-cv-feature-importance
 def xgb_learning(
     X: np.array,
     y: np.array,
@@ -24,7 +24,7 @@ def xgb_learning(
         1: label_weights[1],
         2: label_weights[2],
     }
-
+    print(label_weights)
     xgbs = []
 
     kfold = KFold(n_splits=CV, shuffle=True)
@@ -39,7 +39,7 @@ def xgb_learning(
             sample_weights_i = np.array(sample_weights)[train_idx]
 
         xgb = xgboost.XGBClassifier(
-            objective="multi:softprob",
+            objective="multi:softmax",
             eval_metric="auc",
             colsample_bytree=0.5,
             gamma=0,
@@ -47,6 +47,7 @@ def xgb_learning(
             max_depth=3,
             reg_lambda=0,
             verbosity=1,
+            num_class=3,
         )
 
         eval_set = [(dataset, targets)]
@@ -104,7 +105,9 @@ if __name__ == "__main__":
 
     # DATASET TRANSFORMATION
 
-    # degree = 2 # -> to be put in "preprocessing()" if you want power augmentation
+    # degree = (
+    #    2  # -> to be put in "preprocessing()" if you want power augmentation
+    # )
     dataset, columns_info = preprocessing(ids, smiles, data_dir)
     train_data_size = targets.shape[0]
 
@@ -117,7 +120,8 @@ if __name__ == "__main__":
 
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
-
+    # print(weights)
+    # print(sample_weights)
     xgbs = xgb_learning(
         dataset,
         targets,
@@ -150,6 +154,7 @@ if __name__ == "__main__":
     final_predictions = predict_xgb_ensemble(xgbs, qm_descriptors_test)
 
     submission_file = os.path.join(
-        this_dir, "xg_boost_splitted_no_categorical_nonan_std.csv"
+        this_dir,
+        "xg_boost_splitted_no_categorical_nonan_log_softmax_cancellare_2.csv",
     )
     create_submission_file(submission_ids, final_predictions, submission_file)
