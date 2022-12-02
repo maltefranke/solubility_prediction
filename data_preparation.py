@@ -78,9 +78,13 @@ def smiles_to_qm_descriptors(
 
     # paths to the datasets
     if type_ == "train":
-        qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
+        qm_descriptor_file = os.path.join(
+            data_dir, "train_qm_descriptors_3D.h5"
+        )
     elif type_ == "test":
-        qm_descriptor_file = os.path.join(data_dir, "test_qm_descriptors.h5")
+        qm_descriptor_file = os.path.join(
+            data_dir, "test_qm_descriptors_3D.h5"
+        )
     else:
         qm_descriptor_file = os.path.join(
             data_dir, "descriptors_collection.h5"
@@ -88,7 +92,7 @@ def smiles_to_qm_descriptors(
 
     # creation of the dataset containing the descriptors
     if not os.path.exists(qm_descriptor_file):
-        calc = Calculator(descriptors, ignore_3D=True)
+        calc = Calculator(descriptors)
 
         mols = [Chem.MolFromSmiles(s) for s in smiles]
 
@@ -431,6 +435,7 @@ def transformation(
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
 
     data = logarithm(data, columns_info)
+
     # build poly
     if degree > 1 or pairs == True:
         data, columns_info = build_poly(data, columns_info, degree, pairs)
@@ -732,21 +737,17 @@ def PCA_application(dataset, targets, dataset_test,targets_test):
 
 
 def PCA_application(dataset, dataset_test):
-
+    # https://www.youtube.com/watch?v=oiusrJ0btwA
     X_train = pd.DataFrame(dataset)
 
     X_output = pd.DataFrame(dataset_test)
 
-    std = StandardScaler()
-    X_train_std = std.fit_transform(X_train)
-    X_output_std = std.transform(X_output)
+    pca = PCA(n_components=X_train.shape[1])
+    pca_data = pca.fit_transform(X_train)
+    pca_output_data = pca.transform(X_output)
 
-    pca = PCA(n_components=X_train_std.shape[1])
-    pca_data = pca.fit_transform(X_train_std)
+    explained_variance = pca.explained_variance_ratio_
 
-    percent_var_explained = pca.explained_variance_ / (
-        np.sum(pca.explained_variance_)
-    )
     cumm_var_explained = np.cumsum(percent_var_explained)
 
     plt.plot(cumm_var_explained)
@@ -757,13 +758,13 @@ def PCA_application(dataset, dataset_test):
 
     cum = cumm_var_explained
     var = pca.explained_variance_
-    value = pca.explained_variance_ratio_
-    index = np.where(cum >= 0.99)[0][0]
-    pca = PCA(n_components=index)
-    pca_train_data = pca.fit_transform(X_train_std)
-    pca_output_data = pca.transform(X_output_std)
-    print(pca_train_data)
-    return pca_train_data, pca_output_data
+    index = np.where(cum >= 0.95)[0][0]
+
+    pca = PCA(n_components=index + 1)
+    pca_train_data = pca.fit_transform(X_train)
+    pca_output_data = pca.transform(X_output)
+    # print(pca_train_data)
+    return pca_train_data.to_numpy(), pca_output_data.to_numpy()
 
 
 if __name__ == "__main__":
@@ -864,21 +865,33 @@ if __name__ == "__main__":
         columns_info,
     ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
 
+    submission_ids, submission_smiles = load_test_data(test_path)
+
+    # TEST SET TRANSFORMATION
+    # descriptors
+    qm_descriptors_test = smiles_to_qm_descriptors(
+        submission_smiles, data_dir, "test"
+    )
+
+    # UMAP
+
     p = np.random.permutation(len(targets))
     targets_shuffled = targets[p]
     dataset_shuffled = dataset[p, :]
-    make_umap(
-        dataset_shuffled[0 : int(math.modf(len(targets) * 0.6)[1]), :],
-        targets_shuffled[0 : int(math.modf(len(targets) * 0.6)[1])],
-    )
+    # make_umap(
+    #    dataset_shuffled[0 : int(math.modf(len(targets) * 0.6)[1]), :],
+    #    targets_shuffled[0 : int(math.modf(len(targets) * 0.6)[1])],
+    # )
+    make_umap(dataset_shuffled, targets_shuffled)
     submission_ids, submission_smiles = load_test_data(test_path)
-
+"""
     make_umap(
         dataset_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1, :],
         targets_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1],
     )
-    # submission_ids, submission_smiles = load_test_data(test_path)
-    # add new splitting like this:
-    # split = split_by_class(targets)
+    """
+# submission_ids, submission_smiles = load_test_data(test_path)
+# add new splitting like this:
+# split = split_by_class(targets)
 
-    # DATA AUGMENTATION
+# DATA AUGMENTATION

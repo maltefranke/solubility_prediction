@@ -3,7 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import cohen_kappa_score, confusion_matrix
 import umap
+import plotly.express as px
 from sklearn.decomposition import PCA
+import umap.plot
 
 from data_preparation import *
 
@@ -43,30 +45,74 @@ def make_umap(X: np.array, y: np.array):
     )  # X is sufficient
 
     # could append all fingerprints together -> make sure you know split them based on the label
-    reducer = umap.UMAP()
-    embedding = reducer.fit_transform(all_classes)
+    # reducer = umap.UMAP(n_components=3)
+    reducer = umap.UMAP(n_neighbors=5)
+    mapper = reducer.fit(all_classes)
+
+    umap.plot.points(mapper)
 
     # plot all 3 labels
-    plt.scatter(
+    red = umap.UMAP(n_components=3, n_neighbors=5)
+    embedding = red.fit_transform(all_classes)
+    print(embedding)
+    plt.figure()
+
+    umap.plot.diagnostic(mapper, diagnostic_type="pca")
+    plt.figure()
+
+    fig = plt.figure(figsize=(12, 12))
+    ax = fig.add_subplot(projection="3d")
+    ax.scatter(
         embedding[: len(class_0), 0],
         embedding[: len(class_0), 1],
+        embedding[: len(class_0), 2],
         edgecolor="red",
         linewidths=0.5,
         label="0",
     )
-    plt.scatter(
+    ax.scatter(
         embedding[len(class_0) : len(class_0) + len(class_1), 0],
         embedding[len(class_0) : len(class_0) + len(class_1), 1],
+        embedding[len(class_0) : len(class_0) + len(class_1), 2],
         edgecolor="blue",
         linewidths=0.5,
         label="1",
     )
-    plt.scatter(
+    ax.scatter(
         embedding[len(class_0) + len(class_1) :, 0],
         embedding[len(class_0) + len(class_1) :, 1],
+        embedding[len(class_0) + len(class_1) :, 2],
         edgecolor="yellow",
         linewidths=0.5,
         label="2",
     )
 
+    plt.show()
+
+    plt.scatter(
+        embedding[: len(class_0), 0],
+        embedding[: len(class_0), 1],
+        embedding[: len(class_0), 2],
+        edgecolor="red",
+        linewidths=0.5,
+        label="0",
+    )
+    plt.show()
+    plt.scatter(
+        embedding[len(class_0) : len(class_0) + len(class_1), 0],
+        embedding[len(class_0) : len(class_0) + len(class_1), 1],
+        embedding[len(class_0) : len(class_0) + len(class_1), 2],
+        edgecolor="blue",
+        linewidths=0.5,
+        label="1",
+    )
+    plt.show()
+    plt.scatter(
+        embedding[len(class_0) + len(class_1) :, 0],
+        embedding[len(class_0) + len(class_1) :, 1],
+        embedding[len(class_0) + len(class_1) :, 2],
+        edgecolor="yellow",
+        linewidths=0.5,
+        label="2",
+    )
     plt.show()
