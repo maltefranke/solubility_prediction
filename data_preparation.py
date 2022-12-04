@@ -276,6 +276,8 @@ def indices_by_class(
     for class_ in range(num_classes):
         class_idx = np.where(targets == class_)[0]
         class_indices.append(class_idx)
+    # print('Call to the function indices_by_class returns: ')
+    # print(class_indices)
     return class_indices
 
 
@@ -528,7 +530,7 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     raise ValueError("Type '{}' is not valid".format(random_type))
 
 
-def augment_smiles(smiles: List[str], targets: np.array, data_dir: str, name_file: str) -> Tuple[List[str], np.array]:
+def augment_smiles(ids, smiles: List[str], targets: np.array, data_dir: str, name_file: str):
     """
     Addition of the rotations of a molecule depending on the class it belongs to.
     :param smiles: of the dataset we want to augment
@@ -541,49 +543,66 @@ def augment_smiles(smiles: List[str], targets: np.array, data_dir: str, name_fil
     if not os.path.exists(augmentations_path):
         class_indices = indices_by_class(targets)
 
-        augmentations = []
+        augmentations = set()
+        augmentations_id = []
+        augmentations_targets = []
         for iteration, class_idx in enumerate(class_indices):
             smiles_class_i = np.array(smiles)[class_idx].tolist()
+            ids_class_i = np.array(ids)[class_idx].tolist()
+            targets_class_i = np.array(targets)[class_idx].tolist()
 
             if iteration == 0 or iteration == 1:
-                augmentations_by_class = [
-                    list(set([randomize_smiles(i) for j in range(200)]))
-                    for i in smiles_class_i
-                ]
+                len_smiles = len(augmentations)
+                for (ind, i, t) in zip(ids_class_i, smiles_class_i, targets_class_i):
+                    # Adding the original SMILES
+                    augmentations.add(i)
+                    len_smiles += 1
+                    augmentations_id.append(ind)
+                    augmentations_targets.append(t)
+                    # Adding the rotations
+                    for j in range(200):
+                        augmentations.add(randomize_smiles(i))
+                        if len(augmentations) == len_smiles + 1:
+                            len_smiles += 1
+                            augmentations_id.append(f"{ind}{j}")
+                            augmentations_targets.append(t)
+
             else:
-                augmentations_by_class = [
-                    list(set([randomize_smiles(i) for j in range(5)]))
-                    for i in smiles_class_i
-                ]
+                len_smiles = len(augmentations)
+                for (ind, i, t) in zip(ids_class_i, smiles_class_i, targets_class_i):
+                    # Adding the original SMI.add(i)
+                    len_smiles += 1
+                    augmentations_id.append(ind)
+                    augmentations_targets.append(t)
+                    # Adding the rotations
+                    for j in range(5):
+                        augmentations.add(randomize_smiles(i))
+                        if len(augmentations) == len_smiles + 1:
+                            len_smiles += 1
+                            augmentations_id.append(f"{ind}{j}")
+                            augmentations_targets.append(t)
 
-            augmentations.append(augmentations_by_class)
+        augmentations = list(augmentations)
 
-        augmentations = [np.concatenate(i) for i in augmentations]
-        augmentations_targets = [
-            np.array([idx for i in augmentation])
-            for idx, augmentation in enumerate(augmentations)
-        ]
+        data = {"Id": augmentations_id, "smiles": augmentations, "sol_category": augmentations_targets}
 
-        augmentations = np.concatenate(augmentations).tolist()
-        augmentations_targets = np.concatenate(augmentations_targets)
-
-        data = {"smiles": augmentations, "sol_category": augmentations_targets}
-
+        # creation of the augmented dataset
         df = pd.DataFrame(data=data)
         df.to_csv(augmentations_path, index=False)
 
     final_df = pd.read_csv(augmentations_path)
 
+    final_id = final_df["Id"].tolist()
     final_smiles = final_df["smiles"].tolist()
     final_targets = final_df["sol_category"].to_numpy()
 
-    return final_smiles, final_targets
+    return final_id, final_smiles, final_targets
 
 
 def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
     """
-    It creates 3 .csv files containing a random split of the given dataset into a train (80%),
-    validation (10%) and test (10%) set.
+    It creates 2 .csv files containing a random split of the given dataset into train (70%) and
+    validation (30%) set.
     :param downsampling_class2:
     :param data_dir:
     :param file_name:
@@ -610,44 +629,44 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
         targets = df["sol_category"].values.tolist()
         targets = np.array(targets)
 
-    # assign 80% - 10% - 10% of the data to train - validation - test
+    # assign 70% - 30% of the data to train - validation
     # (it is random, it doesn't depend on the classes)
     N = targets.shape[0]
-    ind_train = np.arange(int(N*0.8))
-    ind_valid = np.arange(int(N*0.8), int(N*0.9))
-    ind_test = np.arange(int(N*0.9), N)
+    ind_train = np.arange(int(N*0.7))
+    ind_valid = np.arange(int(N*0.7), N)
+    # ind_test = np.arange(int(N*0.9), N)
     ids_train = np.array(ids)[ind_train]
     ids_valid = np.array(ids)[ind_valid]
-    ids_test = np.array(ids)[ind_test]
+    # ids_test = np.array(ids)[ind_test]
     smiles_train = np.array(smiles)[ind_train]
     smiles_valid = np.array(smiles)[ind_valid]
-    smiles_test = np.array(smiles)[ind_test]
+    # smiles_test = np.array(smiles)[ind_test]
     targets_train = targets[ind_train]
     targets_valid = targets[ind_valid]
-    targets_test = targets[ind_test]
+    # targets_test = targets[ind_test]
 
     # creation csv files
     dataset_train = {"Id": ids_train, "smiles": smiles_train, "sol_category": targets_train}
     dataset_valid = {"Id": ids_valid, "smiles": smiles_valid, "sol_category": targets_valid}
-    dataset_test = {"Id": ids_test, "smiles": smiles_test, "sol_category": targets_test}
+    # dataset_test = {"Id": ids_test, "smiles": smiles_test, "sol_category": targets_test}
 
     name_train_file = 'split_train.csv'
     name_valid_file = 'split_valid.csv'
-    name_test_file = 'split_test.csv'
+    # name_test_file = 'split_test.csv'
 
     if downsampling_class2:
         name_train_file = 'downsampled2_' + name_train_file
         name_valid_file = 'downsampled2_' + name_valid_file
-        name_test_file = 'downsampled2_' + name_test_file
+        # name_test_file = 'downsampled2_' + name_test_file
 
     df_train = pd.DataFrame(data=dataset_train)
     df_train.to_csv(os.path.join(data_dir, name_train_file), index=False)
     df_valid = pd.DataFrame(data=dataset_valid)
     df_valid.to_csv(os.path.join(data_dir, name_valid_file), index=False)
-    df_test = pd.DataFrame(data=dataset_test)
-    df_test.to_csv(os.path.join(data_dir, name_test_file), index=False)
+    # df_test = pd.DataFrame(data=dataset_test)
+    # df_test.to_csv(os.path.join(data_dir, name_test_file), index=False)
 
-    return name_train_file, name_valid_file, name_test_file
+    return name_train_file, name_valid_file
 
 
 def PCA_application(dataset, targets):
@@ -693,6 +712,10 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
+    # CREATION AUGMENTED DATASET WITH IDs
+    ids, smiles, targets = load_train_data(train_path)
+    aug_id, aug_smiles, aug_targets = augment_smiles(ids, smiles, targets, data_dir, 'augmented_ALLtrain.csv')
+
     # # CREATION SPLIT DATASETS - new .csv files
     # name_tr, name_val, name_te = create_split_csv(data_dir, "train.csv", downsampling_class2=True, p=0.6)
     #
@@ -706,74 +729,80 @@ if __name__ == "__main__":
     # ids_test, smiles_test, targets_test = load_train_data(os.path.join(data_dir, name_te))
     # aug_smiles_test, aug_targets_test = augment_smiles(smiles_test, targets_test, data_dir, 'augmented_' + name_te)
 
-    # CHECK THE NUMBER OF DATAPOINTS PER CLASS IN EACH SPLIT
-    ids_train, smiles_train, targets_train = load_train_data(os.path.join(data_dir, 'split_train.csv'))
-    ids_valid, smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, 'split_valid.csv'))
-    ids_test, smiles_test, targets_test = load_train_data(os.path.join(data_dir, 'split_test.csv'))
+    # # CHECK THE NUMBER OF DATAPOINTS PER CLASS IN EACH SPLIT
+    # ids_train, smiles_train, targets_train = load_train_data(os.path.join(data_dir, 'split_train.csv'))
+    # ids_valid, smiles_valid, targets_valid = load_train_data(os.path.join(data_dir, 'split_valid.csv'))
+    # ids_test, smiles_test, targets_test = load_train_data(os.path.join(data_dir, 'split_test.csv'))
+    #
+    # aug_smiles_train, aug_targets_train = load_train_data(os.path.join(data_dir, 'augmented_split_train.csv'))
+    # aug_smiles_valid, aug_targets_valid = load_train_data(os.path.join(data_dir, 'augmented_split_valid.csv'))
+    # aug_smiles_test, aug_targets_test = load_train_data(os.path.join(data_dir, 'augmented_split_test.csv'))
+    #
+    # down_smiles_train, down_targets_train = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_train.csv'))
+    # down_smiles_valid, down_targets_valid = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_valid.csv'))
+    # down_smiles_test, down_targets_test = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_test.csv'))
 
-    aug_smiles_train, aug_targets_train = load_train_data(os.path.join(data_dir, 'augmented_split_train.csv'))
-    aug_smiles_valid, aug_targets_valid = load_train_data(os.path.join(data_dir, 'augmented_split_valid.csv'))
-    aug_smiles_test, aug_targets_test = load_train_data(os.path.join(data_dir, 'augmented_split_test.csv'))
+    print('************ AUGMENTED ALL TRAIN SET ************')
+    print('Tot datapoints = ', aug_targets.shape[0])
+    print('Class 0 = ', sum(np.where(aug_targets == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(aug_targets == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(aug_targets == 2, 1, 0)))
 
-    down_smiles_train, down_targets_train = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_train.csv'))
-    down_smiles_valid, down_targets_valid = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_valid.csv'))
-    down_smiles_test, down_targets_test = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_test.csv'))
-
-    print('TRAIN SPLIT SET')
-    print('Tot datapoints = ', targets_train.shape[0])
-    print('Class 0 = ', sum(np.where(targets_train == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(targets_train == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(targets_train == 2, 1, 0)))
-
-    print('VALIDATION SPLIT SET')
-    print('Tot datapoints = ', targets_valid.shape[0])
-    print('Class 0 = ', sum(np.where(targets_valid == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(targets_valid == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(targets_valid == 2, 1, 0)))
-
-    print('TEST SPLIT SET')
-    print('Tot datapoints = ', targets_test.shape[0])
-    print('Class 0 = ', sum(np.where(targets_test == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(targets_test == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(targets_test == 2, 1, 0)))
-
-    print('************ AFTER AUGMENTATION ************')
-    print('TRAIN SPLIT SET')
-    print('Tot datapoints = ', aug_targets_train.shape[0])
-    print('Class 0 = ', sum(np.where(aug_targets_train == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(aug_targets_train == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(aug_targets_train == 2, 1, 0)))
-
-    print('VALIDATION SPLIT SET')
-    print('Tot datapoints = ', aug_targets_valid.shape[0])
-    print('Class 0 = ', sum(np.where(aug_targets_valid == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(aug_targets_valid == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(aug_targets_valid == 2, 1, 0)))
-
-    print('TEST SPLIT SET')
-    print('Tot datapoints = ', aug_targets_test.shape[0])
-    print('Class 0 = ', sum(np.where(aug_targets_test == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(aug_targets_test == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(aug_targets_test == 2, 1, 0)))
-
-    print('************ AFTER DOWNSAMPLING + AUGMENTATION ************')
-    print('TRAIN SPLIT SET')
-    print('Tot datapoints = ', down_targets_train.shape[0])
-    print('Class 0 = ', sum(np.where(down_targets_train == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(down_targets_train == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(down_targets_train == 2, 1, 0)))
-
-    print('VALIDATION SPLIT SET')
-    print('Tot datapoints = ', down_targets_valid.shape[0])
-    print('Class 0 = ', sum(np.where(down_targets_valid == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(down_targets_valid == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(down_targets_valid == 2, 1, 0)))
-
-    print('TEST SPLIT SET')
-    print('Tot datapoints = ', down_targets_test.shape[0])
-    print('Class 0 = ', sum(np.where(down_targets_test == 0, 1, 0)))
-    print('Class 1 = ', sum(np.where(down_targets_test == 1, 1, 0)))
-    print('Class 2 = ', sum(np.where(down_targets_test == 2, 1, 0)))
+    # print('TRAIN SPLIT SET')
+    # print('Tot datapoints = ', targets_train.shape[0])
+    # print('Class 0 = ', sum(np.where(targets_train == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(targets_train == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(targets_train == 2, 1, 0)))
+    #
+    # print('VALIDATION SPLIT SET')
+    # print('Tot datapoints = ', targets_valid.shape[0])
+    # print('Class 0 = ', sum(np.where(targets_valid == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(targets_valid == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(targets_valid == 2, 1, 0)))
+    #
+    # print('TEST SPLIT SET')
+    # print('Tot datapoints = ', targets_test.shape[0])
+    # print('Class 0 = ', sum(np.where(targets_test == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(targets_test == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(targets_test == 2, 1, 0)))
+    #
+    # print('************ AFTER AUGMENTATION ************')
+    # print('TRAIN SPLIT SET')
+    # print('Tot datapoints = ', aug_targets_train.shape[0])
+    # print('Class 0 = ', sum(np.where(aug_targets_train == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(aug_targets_train == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(aug_targets_train == 2, 1, 0)))
+    #
+    # print('VALIDATION SPLIT SET')
+    # print('Tot datapoints = ', aug_targets_valid.shape[0])
+    # print('Class 0 = ', sum(np.where(aug_targets_valid == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(aug_targets_valid == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(aug_targets_valid == 2, 1, 0)))
+    #
+    # print('TEST SPLIT SET')
+    # print('Tot datapoints = ', aug_targets_test.shape[0])
+    # print('Class 0 = ', sum(np.where(aug_targets_test == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(aug_targets_test == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(aug_targets_test == 2, 1, 0)))
+    #
+    # print('************ AFTER DOWNSAMPLING + AUGMENTATION ************')
+    # print('TRAIN SPLIT SET')
+    # print('Tot datapoints = ', down_targets_train.shape[0])
+    # print('Class 0 = ', sum(np.where(down_targets_train == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(down_targets_train == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(down_targets_train == 2, 1, 0)))
+    #
+    # print('VALIDATION SPLIT SET')
+    # print('Tot datapoints = ', down_targets_valid.shape[0])
+    # print('Class 0 = ', sum(np.where(down_targets_valid == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(down_targets_valid == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(down_targets_valid == 2, 1, 0)))
+    #
+    # print('TEST SPLIT SET')
+    # print('Tot datapoints = ', down_targets_test.shape[0])
+    # print('Class 0 = ', sum(np.where(down_targets_test == 0, 1, 0)))
+    # print('Class 1 = ', sum(np.where(down_targets_test == 1, 1, 0)))
+    # print('Class 2 = ', sum(np.where(down_targets_test == 2, 1, 0)))
 
     # ids, smiles, targets = load_train_data(train_path)
     #
