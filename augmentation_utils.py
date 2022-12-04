@@ -1,5 +1,5 @@
 from data_utils import *
-
+from conversion_smiles_utils import *
 
 def build_poly(x, columns_info, degree, pairs=False):
     """Polynomial basis functions for input data x, for j=0 up to j=degree.
@@ -216,7 +216,7 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     raise ValueError("Type '{}' is not valid".format(random_type))
 
 
-def augment_smiles(ids, smiles: List[str], targets: np.array, data_dir: str, name_file: str):
+def augment_smiles(ids, smiles, targets, data_dir, name_file):
     """
     Addition of the rotations of a molecule depending on the class it belongs to.
     :param smiles: of the dataset we want to augment
