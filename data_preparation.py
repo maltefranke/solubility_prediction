@@ -120,8 +120,8 @@ def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
 
     # we perform standardization only on qm descriptors!
-    dataset, columns_info = nan_imputation(
-        qm_descriptors, 0.0, standardization=True, cat_del=True
+    dataset, columns_info, log_trans = nan_imputation(
+        qm_descriptors, 0.0, standardization=True, cat_del=False, log=False
     )
 
     if degree > 1:
@@ -134,7 +134,7 @@ def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
         all_fps = smiles_to_morgan_fp(smiles)
         dataset = np.concatenate((dataset, all_fps), axis=1)
 
-    return dataset, columns_info
+    return dataset, columns_info, log_trans
 
 
 def up_down_sampling(y, X):
@@ -400,25 +400,38 @@ def build_poly(x, columns_info, degree, pairs=False):
     return poly, columns_info
 
 
-def logarithm(dataset, columns_info):
+def logarithm(dataset, columns_info, log_trans=None):
     skewness = []
     to_transform = []
-    for i in range(dataset.shape[1]):
-        if (
-            columns_info[i] == 2
-            and len(np.where(np.sign(dataset[:, i]) == -1.0)[0]) == 0
-        ):
-            skewness.append(sc.stats.skew(dataset[:, i]))
-            if np.abs(skewness[-1]) >= 1:
-                to_transform.append(i)
+
+    if (
+        log_trans == None
+    ):  # so that I trasform the same columns in the test set
+        for i in range(dataset.shape[1]):
+            if (
+                columns_info[i] == 2
+                and len(np.where(np.sign(dataset[:, i]) == -1.0)[0]) == 0
+            ):
+                skewness.append(sc.stats.skew(dataset[:, i]))
+                if np.abs(skewness[-1]) >= 1:
+                    to_transform.append(i)
+    else:
+        to_transform = log_trans
     print(len(to_transform))
     dataset[:, to_transform] = np.log1p(dataset[:, to_transform])
 
-    return dataset
+    return dataset, to_transform
 
 
 def transformation(
-    data, columns_info, standardization=True, test=False, degree=1, pairs=False
+    data,
+    columns_info,
+    standardization=True,
+    test=False,
+    degree=1,
+    pairs=False,
+    log_trans=None,
+    log=True,
 ):
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
@@ -433,8 +446,8 @@ def transformation(
             if columns_info[i] == 2:
                 median = np.nanmedian(data[:, i])
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-
-    data = logarithm(data, columns_info)
+    if log == True:
+        data, log_trans = logarithm(data, columns_info, log_trans)
 
     # build poly
     if degree > 1 or pairs == True:
@@ -447,7 +460,7 @@ def transformation(
             data[:, np.where(columns_info == 2)[0]]
         )
 
-    return data
+    return data, log_trans
 
 
 def nan_imputation(
@@ -457,6 +470,7 @@ def nan_imputation(
     cat_del=False,
     degree=1,
     pairs=False,
+    log=True,
 ):
     """
     Function that removes columns with too many nan values (depending on the tolerance) and standardizes
@@ -498,8 +512,15 @@ def nan_imputation(
                 # standardization_data_train[i, :] = median, mean, std
 
     columns_info = np.array(columns_info)
-    data = transformation(data, columns_info, standardization, degree, pairs)
-    return data, columns_info
+    data, log_trans = transformation(
+        data,
+        columns_info,
+        standardization=standardization,
+        degree=degree,
+        pairs=pairs,
+        log=log,
+    )
+    return data, columns_info, log_trans
 
 
 def check_categorical(column):
@@ -744,11 +765,10 @@ def PCA_application(dataset, dataset_test):
 
     pca = PCA(n_components=X_train.shape[1])
     pca_data = pca.fit_transform(X_train)
-    pca_output_data = pca.transform(X_output)
+    # pca_output_data = pca.transform(X_output)
 
     explained_variance = pca.explained_variance_ratio_
-
-    cumm_var_explained = np.cumsum(percent_var_explained)
+    cumm_var_explained = np.cumsum(explained_variance)
 
     plt.plot(cumm_var_explained)
     plt.grid()
@@ -758,13 +778,19 @@ def PCA_application(dataset, dataset_test):
 
     cum = cumm_var_explained
     var = pca.explained_variance_
-    index = np.where(cum >= 0.95)[0][0]
+    index = np.where(cum >= 0.975)[0][0]
 
     pca = PCA(n_components=index + 1)
     pca_train_data = pca.fit_transform(X_train)
     pca_output_data = pca.transform(X_output)
+    print(pca_train_data)
+    print(type(pca_train_data))
+    print(type(pca_output_data))
     # print(pca_train_data)
-    return pca_train_data.to_numpy(), pca_output_data.to_numpy()
+    return (
+        pca_train_data,
+        pca_output_data,
+    )  # pca_train_data.to_numpy(), pca_output_data.to_numpy()
 
 
 if __name__ == "__main__":

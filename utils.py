@@ -5,7 +5,8 @@ from sklearn.metrics import cohen_kappa_score, confusion_matrix
 import umap
 import plotly.express as px
 from sklearn.decomposition import PCA
-import umap.plot
+
+# import umap.plot
 
 from data_preparation import *
 
@@ -30,6 +31,7 @@ def differential_top_k_loss(y_pred, y_true):
     pass
 
 
+"""
 def make_umap(X: np.array, y: np.array):
     X, _ = nan_imputation(
         X, nan_tolerance=0.0, standardization=False, cat_del=False
@@ -116,3 +118,4 @@ def make_umap(X: np.array, y: np.array):
         label="2",
     )
     plt.show()
+"""
