@@ -12,7 +12,7 @@ from ase import Atoms
 from schnetpack.src.schnetpack.data import ASEAtomsData
 from schnetpack.src.schnetpack.data import AtomsDataModule
 
-from data_preparation import *
+from data_utils import *
 
 
 def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,

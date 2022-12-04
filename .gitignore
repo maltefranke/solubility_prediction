@@ -7,3 +7,5 @@ models/SchNet models/split.npz
 data/train_qm_descriptors.h5
 data/test_qm_descriptors.h5
 /data/old_data/
+/chemBERTa/
+/data/old_data/

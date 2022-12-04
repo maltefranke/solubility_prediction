@@ -9,7 +9,7 @@ from sklearn.model_selection import GridSearchCV
 
 import matplotlib.pyplot as plt
 from utils import *
-from data_preparation import *
+from data_utils import *
 
 """
     param_grid = {

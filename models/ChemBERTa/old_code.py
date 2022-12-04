@@ -1,6 +1,6 @@
 import logging
 
-from data_preparation import *
+from data_utils import *
 
 from simpletransformers.classification import ClassificationModel
 import sklearn

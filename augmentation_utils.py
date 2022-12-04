@@ -1,358 +1,4 @@
-import os
-import csv
-import numpy as np
-import pandas as pd
-import rdkit
-import h5py
-import random
-import matplotlib.pyplot as plt
-
-from typing import Tuple, List
-
-from rdkit import Chem as Chem
-from rdkit.Chem import AllChem as AllChem
-from rdkit.Chem import rdFingerprintGenerator
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split, KFold
-from sklearn.decomposition import PCA
-from sklearn.utils import resample
-
-from mordred import Calculator, descriptors
-
-from imblearn.over_sampling import SMOTE
-import sklearn
-
-from utils import *
-
-
-def load_train_data(train_path: str):
-
-    df = pd.read_csv(train_path)
-
-    smiles = df["smiles"].values.tolist()
-    targets = df["sol_category"].values.tolist()
-    targets = np.array(targets)
-
-    if 'Id' in df.columns:
-        ids = df["Id"].values.tolist()
-        return ids, smiles, targets
-    else:
-        return smiles, targets
-
-
-def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
-
-    df = pd.read_csv(test_path)
-
-    ids = df["Id"].values.tolist()
-    smiles = df["smiles"].values.tolist()
-
-    return ids, smiles
-
-
-def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
-    fp_generator = rdFingerprintGenerator.GetMorganGenerator()
-    """
-    Creation of morgan_fingerprints starting from the smiles of the molecules
-    """
-    all_fps = []
-    for molecule in smiles:
-        molecule = Chem.MolFromSmiles(molecule)
-        fp = fp_generator.GetFingerprintAsNumPy(molecule)
-
-        all_fps.append(fp)
-    all_fps = np.array(all_fps)
-
-    return all_fps
-
-
-def smiles_to_qm_descriptors(
-    smiles: List[str], data_dir: str, type_="train"
-) -> np.array:
-    """
-    Creation or loading of the dataset containing features which denote physical/chemical quantities of the molecules
-    """
-
-    # paths to the datasets
-    if type_ == "train":
-        qm_descriptor_file = os.path.join(data_dir, "train_qm_descriptors.h5")
-    elif type_ == "test":
-        qm_descriptor_file = os.path.join(data_dir, "test_qm_descriptors.h5")
-    else:
-        qm_descriptor_file = os.path.join(
-            data_dir, "descriptors_collection.h5"
-        )
-
-    # creation of the dataset containing the descriptors
-    if not os.path.exists(qm_descriptor_file):
-        calc = Calculator(descriptors, ignore_3D=True)
-
-        mols = [Chem.MolFromSmiles(s) for s in smiles]
-
-        df = calc.pandas(mols)
-
-        qm_descriptors = df.to_numpy()
-
-        qm_descriptors = qm_descriptors.astype(np.float64)
-        with h5py.File(qm_descriptor_file, "w") as hf:
-            hf.create_dataset("descriptors", data=qm_descriptors)
-    # loading of the dataset
-    else:
-        with h5py.File(qm_descriptor_file, "r") as hf:
-            qm_descriptors = hf["descriptors"][:]
-
-    return qm_descriptors
-
-
-def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
-    """
-    Sequence of functions to transform the dataset
-    """
-
-    # introduce descriptors
-    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-
-    # we perform standardization only on qm descriptors!
-    dataset, columns_info = nan_imputation(qm_descriptors, 0.0, cat_del=True)
-
-    # if degree > 1:
-    #    dataset = build_poly(dataset, columns_info, degree) # included in transformations
-
-    if fps == True:
-        # add morgan fingerprints
-        all_fps = smiles_to_morgan_fp(smiles)
-        dataset = np.concatenate((dataset, all_fps), axis=1)
-
-    return dataset, columns_info
-
-
-def up_down_sampling(y, X):
-    """
-    Add copies of the observations of the minority classes and remove observations from the majority class
-    Args:
-        y: classes values
-        X: observations
-
-    Returns:
-        y_balanced
-        X_balanced
-    """
-
-    # dividing the data in subsets depending on the class
-    X2 = X[np.where(y == 2)]
-    X1 = X[np.where(y == 1)]
-    X0 = X[np.where(y == 0)]
-
-    # up-sample minority classes
-    X0_up = resample(
-        X0, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13
-    )
-    X1_up = resample(
-        X1, replace=True, n_samples=int(X.shape[0] * 0.25), random_state=13
-    )
-
-    # down-sample majority class
-    X2_down = resample(
-        X2, replace=False, n_samples=int(X.shape[0] * 0.5), random_state=13
-    )
-
-    X_balanced = np.concatenate((X0_up, X1_up, X2_down))
-    y_balanced = np.concatenate(
-        (
-            np.zeros(X0_up.shape[0], dtype=np.int8),
-            np.ones(X1_up.shape[0], dtype=np.int8),
-            2 * np.ones(X2_down.shape[0], dtype=np.int8),
-        )
-    )
-    print(X_balanced.shape, y_balanced.shape)
-
-    return y_balanced, X_balanced
-
-
-def smote_algorithm(y, X, seed: int):
-    """
-    Up-sample the minority class
-    Args:
-        y: classes values
-        X: observations
-
-    Returns:
-        y_resampled
-        X_resampled
-    """
-    sm = SMOTE(random_state=seed)
-    X_resampled, y_resampled = sm.fit_resample(X, y)
-
-    return y_resampled, X_resampled
-
-
-def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
-    """
-    Transform a list of SMILES into their 3D representation using rdkit functions
-    Args:
-        smiles: list of SMILES string
-
-    Returns:
-        tuple containing a list of atomic numbers and a list of corresponding atom positions
-    """
-    # following https://stackoverflow.com/questions/71915443/rdkit-coordinates-for-atoms-in-a-molecule
-    all_atomic_nums = []
-    all_positions = []
-    for molecule in smiles:
-        try:
-            molecule = Chem.MolFromSmiles(molecule)
-            molecule = Chem.AddHs(molecule)
-            AllChem.EmbedMolecule(molecule)
-            AllChem.UFFOptimizeMolecule(molecule)
-            molecule.GetConformer()
-
-            atomic_nums = []
-            atom_positions = []
-            for i, atom in enumerate(molecule.GetAtoms()):
-                # atomic_nums.append(np.array(atom.GetAtomicNum()).item())
-                atomic_nums.append(int(atom.GetAtomicNum()))
-
-                positions = molecule.GetConformer().GetAtomPosition(i)
-                atom_positions.append(
-                    np.array([positions.x, positions.y, positions.z]).tolist()
-                )
-
-            all_atomic_nums.append(atomic_nums)
-            all_positions.append(atom_positions)
-
-        except:
-            print("Molecule not processable")
-            continue
-
-    return all_atomic_nums, all_positions
-
-
-def create_submission_file(
-    ids: List[str], y_pred: np.array, path: str
-) -> None:
-    """
-    Function to create the final submission file
-    Args:
-        ids: list of ids corresponding to the original data
-        y_pred: np.array of model predictions
-        path: path to where the csv should be saved
-
-    Returns:
-        None
-    """
-    with open(path, "w") as submission_file:
-        writer = csv.writer(submission_file, delimiter=",")
-        writer.writerow(["Id", "Pred"])
-        for id, pred in zip(ids, y_pred):
-            writer.writerow([id, pred])
-
-
-def calculate_class_weights(
-    targets: np.array, num_classes: int = 3
-) -> List[float]:
-    """
-    computation of the weights to eal with the umbalanceness of the dataset
-    """
-
-    # see how balanced the data is and assign weights
-    train_data_size = targets.shape[0]
-
-    weights = [
-        1 - np.count_nonzero(targets == int(i)) / train_data_size
-        for i in range(num_classes)
-    ]
-
-    return weights
-
-
-def indices_by_class(
-    targets: np.array, num_classes: int = 3
-) -> List[np.array]:
-    """
-    returns the indices divided following the 3 different solubility classes
-    """
-    class_indices = []
-    for class_ in range(num_classes):
-        class_idx = np.where(targets == class_)[0]
-        class_indices.append(class_idx)
-    # print('Call to the function indices_by_class returns: ')
-    # print(class_indices)
-    return class_indices
-
-
-def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
-    splitted_classes_indices = indices_by_class(targets, num_classes)
-
-    kfold = KFold(n_splits=CV)
-
-    train_indices = [[[] for i in range(num_classes)] for j in range(CV)]
-    test_indices = [[[] for i in range(num_classes)] for j in range(CV)]
-    for idx, class_i_indices in enumerate(splitted_classes_indices):
-        for split_i, (train_split_i, test_split_i) in enumerate(
-            kfold.split(class_i_indices)
-        ):
-            train_idx_class_i = class_i_indices[train_split_i]
-            train_indices[split_i][idx].append(train_idx_class_i)
-
-            test_idx_class_i = class_i_indices[test_split_i]
-            test_indices[split_i][idx].append(test_idx_class_i)
-
-    train_indices = [
-        np.concatenate(i, axis=1).squeeze() for i in train_indices
-    ]
-    test_indices = [np.concatenate(i, axis=1).squeeze() for i in test_indices]
-
-    final_splits = [
-        (train_i, test_i)
-        for train_i, test_i in zip(train_indices, test_indices)
-    ]
-
-    return final_splits
-
-
-def create_subsample_train_csv(data_dir: str, features: np.array):
-    path = os.path.join(data_dir, "random_undersampling.csv")
-    train_path = os.path.join(data_dir, "train.csv")
-    ids, smiles, targets = load_train_data(train_path)
-
-    p = np.random.permutation(targets.shape[0])
-    smiles = np.array(smiles)[p]
-    targets = targets[p]
-    features = features[p]
-
-    # dividing the data in subsets depending on the class
-    smiles_per_class = []
-    all_features = []
-    for class_idx in range(3):
-        indices = np.where(targets == class_idx)
-        smiles_class_i = np.array(smiles)[indices].tolist()
-        smiles_per_class.append(smiles_class_i)
-
-        features_class_i = features[indices]
-        all_features.append(features_class_i)
-
-    min_len = min([len(i) for i in smiles_per_class])
-
-    cutoff_features = []
-    with open(path, "w") as subsampling_file:
-        writer = csv.writer(subsampling_file, delimiter=",")
-        writer.writerow(["Id", "smiles", "sol_category"])
-
-        for idx, smiles_class_i in enumerate(smiles_per_class):
-            subsampled_features = all_features[idx][:min_len]
-            cutoff_features.append(subsampled_features)
-
-            subsampled_smiles = smiles_class_i[:min_len]
-            for temp_smiles in subsampled_smiles:
-                writer.writerow(["-", temp_smiles, idx])
-
-    cutoff_features = np.concatenate(cutoff_features, axis=0)
-    descriptor_file = os.path.join(
-        data_dir, "random_undersampling_descriptors.h5"
-    )
-    with h5py.File(descriptor_file, "w") as hf:
-        hf.create_dataset("descriptors", data=cutoff_features)
+from data_utils import *
 
 
 def build_poly(x, columns_info, degree, pairs=False):
@@ -392,8 +38,38 @@ def build_poly(x, columns_info, degree, pairs=False):
     return poly, columns_info
 
 
+def logarithm(dataset, columns_info, log_trans=None):
+    skewness = []
+    to_transform = []
+
+    if (
+        log_trans == None
+    ):  # so that I trasform the same columns in the test set
+        for i in range(dataset.shape[1]):
+            if (
+                columns_info[i] == 2
+                and len(np.where(np.sign(dataset[:, i]) == -1.0)[0]) == 0
+            ):
+                skewness.append(sc.stats.skew(dataset[:, i]))
+                if np.abs(skewness[-1]) >= 1:
+                    to_transform.append(i)
+    else:
+        to_transform = log_trans
+    print(len(to_transform))
+    dataset[:, to_transform] = np.log1p(dataset[:, to_transform])
+
+    return dataset, to_transform
+
+
 def transformation(
-    data, columns_info, standardization=True, test=False, degree=1, pairs=False
+    data,
+    columns_info,
+    standardization=True,
+    test=False,
+    degree=1,
+    pairs=False,
+    log_trans=None,
+    log=True,
 ):
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
@@ -408,6 +84,8 @@ def transformation(
             if columns_info[i] == 2:
                 median = np.nanmedian(data[:, i])
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
+    if log == True:
+        data, log_trans = logarithm(data, columns_info, log_trans)
 
     # build poly
     if degree > 1 or pairs == True:
@@ -420,7 +98,7 @@ def transformation(
             data[:, np.where(columns_info == 2)[0]]
         )
 
-    return data
+    return data, log_trans
 
 
 def nan_imputation(
@@ -430,6 +108,7 @@ def nan_imputation(
     cat_del=False,
     degree=1,
     pairs=False,
+    log=True,
 ):
     """
     Function that removes columns with too many nan values (depending on the tolerance) and standardizes
@@ -471,8 +150,15 @@ def nan_imputation(
                 # standardization_data_train[i, :] = median, mean, std
 
     columns_info = np.array(columns_info)
-    data = transformation(data, columns_info, standardization, degree, pairs)
-    return data, columns_info
+    data, log_trans = transformation(
+        data,
+        columns_info,
+        standardization=standardization,
+        degree=degree,
+        pairs=pairs,
+        log=log,
+    )
+    return data, columns_info, log_trans
 
 
 def check_categorical(column):
@@ -621,7 +307,7 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
 
     if downsampling_class2:
         ind_2 = np.where(targets == 2)[0]
-        ind_2_to_delete = ind_2[int(p*ind_2.shape[0]):ind_2.shape[0]]
+        ind_2_to_delete = ind_2[int(p * ind_2.shape[0]) : ind_2.shape[0]]
         df.drop(df.index[ind_2_to_delete], inplace=True)
         # re-acquiring data from the down-sampled dataset
         ids = df["Id"].values.tolist()
@@ -634,74 +320,50 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
     N = targets.shape[0]
     ind_train = np.arange(int(N*0.7))
     ind_valid = np.arange(int(N*0.7), N)
-    # ind_test = np.arange(int(N*0.9), N)
+
     ids_train = np.array(ids)[ind_train]
     ids_valid = np.array(ids)[ind_valid]
-    # ids_test = np.array(ids)[ind_test]
     smiles_train = np.array(smiles)[ind_train]
     smiles_valid = np.array(smiles)[ind_valid]
-    # smiles_test = np.array(smiles)[ind_test]
     targets_train = targets[ind_train]
     targets_valid = targets[ind_valid]
-    # targets_test = targets[ind_test]
 
     # creation csv files
     dataset_train = {"Id": ids_train, "smiles": smiles_train, "sol_category": targets_train}
     dataset_valid = {"Id": ids_valid, "smiles": smiles_valid, "sol_category": targets_valid}
-    # dataset_test = {"Id": ids_test, "smiles": smiles_test, "sol_category": targets_test}
 
     name_train_file = 'split_train.csv'
     name_valid_file = 'split_valid.csv'
-    # name_test_file = 'split_test.csv'
 
     if downsampling_class2:
         name_train_file = 'downsampled2_' + name_train_file
         name_valid_file = 'downsampled2_' + name_valid_file
         # name_test_file = 'downsampled2_' + name_test_file
 
+    dataset_train = {
+        "Id": ids_train,
+        "smiles": smiles_train,
+        "sol_category": targets_train,
+    }
+    dataset_valid = {
+        "Id": ids_valid,
+        "smiles": smiles_valid,
+        "sol_category": targets_valid,
+    }
+
+    name_train_file = "split_train.csv"
+    name_valid_file = "split_valid.csv"
+
+    if downsampling_class2:
+        name_train_file = "downsampled2_" + name_train_file
+        name_valid_file = "downsampled2_" + name_valid_file
+
     df_train = pd.DataFrame(data=dataset_train)
     df_train.to_csv(os.path.join(data_dir, name_train_file), index=False)
     df_valid = pd.DataFrame(data=dataset_valid)
     df_valid.to_csv(os.path.join(data_dir, name_valid_file), index=False)
-    # df_test = pd.DataFrame(data=dataset_test)
-    # df_test.to_csv(os.path.join(data_dir, name_test_file), index=False)
 
     return name_train_file, name_valid_file
-
-
-def PCA_application(dataset, targets):
-
-    X = pd.DataFrame(dataset)
-    y = pd.DataFrame(targets)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-
-    std = StandardScaler()
-    X_train_std = std.fit_transform(X_train)
-    X_test_std = std.transform(X_test)
-
-    pca = PCA(n_components=X_train_std.shape[1])
-    pca_data = pca.fit_transform(X_train_std)
-
-    percent_var_explained = pca.explained_variance_ / (
-        np.sum(pca.explained_variance_)
-    )
-    cumm_var_explained = np.cumsum(percent_var_explained)
-
-    plt.plot(cumm_var_explained)
-    plt.grid()
-    plt.xlabel("n_components")
-    plt.ylabel("% variance explained")
-    plt.show()
-
-    cum = cumm_var_explained
-    var = pca.explained_variance_
-    value = pca.explained_variance_ratio_
-    index = np.where(cum >= value)[0][0]
-
-    pca = PCA(n_components=index)
-    pca_train_data = pca.fit_transform(X_train_std)
-    pca_test_data = pca.transform(X_test_std)
 
 
 if __name__ == "__main__":
@@ -712,6 +374,7 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
+    """
     # CREATION AUGMENTED DATASET WITH IDs
     ids, smiles, targets = load_train_data(train_path)
     aug_id, aug_smiles, aug_targets = augment_smiles(ids, smiles, targets, data_dir, 'augmented_ALLtrain.csv')
@@ -804,19 +467,63 @@ if __name__ == "__main__":
     # print('Class 1 = ', sum(np.where(down_targets_test == 1, 1, 0)))
     # print('Class 2 = ', sum(np.where(down_targets_test == 2, 1, 0)))
 
-    # ids, smiles, targets = load_train_data(train_path)
-    #
-    # qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-    # (
-    #     dataset,
-    #     columns_info,
-    # ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
-    #
-    # make_umap(dataset, targets)
+    down_smiles_train, down_targets_train = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_train.csv'))
+    down_smiles_valid, down_targets_valid = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_valid.csv'))
+    down_smiles_test, down_targets_test = load_train_data(os.path.join(data_dir, 'augmented_downsampled2_split_test.csv'))
 
-    # submission_ids, submission_smiles = load_test_data(test_path)
+    print('TRAIN SPLIT SET')
+    print('Tot datapoints = ', targets_train.shape[0])
+    print('Class 0 = ', sum(np.where(targets_train == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(targets_train == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(targets_train == 2, 1, 0)))
 
-    # add new splitting like this:
-    # split = split_by_class(targets)
+    print('VALIDATION SPLIT SET')
+    print('Tot datapoints = ', targets_valid.shape[0])
+    print('Class 0 = ', sum(np.where(targets_valid == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(targets_valid == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(targets_valid == 2, 1, 0)))
 
-    # DATA AUGMENTATION
+    print('TEST SPLIT SET')
+    print('Tot datapoints = ', targets_test.shape[0])
+    print('Class 0 = ', sum(np.where(targets_test == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(targets_test == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(targets_test == 2, 1, 0)))
+
+    print('************ AFTER AUGMENTATION ************')
+    print('TRAIN SPLIT SET')
+    print('Tot datapoints = ', aug_targets_train.shape[0])
+    print('Class 0 = ', sum(np.where(aug_targets_train == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(aug_targets_train == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(aug_targets_train == 2, 1, 0)))
+
+    print('VALIDATION SPLIT SET')
+    print('Tot datapoints = ', aug_targets_valid.shape[0])
+    print('Class 0 = ', sum(np.where(aug_targets_valid == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(aug_targets_valid == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(aug_targets_valid == 2, 1, 0)))
+
+    print('TEST SPLIT SET')
+    print('Tot datapoints = ', aug_targets_test.shape[0])
+    print('Class 0 = ', sum(np.where(aug_targets_test == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(aug_targets_test == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(aug_targets_test == 2, 1, 0)))
+
+    print('************ AFTER DOWNSAMPLING + AUGMENTATION ************')
+    print('TRAIN SPLIT SET')
+    print('Tot datapoints = ', down_targets_train.shape[0])
+    print('Class 0 = ', sum(np.where(down_targets_train == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(down_targets_train == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(down_targets_train == 2, 1, 0)))
+
+    print('VALIDATION SPLIT SET')
+    print('Tot datapoints = ', down_targets_valid.shape[0])
+    print('Class 0 = ', sum(np.where(down_targets_valid == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(down_targets_valid == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(down_targets_valid == 2, 1, 0)))
+
+    print('TEST SPLIT SET')
+    print('Tot datapoints = ', down_targets_test.shape[0])
+    print('Class 0 = ', sum(np.where(down_targets_test == 0, 1, 0)))
+    print('Class 1 = ', sum(np.where(down_targets_test == 1, 1, 0)))
+    print('Class 2 = ', sum(np.where(down_targets_test == 2, 1, 0)))
+    """

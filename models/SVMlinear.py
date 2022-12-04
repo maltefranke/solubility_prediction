@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.linear_model import SGDClassifier
 
 from utils import *
-from data_preparation import *
+from data_utils import *
 
 
 def SVMlearning(

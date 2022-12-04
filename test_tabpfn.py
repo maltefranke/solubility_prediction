@@ -9,7 +9,7 @@ from sklearn.linear_model import SGDClassifier
 device = "cuda" if th.cuda.is_available() else "cpu"
 
 from utils import *
-from data_preparation import *
+from data_utils import *
 from TabPFN_main.tabpfn.scripts.transformer_prediction_interface import (
     TabPFNClassifier,
 )

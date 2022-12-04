@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 from utils import *
-from data_preparation import *
+from data_utils import *
 
 
 def rf_learning(X: np.array, y: np.array, CV: int = 5, depth: int = 20, label_weights: List[float] = None, seed: int = 13,

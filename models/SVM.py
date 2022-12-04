@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.svm import SVC
 
 from utils import *
-from data_preparation import *
+from data_utils import *
 
 # This is definitely too slow!!! DO NOT USE THIS
 

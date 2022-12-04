@@ -4,7 +4,7 @@ import tempfile
 import csv
 import h5py
 
-from data_preparation import *
+from data_utils import *
 
 
 # Training

@@ -2,5 +2,8 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ChemBERTa-10M-MTR" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/chemBERTa/bert-loves-chemistry" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/chemBERTa/bertviz_repo" vcs="Git" />
   </component>
 </project>

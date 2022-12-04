@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from rdkit.Chem.Scaffolds.MurckoScaffold import GetScaffoldForMol
-from data_preparation import *
+from data_utils import *
 from rdkit import DataStructs
 
 
