@@ -1,5 +1,4 @@
 from augmentation_utils import *
-from utils import *
 from conversion_smiles_utils import *
 
 import os

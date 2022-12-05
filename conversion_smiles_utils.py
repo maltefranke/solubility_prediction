@@ -1,4 +1,6 @@
 from data_utils import *
+from typing import Tuple, List
+
 
 
 def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
