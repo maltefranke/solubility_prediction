@@ -1,5 +1,12 @@
 import sklearn.utils.class_weight
 
+import random
+
+import rdkit
+from rdkit import Chem as Chem
+from rdkit.Chem import AllChem as AllChem
+from rdkit.Chem import rdFingerprintGenerator
+
 from data_utils import *
 import os
 import numpy as np

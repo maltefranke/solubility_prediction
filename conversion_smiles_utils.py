@@ -1,6 +1,20 @@
 from data_utils import *
 from typing import Tuple, List
 
+import os
+
+import numpy as np
+
+from typing import Tuple, List
+
+import rdkit
+from rdkit import Chem as Chem
+from rdkit.Chem import AllChem as AllChem
+from rdkit.Chem import rdFingerprintGenerator
+
+from mordred import Calculator, descriptors
+
+import h5py
 
 
 def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
