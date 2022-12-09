@@ -1,11 +1,10 @@
+from random import random
+
 import sklearn.utils.class_weight
+from rdkit.Contrib.fraggle.cxn_tversky import sc
+from sklearn.preprocessing import StandardScaler
 
-import random
-
-import rdkit
-from rdkit import Chem as Chem
-from rdkit.Chem import AllChem as AllChem
-from rdkit.Chem import rdFingerprintGenerator
+from data_utils import load_train_data
 
 from data_utils import *
 import os
@@ -17,11 +16,12 @@ def build_poly(x, columns_info, degree, pairs=False):
     Optionally can add square or cube roots of x as additional features,
     or the basis of products between the features.
     Args:
-        x: numpy array of shape (N,), N is the number of samples
-        degree: integer
-        pairs: boolean
+        :param x: numpy array of shape (N,), N is the number of samples
+        :param degree: integer
+        :param pairs: boolean
+        :param columns_info:
     Returns:
-        poly: numpy array of shape (N,d+1)
+        :return poly: numpy array of shape (N,d+1)
     """
     # I have already removed nan columns
     # columns_info = np.delete(columns_info, np.where(columns_info == 0)[0]) # already done in transformation
@@ -53,9 +53,7 @@ def logarithm(dataset, columns_info, log_trans=None):
     skewness = []
     to_transform = []
 
-    if (
-        log_trans == None
-    ):  # so that I trasform the same columns in the test set
+    if not log_trans:  # so that I transform the same columns in the test set
         for i in range(dataset.shape[1]):
             if (
                 columns_info[i] == 2
@@ -89,20 +87,20 @@ def transformation(
 
     # correct nans in test
 
-    if test == True:
+    if test:
         N, M = data.shape
         for i in range(M):
             if columns_info[i] == 2:
                 median = np.nanmedian(data[:, i])
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-    if log == True:
+    if log:
         data, log_trans = logarithm(data, columns_info, log_trans)
 
     # build poly
-    if degree > 1 or pairs == True:
+    if degree > 1 or pairs:
         data, columns_info = build_poly(data, columns_info, degree, pairs)
 
-    if standardization == True:
+    if standardization:
         data[
             :, np.where(columns_info == 2)[0]
         ] = StandardScaler().fit_transform(
@@ -125,6 +123,11 @@ def nan_imputation(
     Function that removes columns with too many nan values (depending on the tolerance) and standardizes
     the data substituting the median to the nan values.
     It doesn't touch the categorical features.
+    :param log:
+    :param pairs:
+    :param degree:
+    :param cat_del:
+    :param standardization:
     :param nan_tolerance: percentage of nan we want to accept for each column
     :param data: list with only qm_descriptors
     :return:
@@ -145,7 +148,7 @@ def nan_imputation(
             if check_categorical(
                 data[:, i]
             ):  # if it is categorical, don't do anything or delete
-                if cat_del == True:
+                if cat_del:
                     columns_info.append(0)
                 else:
                     columns_info.append(1)
@@ -174,8 +177,8 @@ def nan_imputation(
 
 def check_categorical(column):
     """
-    Function that checks if a columns contains categorical feature or not (ignoring the nan values)
-    :param column:
+    Function that checks if a column contains categorical feature or not (ignoring the nan values)
+    :param column: column where to check if the feature contained is categorical or not
     :return: Bool
     """
     # removing nan values and substituting them with 0
@@ -193,8 +196,9 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     """
     From: https://github.com/undeadpixel/reinvent-randomized and https://github.com/GLambard/SMILES-X
     Returns a random SMILES given a SMILES of a molecule.
-    :param mol: A Mol object
+    :param smiles: list of SMILES
     :param random_type: The type (unrestricted, restricted, rotated) of randomization performed.
+    :param isomericSmiles: Bool
     :return : A random SMILES string of the same molecule or None if the molecule is invalid.
     """
     mol = Chem.MolFromSmiles(smiles)
@@ -230,6 +234,7 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
 def augment_smiles(ids, smiles, targets, data_dir, name_file):
     """
     Addition of the rotations of a molecule depending on the class it belongs to.
+    :param ids: indices of the dataset we want to augment
     :param smiles: of the dataset we want to augment
     :param targets: of the dataset we want to augment
     :param data_dir: where we want to save the new file
@@ -302,11 +307,12 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
     """
     It creates 2 .csv files containing a random split of the given dataset into train (70%) and
     validation (30%) set.
-    :param downsampling_class2:
-    :param data_dir:
-    :param file_name:
+    :param downsampling_class2: Bool (True if we want to downsample class 2)
+    :param data_dir: path to the directory with the data
+    :param file_name: name of the file we want to create
     :param p: percentage of datapoints in class 2 to keep
-    :return:
+    :return name_train_file:
+    :return name_valid_file:
     """
     data_path = os.path.join(data_dir, file_name)
     df = pd.read_csv(data_path)
@@ -342,16 +348,6 @@ def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
     targets_valid = targets[ind_valid]
 
     # creation csv files
-    dataset_train = {"Id": ids_train, "smiles": smiles_train, "sol_category": targets_train}
-    dataset_valid = {"Id": ids_valid, "smiles": smiles_valid, "sol_category": targets_valid}
-
-    name_train_file = 'split_train.csv'
-    name_valid_file = 'split_valid.csv'
-
-    if downsampling_class2:
-        name_train_file = 'downsampled2_' + name_train_file
-        name_valid_file = 'downsampled2_' + name_valid_file
-
     dataset_train = {
         "Id": ids_train,
         "smiles": smiles_train,
@@ -386,7 +382,6 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-
     # CREATION AUGMENTED DATASET WITH IDs
     ids, smiles, targets = load_train_data(train_path)
     aug_id, aug_smiles, aug_targets = augment_smiles(ids, smiles, targets, data_dir, 'augmented_ALLtrain.csv')
@@ -396,7 +391,6 @@ if __name__ == "__main__":
     print('Class 0 = ', sum(np.where(aug_targets == 0, 1, 0)))
     print('Class 1 = ', sum(np.where(aug_targets == 1, 1, 0)))
     print('Class 2 = ', sum(np.where(aug_targets == 2, 1, 0)))
-
 
     # CREATION SPLIT DATASETS - new .csv files
     name_tr, name_val = create_split_csv(data_dir, "train.csv", downsampling_class2=False, p=0.6)
@@ -435,7 +429,6 @@ if __name__ == "__main__":
     print('Class 1 = ', sum(np.where(aug_targets_valid == 1, 1, 0)))
     print('Class 2 = ', sum(np.where(aug_targets_valid == 2, 1, 0)))
 
-
     ################### RE-DO EVERYTHING BY DOWNSAMPLING CLASS 2 ###################
 
     # CREATION SPLIT DATASETS ALLOWING DOWNSAMPLING - new .csv files
@@ -451,7 +444,6 @@ if __name__ == "__main__":
     _, aug_smiles_valid_down, aug_targets_valid_down = augment_smiles(ids_valid_down, smiles_valid_down,
                                                                       targets_valid_down, data_dir,
                                                                       'augmented_'+name_val_down)
-
 
     print('************ AFTER DOWNSAMPLING + AUGMENTATION ************')
     print('TRAIN SPLIT SET')

@@ -1,16 +1,11 @@
 import pytorch_lightning as pl
 import pandas as pd
-import numpy as np
 
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from transformers import AutoTokenizer, RobertaModel
 
 from sklearn.metrics import cohen_kappa_score
-from time import time
-from itertools import chain
-# from solubilitykaggle import *
 
 from transformers import AutoTokenizer, RobertaForSequenceClassification
 from torch.utils.data import Dataset

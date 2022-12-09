@@ -1,6 +1,6 @@
-from roberta import *
 import tqdm
-import re
+from chemberta77M import *
+
 
 @click.command()
 @click.option("--size", type=int, default=300)

@@ -5,29 +5,23 @@ import os
 import csv
 import numpy as np
 import pandas as pd
-import random
 import matplotlib.pyplot as plt
-import math
-import scipy as sc
 from typing import Tuple, List
 
-import rdkit
-from rdkit import Chem as Chem
-from rdkit.Chem import AllChem as AllChem
-from rdkit.Chem import rdFingerprintGenerator
-
-import sklearn
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold
 from sklearn.decomposition import PCA
 from sklearn.utils import resample
 
-from mordred import Calculator, descriptors
 from imblearn.over_sampling import SMOTE
 import h5py
 
 
 def load_train_data(train_path: str):
+    """
+    Load the data from the .csv file with the train dataset
+    :param train_path:
+    :return:
+    """
 
     df = pd.read_csv(train_path)
 
@@ -43,6 +37,11 @@ def load_train_data(train_path: str):
 
 
 def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
+    """
+    Load the data from the .csv file with the test dataset
+    :param test_path:
+    :return:
+    """
 
     df = pd.read_csv(test_path)
 
@@ -51,14 +50,13 @@ def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
 
     return ids, smiles
 
-def create_submission_file(
-    ids: List[str], y_pred: np.array, path: str
-) -> None:
+
+def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
     """
     Function to create the final submission file
     Args:
         ids: list of ids corresponding to the original data
-        y_pred: np.array of model predictions
+        y_pred: array of model predictions'
         path: path to where the csv should be saved
 
     Returns:
@@ -131,27 +129,7 @@ def smote_algorithm(y, X, seed: int):
     return y_resampled, X_resampled
 
 
-def calculate_class_weights(
-    targets: np.array, num_classes: int = 3
-) -> List[float]:
-    """
-    computation of the weights to eal with the umbalanceness of the dataset
-    """
-
-    # see how balanced the data is and assign weights
-    train_data_size = targets.shape[0]
-
-    weights = [
-        1 - np.count_nonzero(targets == int(i)) / train_data_size
-        for i in range(num_classes)
-    ]
-
-    return weights
-
-
-def indices_by_class(
-    targets: np.array, num_classes: int = 3
-) -> List[np.array]:
+def indices_by_class(targets: np.array, num_classes: int = 3) -> List[np.array]:
     """
     returns the indices divided following the 3 different solubility classes
     """
@@ -165,6 +143,13 @@ def indices_by_class(
 
 
 def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
+    """
+
+    :param targets:
+    :param CV:
+    :param num_classes:
+    :return:
+    """
     splitted_classes_indices = indices_by_class(targets, num_classes)
 
     kfold = KFold(n_splits=CV)
@@ -195,6 +180,12 @@ def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
 
 
 def create_subsample_train_csv(data_dir: str, features: np.array):
+    """
+
+    :param data_dir:
+    :param features:
+    :return:
+    """
     path = os.path.join(data_dir, "random_undersampling.csv")
     train_path = os.path.join(data_dir, "train.csv")
     ids, smiles, targets = load_train_data(train_path)
@@ -281,6 +272,12 @@ def PCA_application(dataset, targets, dataset_test,targets_test):
 
 
 def PCA_application(dataset, dataset_test):
+    """
+
+    :param dataset:
+    :param dataset_test:
+    :return:
+    """
     # https://www.youtube.com/watch?v=oiusrJ0btwA
     X_train = pd.DataFrame(dataset)
 

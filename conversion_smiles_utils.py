@@ -1,6 +1,5 @@
+from augmentation_utils import build_poly
 from data_utils import *
-from typing import Tuple, List
-
 import os
 
 import numpy as np
@@ -18,10 +17,12 @@ import h5py
 
 
 def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
-    fp_generator = rdFingerprintGenerator.GetMorganGenerator()
     """
     Creation of morgan_fingerprints starting from the smiles of the molecules
+    :param smiles:
+    :return: array with Morgan fingerprints
     """
+    fp_generator = rdFingerprintGenerator.GetMorganGenerator()
     all_fps = []
     for molecule in smiles:
         molecule = Chem.MolFromSmiles(molecule)
@@ -33,13 +34,15 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     return all_fps
 
 
-def smiles_to_qm_descriptors(
-    smiles: List[str], data_dir: str, type_="train"
-) -> np.array:
+def smiles_to_qm_descriptors(smiles: List[str], data_dir: str, type_="train") -> np.array:
     """
-    Creation or loading of the dataset containing features which denote physical/chemical quantities of the molecules
+    Creation or loading of the dataset containing features which denote physical/chemical quantities
+    of the molecules
+    :param smiles:
+    :param data_dir:
+    :param type_:
+    :return:
     """
-
     # paths to the datasets
     if type_ == "train":
         qm_descriptor_file = os.path.join(
@@ -78,6 +81,12 @@ def smiles_to_qm_descriptors(
 def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
     """
     Sequence of functions to transform the dataset
+    :param ids:
+    :param smiles:
+    :param data_dir:
+    :param degree:
+    :param fps:
+    :return:
     """
 
     # introduce descriptors
@@ -93,7 +102,7 @@ def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
             dataset, columns_info, degree, pairs=False
         )  # included in transformations
 
-    if fps == True:
+    if fps:
         # add morgan fingerprints
         all_fps = smiles_to_morgan_fp(smiles)
         dataset = np.concatenate((dataset, all_fps), axis=1)
@@ -105,10 +114,10 @@ def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
     """
     Transform a list of SMILES into their 3D representation using rdkit functions
     Args:
-        smiles: list of SMILES string
+        :param smiles: list of SMILES string
 
     Returns:
-        tuple containing a list of atomic numbers and a list of corresponding atom positions
+        :return : tuple containing a list of atomic numbers and a list of corresponding atom positions
     """
     # following https://stackoverflow.com/questions/71915443/rdkit-coordinates-for-atoms-in-a-molecule
     all_atomic_nums = []
