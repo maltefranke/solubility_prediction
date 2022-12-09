@@ -1,6 +1,3 @@
-from augmentation_utils import *
-from conversion_smiles_utils import *
-
 import os
 import csv
 import numpy as np
@@ -315,6 +312,7 @@ def PCA_application(dataset, dataset_test):
 
 if __name__ == "__main__":
 
+    """
     this_dir = os.getcwd()
 
     data_dir = os.path.join(this_dir, "data")
@@ -322,6 +320,8 @@ if __name__ == "__main__":
     test_path = os.path.join(data_dir, "test.csv")
 
     ids, smiles, targets = load_train_data(train_path)
+
+    from augmentation_utils import nan_imputation
 
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
     (
@@ -348,11 +348,11 @@ if __name__ == "__main__":
     # )
     # make_umap(dataset_shuffled, targets_shuffled)
     submission_ids, submission_smiles = load_test_data(test_path)
-    """
+    
     make_umap(
         dataset_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1, :],
         targets_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1],
     )
+    
+
     """
-
-

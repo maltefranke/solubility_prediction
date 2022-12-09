@@ -16,7 +16,7 @@ def draw_molecules(smiles, n=9):
     :param n: number of molecules to draw
     :return: None
     """
-    rnd_mol = [random.randint(0, smiles.shape[0]) for i in range(n)]
+    rnd_mol = [random.randint(0, len(smiles)) for i in range(n)]
     selected_mol = [Chem.MolFromSmiles(smiles[i]) for i in rnd_mol]
     print(targets[rnd_mol])
 

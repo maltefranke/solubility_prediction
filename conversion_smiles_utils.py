@@ -1,5 +1,5 @@
 from augmentation_utils import build_poly
-from data_utils import *
+from data_utils import nan_imputation
 import os
 
 import numpy as np

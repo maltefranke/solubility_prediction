@@ -1,14 +1,16 @@
-from random import random
-
-import sklearn.utils.class_weight
-from rdkit.Contrib.fraggle.cxn_tversky import sc
-from sklearn.preprocessing import StandardScaler
-
-from data_utils import load_train_data
-
-from data_utils import *
 import os
 import numpy as np
+import pandas as pd
+from random import random
+
+import rdkit
+import rdkit.Chem as Chem
+
+import sklearn.utils.class_weight
+import scipy as sc
+from sklearn.preprocessing import StandardScaler
+
+from data_utils import load_train_data, indices_by_class
 
 
 def build_poly(x, columns_info, degree, pairs=False):
