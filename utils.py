@@ -5,10 +5,16 @@ from sklearn.metrics import cohen_kappa_score, confusion_matrix
 import umap
 import plotly.express as px
 from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+from mpl_toolkits.mplot3d import Axes3D
+import seaborn as sns
+from shapely.geometry import Point
+from shapely.ops import cascaded_union
 
-# import umap.plot
+####  TO CHECK THE LAST 2 FUNCTIONS
+import umap.plot
 
-from data_utils import *
+from data_preparation import *
 
 
 def quadratic_weighted_kappa(y_pred: np.array, y_true: np.array) -> float:
@@ -26,96 +32,210 @@ def quadratic_weighted_kappa(y_pred: np.array, y_true: np.array) -> float:
     return score
 
 
-def differential_top_k_loss(y_pred, y_true):
-    # following https://github.com/Felix-Petersen/difftopk
-    pass
+def make_umap():
+    """
+    plot of the umap of the qm_descriptors and of the morgan fingerprints
+    """
 
+    this_dir = os.getcwd()
 
-"""
-def make_umap(X: np.array, y: np.array):
-    X, _ = nan_imputation(
-        X, nan_tolerance=0.0, standardization=False, cat_del=False
+    data_dir = os.path.join(this_dir, "data")
+    train_path = os.path.join(data_dir, "train.csv")
+    test_path = os.path.join(data_dir, "test.csv")
+
+    ids, smiles, y = load_train_data(train_path)
+
+    # descriptors
+
+    X = smiles_to_qm_descriptors(smiles, data_dir)
+
+    X, _, _ = nan_imputation(
+        X,
+        smiles,
+        nan_tolerance=0.0,
+        standardization=False,
+        cat_del=False,
+        log=False,
     )  # nans are not accepted
 
+    # fingerprints
+    fps = smiles_to_morgan_fp(smiles)
+
+    p = np.random.permutation(len(y))
+    y = y[p]
+    X = X[p, :]
+
+    # division in classe
     class_indices = indices_by_class(y)
     class_0 = X[class_indices[0]]
     class_1 = X[class_indices[1]]
     class_2 = X[class_indices[2]]
 
-    all_classes = np.concatenate(
-        [class_0, class_1, class_2], axis=0
-    )  # X is sufficient
+    all_classes = np.concatenate([class_0, class_1, class_2], axis=0)
 
-    # could append all fingerprints together -> make sure you know split them based on the label
-    # reducer = umap.UMAP(n_components=3)
-    reducer = umap.UMAP(n_neighbors=5)
-    mapper = reducer.fit(all_classes)
-
-    umap.plot.points(mapper)
-
-    # plot all 3 labels
-    red = umap.UMAP(n_components=3, n_neighbors=5)
-    embedding = red.fit_transform(all_classes)
-    print(embedding)
-    plt.figure()
-
-    umap.plot.diagnostic(mapper, diagnostic_type="pca")
-    plt.figure()
-
-    fig = plt.figure(figsize=(12, 12))
-    ax = fig.add_subplot(projection="3d")
-    ax.scatter(
-        embedding[: len(class_0), 0],
-        embedding[: len(class_0), 1],
-        embedding[: len(class_0), 2],
-        edgecolor="red",
-        linewidths=0.5,
-        label="0",
-    )
-    ax.scatter(
-        embedding[len(class_0) : len(class_0) + len(class_1), 0],
-        embedding[len(class_0) : len(class_0) + len(class_1), 1],
-        embedding[len(class_0) : len(class_0) + len(class_1), 2],
-        edgecolor="blue",
-        linewidths=0.5,
-        label="1",
-    )
-    ax.scatter(
-        embedding[len(class_0) + len(class_1) :, 0],
-        embedding[len(class_0) + len(class_1) :, 1],
-        embedding[len(class_0) + len(class_1) :, 2],
-        edgecolor="yellow",
-        linewidths=0.5,
-        label="2",
+    # splitting into train and test
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.33, random_state=42
     )
 
-    plt.show()
+    fps_train, fps_test, fps_y_train, fps_y_test = train_test_split(
+        fps, y, test_size=0.33, random_state=42
+    )
 
-    plt.scatter(
-        embedding[: len(class_0), 0],
-        embedding[: len(class_0), 1],
-        embedding[: len(class_0), 2],
-        edgecolor="red",
-        linewidths=0.5,
-        label="0",
+    indexes_train = np.where(fps_y_train != 2)[0]
+    indexes_test = np.where(fps_y_test != 2)[0]
+
+    # UMAP
+    draw_umap(
+        fps_train[indexes_train, :],
+        fps_y_train[indexes_train],
+        n_components=2,
+        title="Umap of Morgan fingerprints - train, classes 0 and 1 -",
     )
-    plt.show()
-    plt.scatter(
-        embedding[len(class_0) : len(class_0) + len(class_1), 0],
-        embedding[len(class_0) : len(class_0) + len(class_1), 1],
-        embedding[len(class_0) : len(class_0) + len(class_1), 2],
-        edgecolor="blue",
-        linewidths=0.5,
-        label="1",
+    draw_umap(
+        fps_X_test[indexes_test, :],
+        fps_y_test[indexes_test],
+        n_components=2,
+        title="Umap of fingerprints - test, classes 0 and 1 -",
     )
-    plt.show()
-    plt.scatter(
-        embedding[len(class_0) + len(class_1) :, 0],
-        embedding[len(class_0) + len(class_1) :, 1],
-        embedding[len(class_0) + len(class_1) :, 2],
-        edgecolor="yellow",
-        linewidths=0.5,
-        label="2",
+
+    draw_umap(
+        fps_X_train,
+        fps_y_train,
+        n_components=2,
+        title="Umap of fingerprints - train -",
     )
-    plt.show()
+    draw_umap(
+        fps_X_test,
+        fps_y_test,
+        n_components=2,
+        title="Umap of fingerprints - test -",
+    )
+
+
+def draw_umap(
+    data,
+    targets,
+    n_neighbors=15,
+    min_dist=0.1,
+    n_components=3,
+    metric="euclidean",
+    title="",
+):
+    assert (
+        n_components == 2 or n_components == 3
+    ), f"n_components should 2 (2D) or 3 (3D): {n_components}"
+    # https://umap-learn.readthedocs.io/en/latest/parameters.html
+    fit = umap.UMAP(
+        n_neighbors=n_neighbors,
+        min_dist=min_dist,
+        n_components=n_components,
+        metric=metric,
+    )
+    u = fit.fit_transform(data)
+    fig = plt.figure()
+
+    if n_components == 2:
+        plt.figure(figsize=(7, 7))
+        ax = plt.axes()
+        ax.set_xlim(-10, 15)
+        ax.set_ylim(-10, 15)
+        fg = ax.scatter(
+            u[:, 0], u[:, 1], c=targets, alpha=0.1, cmap="prism"
+        )  # cmap="hsv"
+    if n_components == 3:
+        plt.figure(figsize=(7, 7))
+        ax = plt.axes(projection="3d")
+        ax.set_xlim3d(-10, 15)
+        ax.set_ylim3d(-10, 15)
+        ax.set_zlim3d(-10, 15)
+        fg = ax.scatter3D(
+            u[:, 0], u[:, 1], u[:, 2], c=targets, alpha=0.1, cmap="prism"
+        )
+
+    plt.title(title, fontsize=18)
+
+
+"""
+def scatter_umap(u, class_0, class_1, class_2):
+
+    alpha = 0.5
+    polygons1 = [
+        Point(u[i, 0], u[i, 1]).buffer(0.08) for i in range(len(class_0))
+    ]
+    polygons2 = [
+        Point(u[len(class_0) + i, 0], u[len(class_0) + i, 1]).buffer(0.08)
+        for i in range(len(class_1))
+    ]
+    polygons3 = [
+        Point(u[len(class_1) + i, 0], u[len(class_1) + i, 1]).buffer(0.08)
+        for i in range(len(class_2))
+    ]
+    polygons1 = cascaded_union(polygons1)
+    polygons2 = cascaded_union(polygons2)
+    polygons3 = cascaded_union(polygons3)
+    fig = plt.figure(figsize=(4, 4))
+    ax = fig.add_subplot(111, title="Umap_points")
+    for polygon1 in polygons1:
+        polygon1 = ptc.Polygon(
+            np.array(polygon1.exterior), facecolor="red", lw=0, alpha=alpha
+        )
+        ax.add_patch(polygon1)
+    for polygon2 in polygons2:
+        polygon2 = ptc.Polygon(
+            np.array(polygon2.exterior), facecolor="blue", lw=0, alpha=alpha
+        )
+        ax.add_patch(polygon2)
+    for polygon3 in polygons3:
+        polygon3 = ptc.Polygon(
+            np.array(polygon3.exterior), facecolor="green", lw=0, alpha=alpha
+        )
+        ax.add_patch(polygon3)
+    ax.axis([-5, 15, -5, 15])
+
+
+def scatter_umap_3d(u, class_0, class_1, class_2):
+
+    alpha = 0.5
+    polygons1 = [
+        Point(u[i, 0], u[i, 1], u[i, 2]).buffer(0.06)
+        for i in range(len(class_0))
+    ]
+    polygons2 = [
+        Point(
+            u[len(class_0) + i, 0],
+            u[len(class_0) + i, 1],
+            u[len(class_0) + i, 2],
+        ).buffer(0.06)
+        for i in range(len(class_1))
+    ]
+    polygons3 = [
+        Point(
+            u[len(class_1) + i, 0],
+            u[len(class_1) + i, 1],
+            u[len(class_1) + i, 2],
+        ).buffer(0.06)
+        for i in range(len(class_2))
+    ]
+    polygons1 = cascaded_union(polygons1)
+    polygons2 = cascaded_union(polygons2)
+    polygons3 = cascaded_union(polygons3)
+    fig = plt.figure(figsize=(4, 4))
+    ax = fig.add_subplot(111, title="Umap_points")
+    for polygon1 in polygons1:
+        polygon1 = ptc.Polygon(
+            np.array(polygon1.exterior), facecolor="red", lw=0, alpha=alpha
+        )
+        ax.add_patch(polygon1)
+    for polygon2 in polygons2:
+        polygon2 = ptc.Polygon(
+            np.array(polygon2.exterior), facecolor="blue", lw=0, alpha=alpha
+        )
+        ax.add_patch(polygon2)
+    for polygon3 in polygons3:
+        polygon3 = ptc.Polygon(
+            np.array(polygon3.exterior), facecolor="green", lw=0, alpha=alpha
+        )
+        ax.add_patch(polygon3)
+    ax.axis([-5, 15, -5, 15])
 """
