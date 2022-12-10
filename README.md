@@ -1,20 +1,10 @@
-This is our repository for the 1st EUOS/SLAS Joint Challenge: Compound Solubility.
+# Compound Solubility Prediction
 
-<br/><br/>
+EPFL Machine Learning Course, Autumn 2022 - Class Project 2
 
-Checklist:
+Team members: Malte Franke, Laura Mismetti, Giacomo Mossinelli
 
-<br/><br/>
-
-Code:
-- [ ] improve weak algorithms (i.e. SVM, ANN, RandomForest...)
-- [ ] CLEAN AND COMMENT THE CODE
-- [ ] write a proper README
-<br/><br/>
-
-- [ ] improve xgboost with cross validation
-- [ ] make roBERTa work
-- [ ] connect different schemes to build a bigger one (XGboost, Schnet, roBERTa (?))
-- [ ] try out TABPFN in the same way
-- [ ] think of some meaningfull plot (e.g. Umap)
-- [ ] collect papers
+This repository contains the code for the prediction of solubility class of compounds. In particular are distinguished compounds with:
+- High solubility: Nephelometry values lower than 50000
+- Medium solubility: Nephelometry values between 50000 and 100000
+- Low solubility: Nephelometry values higher than 100000
