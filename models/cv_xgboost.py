@@ -8,48 +8,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
 
-from hyperopt import STATUS_OK, Trials, fmin, hp, tpe
 import matplotlib.pyplot as plt
+from augmentation_utils import *
 from utils import *
 from data_utils import *
+from conversion_smiles_utils import *
 
-
-def xgb_cross(
-    X: np.array,
-    y: np.array,
-    label_weights: List[float] = None,
-    seed: int = 13,
-    sample_weights: List[float] = None,
-):
-
-    np.random.seed(seed)
-    p = np.random.permutation(targets.shape[0])
-    X = X[p]
-    y = y[p]
-
-    param_grid = {
-        "max_depth": [2, 3, 4, 5, 6, 8],
-        "learning_rate": [0.01, 0.05, 0.1, 0.2, 0.25],
-        "gamma": [0.0, 0.2, 0, 4, 0.5, 0.7, 0.9, 1],
-        "max_delta_step": [0, 1, 3, 5, 7, 10],
-        "reg_lambda": [0, 1, 5, 10],
-        "alpha": [0, 1, 5, 10],
-        "num_class": [3],
-    }
-    # Init classifier
-    xgb_cl = xgboost.XGBClassifier(objective="multi:softmax")
-    kappa_scorer = make_scorer(cohen_kappa_score)
-    # Init Grid Search
-    grid_cv = GridSearchCV(
-        xgb_cl, param_grid, n_jobs=-1, cv=5, scoring=kappa_scorer
-    )
-
-    # Fit
-    _ = grid_cv.fit(X, y)
-
-    grid_cv.best_score_
-
-    print(grid_cv.best_params_)
+"""
+XGBoost cross validation
+"""
 
 
 if __name__ == "__main__":
@@ -57,17 +24,21 @@ if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
     # data path
-    data_dir = os.path.join(this_dir, "solubility_prediction/data")
+    data_dir = os.path.join(
+        this_dir, "solubility_prediction/data"
+    )  # CHANGE DEPENDING ON THE FOLDER!
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
+    print("importing train...")
 
-    # get data and transform smiles -> morgan fingerprint
+    # load dataset
     ids, smiles, targets = load_train_data(train_path)
 
     # manipulation of the dataset
-    # degree = 2
-    dataset, columns_info = preprocessing(ids, smiles, data_dir)
+    print("PREPROCESSING...")
+    dataset, columns_info, log_trans = preprocessing(ids, smiles, data_dir)
     train_data_size = targets.shape[0]
+
     # we permute/shuffle our data first
     seed = 13
     np.random.seed(seed)
@@ -75,44 +46,67 @@ if __name__ == "__main__":
     dataset = dataset[p]
     targets = targets[p]
 
+    # TEST SET
+    print("importing test...")
+
+    submission_ids, submission_smiles = load_test_data(test_path)
+
+    # TEST SET TRANSFORMATION
+    # descriptors
+    qm_descriptors_test = smiles_to_qm_descriptors(
+        submission_smiles, data_dir, "test"
+    )
+
+    qm_descriptors_test, _ = transformation(
+        qm_descriptors_test,
+        submission_smiles,
+        columns_info,
+        standardization=False,
+        test=True,
+        degree=1,
+        pairs=False,
+        log_trans=log_trans,
+        log=False,
+        fps=True,
+    )
+    # features selection -> PCA
+
+    # dataset, qm_descriptors_test = PCA_application(
+    #    dataset, qm_descriptors_test
+    # )
+
+    # Computation of weights
     weights = calculate_class_weights(targets)
-    print(type(weights))
     sample_weights = [weights[i] for i in targets]
     label_weights = {
         0: weights[0],
         1: weights[1],
         2: weights[2],
     }
-
-    """
-    xgbs = xgb_cross(
-        dataset,
-        targets,
-        label_weights=weights,
-        sample_weights=sample_weights,
-        seed=seed,
-    )
-    """
+    # parameters collection
     param_grid = {
-        "max_depth": [2, 3, 4, 5, 6, 8],
-        "learning_rate": [0.01, 0.05, 0.1, 0.2, 0.25],
-        "gamma": [0.0, 0.2, 0, 4, 0.5, 0.7, 0.9, 1],
-        "max_delta_step": [0, 1, 3, 5, 7, 10],
-        "reg_lambda": [0, 1, 5, 10],
-        "alpha": [0, 1, 5, 10],
+        "max_depth": [2, 3, 4, 5],
+        "learning_rate": [0.01, 0.05, 0.1],
+        "gamma": [0.0, 5.0, 10.0],
+        "max_delta_step": [0, 5, 10],
+        "reg_lambda": [0, 1, 5],
         "num_class": [3],
     }
+
     # Init classifier
-    xgb_cl = xgboost.XGBClassifier(objective="multi:softmax")
-    kappa_scorer = make_scorer(cohen_kappa_score)
-    # Init Grid Search
-    # https://stackoverflow.com/questions/13051706/using-sample-weight-in-gridsearchcv
+    print("XGBoost...")
+    xgb_cl = xgboost.XGBClassifier(
+        objective="multi:softmax", tree_method="gpu_hist"
+    )
+    kappa_scorer = make_scorer(quadratic_weighted_kappa)
 
     grid_cv = GridSearchCV(xgb_cl, param_grid, cv=5, scoring=kappa_scorer)
 
     # Fit
-    _ = grid_cv.fit(dataset, targets, fit_params={"sample_weight": weights})
-
-    print(grid_cv.best_score_)
-
+    _ = grid_cv.fit(dataset, targets, sample_weight=sample_weights)
+    print("results...")
+    best_score = grid_cv.best_score_
+    best_params = grid_cv.best_params_
+    print(f"best squared kappa={grid_cv.best_score_}")
+    print("BEST PARAMS")
     print(grid_cv.best_params_)
