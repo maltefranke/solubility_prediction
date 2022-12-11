@@ -12,7 +12,7 @@ def comparison(x1, x2, x3):
     result = np.zeros(x1.shape[0], dtype=int)
 
     for i in range(result.shape[0]):
-        # PROBLEM: if the 3 values are different, it takes the first one -> idea: put the strongest method as the 1st
+        # if the 3 values are different, it takes the first one -> strongest method as the 1st
         result[i] = statistics.mode([x1[i, 1], x2[i, 1], x3[i, 1]])
 
     return x1[:, 0], result
@@ -47,5 +47,5 @@ if __name__ == "__main__":
 
     ids, X = comparison(x_xgboost, x_chem, x_schnet)
 
-    submission_file = os.path.join(this_dir, "comparison2.csv")
+    submission_file = os.path.join(this_dir, "comparison.csv")
     create_submission_file(ids, X, submission_file)
