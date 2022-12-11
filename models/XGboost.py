@@ -6,25 +6,28 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import cohen_kappa_score
 
 import matplotlib.pyplot as plt
+from augmentation_utils import *
 from utils import *
 from data_utils import *
+from conversion_smiles_utils import *
 
 # IMPORTANT https://www.kaggle.com/code/prashant111/xgboost-k-fold-cv-feature-importance
+
+
 def xgb_learning(
     X: np.array,
     y: np.array,
     CV: int = 5,
-    depth: int = 20,
     label_weights: List[float] = None,
     seed: int = 13,
     sample_weights: List[float] = None,
 ) -> List[xgboost.XGBClassifier]:
+
     label_weights = {
         0: label_weights[0],
         1: label_weights[1],
         2: label_weights[2],
     }
-    print(label_weights)
     xgbs = []
 
     kfold = KFold(n_splits=CV, shuffle=True)
@@ -40,14 +43,14 @@ def xgb_learning(
 
         xgb = xgboost.XGBClassifier(
             objective="multi:softmax",
-            eval_metric="auc",
-            colsample_bytree=0.5,
-            gamma=0,
+            gamma=1,
             learning_rate=0.1,
-            max_depth=3,
-            reg_lambda=0,
+            max_delta_step=10,
+            max_depth=4,
+            reg_lambda=5.0,
             verbosity=1,
             num_class=3,
+            tree_method="hist",
         )
 
         eval_set = [(dataset, targets)]
@@ -108,7 +111,10 @@ if __name__ == "__main__":
     # degree = (
     #    2  # -> to be put in "preprocessing()" if you want power augmentation
     # )
-    dataset, columns_info = preprocessing(ids, smiles, data_dir)
+
+    dataset, columns_info, log_trans = preprocessing(ids, smiles, data_dir)
+
+    #############################
     train_data_size = targets.shape[0]
 
     # we permute/shuffle our data first
@@ -117,19 +123,6 @@ if __name__ == "__main__":
     p = np.random.permutation(targets.shape[0])
     dataset = dataset[p]
     targets = targets[p]
-
-    weights = calculate_class_weights(targets)
-    sample_weights = [weights[i] for i in targets]
-    # print(weights)
-    # print(sample_weights)
-    xgbs = xgb_learning(
-        dataset,
-        targets,
-        CV=5,
-        label_weights=weights,
-        sample_weights=sample_weights,
-        seed=seed,
-    )
 
     # TEST SET
 
@@ -140,21 +133,41 @@ if __name__ == "__main__":
     qm_descriptors_test = smiles_to_qm_descriptors(
         submission_smiles, data_dir, "test"
     )
-
-    qm_descriptors_test = transformation(
+    qm_descriptors_test, _ = transformation(
         qm_descriptors_test,
+        submission_smiles,
         columns_info,
         standardization=True,
         test=True,
         degree=1,
         pairs=False,
+        log_trans=log_trans,
+        log=True,
+        fps=True,
     )
+
+    # dataset, qm_descriptors_test = PCA_application(   #<------------------------
+    #    dataset, qm_descriptors_test
+    # )
+
+    weights = calculate_class_weights(targets)
+    sample_weights = [weights[i] for i in targets]
+
+    xgbs = xgb_learning(
+        dataset,
+        targets,
+        CV=5,
+        label_weights=weights,
+        sample_weights=sample_weights,
+        seed=seed,
+    )
+
     # qm_descriptors_test = build_poly(qm_descriptors_test, columns_info, degree)
 
     final_predictions = predict_xgb_ensemble(xgbs, qm_descriptors_test)
 
     submission_file = os.path.join(
         this_dir,
-        "xg_boost_splitted_no_categorical_nonan_log_softmax_cancellare_2.csv",
+        "xn_all_in_cv.csv",
     )
     create_submission_file(submission_ids, final_predictions, submission_file)
