@@ -14,7 +14,10 @@ from shapely.ops import cascaded_union
 ####  TO CHECK THE LAST 2 FUNCTIONS
 import umap.plot
 
-from data_preparation import *
+from data_utils import *
+
+from augmentation_utils import *
+from conversion_smiles_utils import *
 
 
 def quadratic_weighted_kappa(y_pred: np.array, y_true: np.array) -> float:

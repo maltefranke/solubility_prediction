@@ -48,7 +48,9 @@ def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
     return ids, smiles
 
 
-def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
+def create_submission_file(
+    ids: List[str], y_pred: np.array, path: str
+) -> None:
     """
     Function to create the final submission file
     Args:
@@ -64,6 +66,24 @@ def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
         writer.writerow(["Id", "Pred"])
         for id, pred in zip(ids, y_pred):
             writer.writerow([id, pred])
+
+
+def calculate_class_weights(
+    targets: np.array, num_classes: int = 3
+) -> List[float]:
+    """
+    computation of the weights to eal with the umbalanceness of the dataset
+    """
+
+    # see how balanced the data is and assign weights
+    train_data_size = targets.shape[0]
+
+    weights = [
+        1 - np.count_nonzero(targets == int(i)) / train_data_size
+        for i in range(num_classes)
+    ]
+
+    return weights
 
 
 def up_down_sampling(y, X):
@@ -126,7 +146,9 @@ def smote_algorithm(y, X, seed: int):
     return y_resampled, X_resampled
 
 
-def indices_by_class(targets: np.array, num_classes: int = 3) -> List[np.array]:
+def indices_by_class(
+    targets: np.array, num_classes: int = 3
+) -> List[np.array]:
     """
     returns the indices divided following the 3 different solubility classes
     """
@@ -225,90 +247,6 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
     with h5py.File(descriptor_file, "w") as hf:
         hf.create_dataset("descriptors", data=cutoff_features)
 
-"""
-def PCA_application(dataset, targets, dataset_test,targets_test):
-
-    X = pd.DataFrame(dataset)
-    y = pd.DataFrame(targets)
-    
-    X_output = pd.DataFrame(dataset_test)
-    y_output = pd.DataFrame(targets_test)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-
-    std = StandardScaler()
-    X_train_std = std.fit_transform(X_train)
-    X_test_std = std.transform(X_test)
-    X_output_std = std.transform(X_output)
-
-    pca = PCA(n_components=X_train_std.shape[1])
-    pca_data = pca.fit_transform(X_train_std)
-
-    percent_var_explained = pca.explained_variance_ / (
-        np.sum(pca.explained_variance_)
-    )
-    cumm_var_explained = np.cumsum(percent_var_explained)
-
-    plt.plot(cumm_var_explained)
-    plt.grid()
-    plt.xlabel("n_components")
-    plt.ylabel("% variance explained")
-    plt.show()
-
-    cum = cumm_var_explained
-    var = pca.explained_variance_
-    value = pca.explained_variance_ratio_
-    index = np.where(cum >= value)[0][0]
-
-    pca = PCA(n_components=index)
-    pca_train_data = pca.fit_transform(X_train_std)
-    pca_test_data = pca.transform(X_test_std)
-    pca_output_data = pca.transform(X_output_std)
-    return pca_train_data,pca_test_data,pca_output_data
-"""
-
-
-def PCA_application(dataset, dataset_test):
-    """
-
-    :param dataset:
-    :param dataset_test:
-    :return:
-    """
-    # https://www.youtube.com/watch?v=oiusrJ0btwA
-    X_train = pd.DataFrame(dataset)
-
-    X_output = pd.DataFrame(dataset_test)
-
-    pca = PCA(n_components=X_train.shape[1])
-    pca_data = pca.fit_transform(X_train)
-    # pca_output_data = pca.transform(X_output)
-
-    explained_variance = pca.explained_variance_ratio_
-    cumm_var_explained = np.cumsum(explained_variance)
-
-    plt.plot(cumm_var_explained)
-    plt.grid()
-    plt.xlabel("n_components")
-    plt.ylabel("% variance explained")
-    plt.show()
-
-    cum = cumm_var_explained
-    var = pca.explained_variance_
-    index = np.where(cum >= 0.975)[0][0]
-
-    pca = PCA(n_components=index + 1)
-    pca_train_data = pca.fit_transform(X_train)
-    pca_output_data = pca.transform(X_output)
-    print(pca_train_data)
-    print(type(pca_train_data))
-    print(type(pca_output_data))
-    # print(pca_train_data)
-    return (
-        pca_train_data,
-        pca_output_data,
-    )  # pca_train_data.to_numpy(), pca_output_data.to_numpy()
-
 
 if __name__ == "__main__":
 
@@ -348,11 +286,11 @@ if __name__ == "__main__":
     # )
     # make_umap(dataset_shuffled, targets_shuffled)
     submission_ids, submission_smiles = load_test_data(test_path)
-    
+
     make_umap(
         dataset_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1, :],
         targets_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1],
     )
-    
+
 
     """

@@ -1,5 +1,3 @@
-from augmentation_utils import build_poly
-from data_utils import nan_imputation
 import os
 
 import numpy as np
@@ -34,7 +32,9 @@ def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     return all_fps
 
 
-def smiles_to_qm_descriptors(smiles: List[str], data_dir: str, type_="train") -> np.array:
+def smiles_to_qm_descriptors(
+    smiles: List[str], data_dir: str, type_="train"
+) -> np.array:
     """
     Creation or loading of the dataset containing features which denote physical/chemical quantities
     of the molecules
@@ -77,38 +77,6 @@ def smiles_to_qm_descriptors(smiles: List[str], data_dir: str, type_="train") ->
 
     return qm_descriptors
 
-# Not clear what this function is!!!!
-def preprocessing(ids, smiles, data_dir, degree=1, fps=False):
-    """
-    Sequence of functions to transform the dataset
-    :param ids:
-    :param smiles:
-    :param data_dir:
-    :param degree:
-    :param fps:
-    :return:
-    """
-
-    # introduce descriptors
-    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-
-    # we perform standardization only on qm descriptors!
-    dataset, columns_info, log_trans = nan_imputation(
-        qm_descriptors, 0.0, standardization=True, cat_del=False, log=False
-    )
-
-    if degree > 1:
-        dataset = build_poly(
-            dataset, columns_info, degree, pairs=False
-        )  # included in transformations
-
-    if fps:
-        # add morgan fingerprints
-        all_fps = smiles_to_morgan_fp(smiles)
-        dataset = np.concatenate((dataset, all_fps), axis=1)
-
-    return dataset, columns_info, log_trans
-
 
 def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
     """
@@ -149,5 +117,3 @@ def smiles_to_3d(smiles: List[str]) -> Tuple[List[np.array], List[np.array]]:
             continue
 
     return all_atomic_nums, all_positions
-
-
