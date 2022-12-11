@@ -3,8 +3,7 @@ import os
 import numpy as np
 import statistics
 
-from utils import *
-from data_preparation import *
+from data_utils import *
 
 
 def comparison(x1, x2, x3):
