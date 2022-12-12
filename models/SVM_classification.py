@@ -1,0 +1,147 @@
+import os
+import csv
+from typing import Tuple, List
+import math
+import numpy as np
+from sklearn.linear_model import SGDClassifier
+
+from augmentation_utils import *
+from utils import *
+from data_utils import *
+from conversion_smiles_utils import *
+
+# predictions_svm_class_constantlr_0.01_l1 submission (2) su leo->0.01283
+
+
+def SVMlearning(
+    X: np.array,
+    y: np.array,
+    CV: int = 5,
+    label_weights: List[float] = None,
+    seed: int = 13,
+    sample_weights: List[float] = None,
+) -> List[SGDClassifier]:
+    # by default the SGDClassifier fits a linear support vector machine, with L2-norm penalization
+    label_weights = {
+        0: label_weights[0],
+        1: label_weights[1],
+        2: label_weights[2],
+    }
+
+    svms = []
+
+    kfold = KFold(n_splits=CV, shuffle=True)
+
+    for i, (train_idx, test_idx) in enumerate(kfold.split(X)):
+
+        X_train_i, X_test_i = X[train_idx], X[test_idx]
+        y_train_i, y_test_i = y[train_idx], y[test_idx]
+
+        sample_weights_i = None
+        if sample_weights is not None:
+            sample_weights_i = np.array(sample_weights)[train_idx]
+
+        svm = SGDClassifier(
+            penalty="l1",
+            learning_rate="constant",
+            eta0=0.01,
+            class_weight=label_weights,
+        )
+
+        svm.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
+
+        y_pred = svm.predict(X_test_i)
+        kappa = quadratic_weighted_kappa(y_pred, y_test_i)
+        print("Kappa = ", kappa)
+
+        svms.append(svm)
+
+    return svms
+
+
+def predict_svm_ensemble(svms: List[SGDClassifier], X) -> np.array:
+    predictions = []
+
+    for svm in svms:
+        model_predictions = svm.predict(X)
+        predictions.append(model_predictions.reshape((-1, 1)))
+
+    predictions = np.concatenate(predictions, axis=1)
+
+    # count the number of class predictions for each sample
+    num_predicted = [
+        np.count_nonzero(predictions == i, axis=1).reshape((-1, 1))
+        for i in range(3)
+    ]
+    num_predicted = np.concatenate(num_predicted, axis=1)
+
+    # majority vote for final prediction
+    final_predictions = np.argmax(num_predicted, axis=1)
+
+    return final_predictions
+
+
+if __name__ == "__main__":
+    this_dir = os.path.dirname(os.getcwd())
+
+    data_dir = os.path.join(
+        this_dir, "data"
+    )  # MODIFY depending on your folder!!
+    train_path = os.path.join(data_dir, "train.csv")
+    test_path = os.path.join(data_dir, "test.csv")
+
+    # get data and transform smiles -> morgan fingerprint
+    ids, smiles, targets = load_train_data(train_path)
+
+    # degree = (
+    #    2  # -> to be put in "preprocessing()" if you want power augmentation
+    # )
+    dataset, columns_info, log_trans = preprocessing(ids, smiles, data_dir)
+    train_data_size = targets.shape[0]
+
+    seed = 13
+    np.random.seed(seed)
+    p = np.random.permutation(targets.shape[0])
+    dataset = dataset[p]
+    targets = targets[p]
+
+    # TEST SET
+
+    submission_ids, submission_smiles = load_test_data(test_path)
+
+    # TEST SET TRANSFORMATION
+    # descriptors
+    qm_descriptors_test = smiles_to_qm_descriptors(
+        submission_smiles, data_dir, "test"
+    )
+
+    qm_descriptors_test, _ = transformation(
+        qm_descriptors_test,
+        columns_info,
+        standardization=True,
+        test=True,
+        degree=1,
+        pairs=False,
+        log_trans=log_trans,
+    )
+
+    # dataset, qm_descriptors_test = PCA_application(
+    #    dataset, qm_descriptors_test
+    # )
+
+    weights = calculate_class_weights(targets)
+    sample_weights = [weights[i] for i in targets]
+
+    svms = SVMlearning(
+        dataset,
+        targets,
+        CV=5,
+        label_weights=weights,
+        sample_weights=sample_weights,
+        seed=seed,
+    )
+
+    final_predictions = predict_svm_ensemble(svms, qm_descriptors_test)
+
+    submission_file = os.path.join(this_dir, "submission.csv")
+    create_submission_file(submission_ids, final_predictions, submission_file)
