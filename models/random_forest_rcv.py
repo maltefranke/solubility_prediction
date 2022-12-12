@@ -4,14 +4,16 @@ from typing import Tuple, List
 import math
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-
+from sklearn.model_selection import RandomizedSearchCV
 from augmentation_utils import *
 from utils import *
 from data_utils import *
 from conversion_smiles_utils import *
+from sklearn.metrics import make_scorer
 
-
-def rf_learning(
+# {'n_estimators': 110, 'max_features': 'sqrt', 'max_depth': 5}
+# random_forest_post_cv_0.00572
+def rf_cross_validation(
     X: np.array,
     y: np.array,
     CV: int = 5,
@@ -25,58 +27,39 @@ def rf_learning(
         2: label_weights[2],
     }
 
-    rfs = []
+    # Number of trees in random forest
+    n_estimators = [int(x) for x in np.linspace(start=20, stop=200, num=5)]
+    # Number of features to consider at every split
+    max_features = ["None", "sqrt"]
+    # Maximum number of levels in tree
+    max_depth = [int(x) for x in np.linspace(5, 50, num=3)]
+    forest = RandomForestClassifier(criterion="entropy", n_jobs=-1)
+    # Create the random grid
+    random_grid = {
+        "n_estimators": n_estimators,
+        "max_features": max_features,
+        "max_depth": max_depth,
+    }
+    kappa_scorer = make_scorer(quadratic_weighted_kappa)
+    rf_random = RandomizedSearchCV(
+        estimator=forest,
+        param_distributions=random_grid,
+        n_iter=10,
+        cv=5,
+        verbose=2,
+        random_state=seed,
+        n_jobs=-1,
+        scoring=kappa_scorer,
+    )
+    # Fit the random search model
+    rf_random.fit(dataset, targets, sample_weight=sample_weights)
 
-    kfold = KFold(n_splits=CV, shuffle=True)
-
-    for i, (train_idx, test_idx) in enumerate(kfold.split(X)):
-
-        X_train_i, X_test_i = X[train_idx], X[test_idx]
-        y_train_i, y_test_i = y[train_idx], y[test_idx]
-
-        sample_weights_i = None
-        if sample_weights is not None:
-            sample_weights_i = np.array(sample_weights)[train_idx]
-
-        rf = RandomForestClassifier(
-            n_estimators=110,
-            max_depth=20,
-            criterion="entropy",
-            random_state=seed,
-            class_weight=label_weights,
-        )
-
-        rf.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
-
-        y_pred = rf.predict(X_test_i)
-        kappa = quadratic_weighted_kappa(y_pred, y_test_i)
-        print("Kappa = ", kappa)
-
-        rfs.append(rf)
-
-    return rfs
-
-
-def predict_rf_ensemble(rfs: List[RandomForestClassifier], X) -> np.array:
-    predictions = []
-
-    for rf in rfs:
-        model_predictions = rf.predict(X)
-        predictions.append(model_predictions.reshape((-1, 1)))
-
-    predictions = np.concatenate(predictions, axis=1)
-
-    # count the number of class predictions for each sample
-    num_predicted = [
-        np.count_nonzero(predictions == i, axis=1).reshape((-1, 1))
-        for i in range(3)
-    ]
-    num_predicted = np.concatenate(num_predicted, axis=1)
-
-    # majority vote for final prediction
-    final_predictions = np.argmax(num_predicted, axis=1)
-
-    return final_predictions
+    print("results...")
+    print(rf_random.best_score_)
+    print(rf_random.cv_results_)
+    print("---")
+    print(rf_random.best_params_)
+    print("---")
 
 
 if __name__ == "__main__":
@@ -126,6 +109,7 @@ if __name__ == "__main__":
         pairs=False,
         log_trans=log_trans,
     )
+    # features reduction -> PCA
 
     # dataset, qm_descriptors_test = PCA_application(
     #    dataset, qm_descriptors_test
@@ -134,7 +118,7 @@ if __name__ == "__main__":
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 
-    rfs = rf_learning(
+    rfs = rf_cross_validation(
         dataset,
         targets,
         CV=5,
@@ -142,8 +126,3 @@ if __name__ == "__main__":
         sample_weights=sample_weights,
         seed=seed,
     )
-
-    final_predictions = predict_rf_ensemble(rfs, qm_descriptors_test)
-
-    submission_file = os.path.join(this_dir, "submission.csv")
-    create_submission_file(submission_ids, final_predictions, submission_file)
