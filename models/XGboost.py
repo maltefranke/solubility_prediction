@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import xgboost
+import time
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import cohen_kappa_score
@@ -10,8 +11,6 @@ from augmentation_utils import *
 from utils import *
 from data_utils import *
 from conversion_smiles_utils import *
-
-# IMPORTANT https://www.kaggle.com/code/prashant111/xgboost-k-fold-cv-feature-importance
 
 
 def xgb_learning(
@@ -23,13 +22,17 @@ def xgb_learning(
     sample_weights: List[float] = None,
 ) -> List[xgboost.XGBClassifier]:
 
+    """
+    creation of the XGBooot model testing 5 splitting of the dataset
+    """
+    # weights per class
     label_weights = {
         0: label_weights[0],
         1: label_weights[1],
         2: label_weights[2],
     }
-    xgbs = []
 
+    xgbs = []
     kfold = KFold(n_splits=CV, shuffle=True)
 
     for i, (train_idx, test_idx) in enumerate(kfold.split(X)):
@@ -43,17 +46,18 @@ def xgb_learning(
 
         xgb = xgboost.XGBClassifier(
             objective="multi:softmax",
-            gamma=1,
+            gamma=0,
             learning_rate=0.1,
-            max_delta_step=10,
-            max_depth=4,
-            reg_lambda=5.0,
+            max_delta_step=0,
+            max_depth=3,
+            reg_lambda=0.0,
             verbosity=1,
             num_class=3,
             tree_method="hist",
         )
 
         eval_set = [(dataset, targets)]
+
         xgb.fit(
             X_train_i,
             y_train_i,
@@ -73,6 +77,9 @@ def xgb_learning(
 
 
 def predict_xgb_ensemble(xgbs: List[xgboost.XGBClassifier], X) -> np.array:
+    """
+    creation of the output with using previously built models
+    """
     predictions = []
 
     for xgb in xgbs:
@@ -104,18 +111,24 @@ if __name__ == "__main__":
     test_path = os.path.join(data_dir, "test.csv")
 
     # get data and transform smiles
+    print("loading data...\n")
     ids, smiles, targets = load_train_data(train_path)
 
     # DATASET TRANSFORMATION
-
-    # degree = (
-    #    2  # -> to be put in "preprocessing()" if you want power augmentation
-    # )
-
-    dataset, columns_info, log_trans = preprocessing(ids, smiles, data_dir)
-
-    #############################
-    train_data_size = targets.shape[0]
+    start = time.time()
+    print("transformation...\n")
+    dataset, columns_info, log_trans = preprocessing(
+        ids,
+        smiles,
+        data_dir,
+        nan_tolerance=0.0,
+        standardization=True,
+        cat_del=True,
+        log=True,
+        fps=False,
+        degree=1,
+        pairs=False,
+    )
 
     # we permute/shuffle our data first
     seed = 13
@@ -125,7 +138,7 @@ if __name__ == "__main__":
     targets = targets[p]
 
     # TEST SET
-
+    print("loading test set...\n")
     submission_ids, submission_smiles = load_test_data(test_path)
 
     # TEST SET TRANSFORMATION
@@ -143,16 +156,21 @@ if __name__ == "__main__":
         pairs=False,
         log_trans=log_trans,
         log=True,
-        fps=True,
+        fps=False,
     )
 
-    # dataset, qm_descriptors_test = PCA_application(   #<------------------------
-    #    dataset, qm_descriptors_test
-    # )
+    # application of the PCA
+    print("PCA...\n")
+    (
+        dataset,
+        qm_descriptors_test,
+    ) = PCA_application(dataset, qm_descriptors_test)
 
+    #
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 
+    print("XGBoost...\n")
     xgbs = xgb_learning(
         dataset,
         targets,
@@ -162,12 +180,13 @@ if __name__ == "__main__":
         seed=seed,
     )
 
-    # qm_descriptors_test = build_poly(qm_descriptors_test, columns_info, degree)
-
     final_predictions = predict_xgb_ensemble(xgbs, qm_descriptors_test)
+
+    end = time.time()
+    print(f"required time: {end - start}")
 
     submission_file = os.path.join(
         this_dir,
-        "xn_all_in_cv.csv",
+        "submission.csv",
     )
     create_submission_file(submission_ids, final_predictions, submission_file)
