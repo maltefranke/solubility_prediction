@@ -105,7 +105,7 @@ if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
     data_dir = os.path.join(
-        this_dir, "solubility_prediction\data"
+        this_dir, "data"
     )  # MODIFY depending on your folder!!
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
@@ -166,7 +166,6 @@ if __name__ == "__main__":
         qm_descriptors_test,
     ) = PCA_application(dataset, qm_descriptors_test)
 
-    #
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 

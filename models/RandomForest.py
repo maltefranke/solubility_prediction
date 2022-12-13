@@ -19,6 +19,10 @@ def rf_learning(
     seed: int = 13,
     sample_weights: List[float] = None,
 ) -> List[RandomForestClassifier]:
+
+    """
+    creation of the Random Forest model testing 5 splitting of the dataset
+    """
     label_weights = {
         0: label_weights[0],
         1: label_weights[1],
@@ -58,6 +62,9 @@ def rf_learning(
 
 
 def predict_rf_ensemble(rfs: List[RandomForestClassifier], X) -> np.array:
+    """
+    creation of the output with using previously built models
+    """
     predictions = []
 
     for rf in rfs:
@@ -84,21 +91,30 @@ if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
     data_dir = os.path.join(
-        this_dir, "solubility_prediction\data"
+        this_dir, "data"
     )  # MODIFY depending on your folder!!
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
     # get data and transform smiles
+    print("loading data...\n")
     ids, smiles, targets = load_train_data(train_path)
 
     # DATASET TRANSFORMATION
-
-    # degree = (
-    #    2  # -> to be put in "preprocessing()" if you want power augmentation
-    # )
-    dataset, columns_info, log_trans = preprocessing(ids, smiles, data_dir)
-    train_data_size = targets.shape[0]
+    start = time.time()
+    print("transformation...\n")
+    dataset, columns_info, log_trans = preprocessing(
+        ids,
+        smiles,
+        data_dir,
+        nan_tolerance=0.0,
+        standardization=True,
+        cat_del=True,
+        log=True,
+        fps=False,
+        degree=1,
+        pairs=False,
+    )
 
     # we permute/shuffle our data first
     seed = 13
@@ -108,7 +124,7 @@ if __name__ == "__main__":
     targets = targets[p]
 
     # TEST SET
-
+    print("loading test set...\n")
     submission_ids, submission_smiles = load_test_data(test_path)
 
     # TEST SET TRANSFORMATION
@@ -119,14 +135,19 @@ if __name__ == "__main__":
 
     qm_descriptors_test, _ = transformation(
         qm_descriptors_test,
+        submission_smiles,
         columns_info,
         standardization=True,
         test=True,
         degree=1,
         pairs=False,
         log_trans=log_trans,
+        log=True,
+        fps=False,
     )
 
+    # application of the PCA
+    # print("PCA...\n")
     # dataset, qm_descriptors_test = PCA_application(
     #    dataset, qm_descriptors_test
     # )
@@ -134,6 +155,7 @@ if __name__ == "__main__":
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 
+    print("Random Forest...\n")
     rfs = rf_learning(
         dataset,
         targets,
