@@ -20,7 +20,7 @@ def rf_cross_validation(
     label_weights: List[float] = None,
     seed: int = 13,
     sample_weights: List[float] = None,
-) -> List[RandomForestClassifier]:
+):
     label_weights = {
         0: label_weights[0],
         1: label_weights[1],
@@ -52,7 +52,7 @@ def rf_cross_validation(
         scoring=kappa_scorer,
     )
     # Fit the random search model
-    rf_random.fit(dataset, targets, sample_weight=sample_weights)
+    rf_random.fit(X, y, sample_weight=sample_weights)
 
     print("results...")
     print(rf_random.best_score_)
@@ -97,35 +97,6 @@ if __name__ == "__main__":
     p = np.random.permutation(targets.shape[0])
     dataset = dataset[p]
     targets = targets[p]
-
-    # TEST SET
-    print("loading test set...\n")
-    submission_ids, submission_smiles = load_test_data(test_path)
-
-    # TEST SET TRANSFORMATION
-    # descriptors
-    qm_descriptors_test = smiles_to_qm_descriptors(
-        submission_smiles, data_dir, "test"
-    )
-
-    qm_descriptors_test, _ = transformation(
-        qm_descriptors_test,
-        submission_smiles,
-        columns_info,
-        standardization=True,
-        test=True,
-        degree=1,
-        pairs=False,
-        log_trans=log_trans,
-        log=True,
-        fps=False,
-    )
-
-    # application of the PCA
-    # print("PCA...\n")
-    # dataset, qm_descriptors_test = PCA_application(
-    #    dataset, qm_descriptors_test
-    # )
 
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
