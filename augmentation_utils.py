@@ -15,8 +15,6 @@ from data_utils import load_train_data, indices_by_class
 import matplotlib.pyplot as plt
 from conversion_smiles_utils import *
 
-# to check -> build poly
-
 
 def preprocessing(
     ids,
@@ -243,14 +241,13 @@ def PCA_application(
     :return pca_train_data: transformation of dataset after PCA
     :return pca_output_data: transformation of dataset_test after PCA
     """
-    # https://www.youtube.com/watch?v=oiusrJ0btwA
+
     X_train = pd.DataFrame(dataset)
 
     X_output = pd.DataFrame(dataset_test)
 
     pca = PCA(n_components=X_train.shape[1])
     pca_data = pca.fit_transform(X_train)
-    # pca_output_data = pca.transform(X_output)
 
     explained_variance = pca.explained_variance_ratio_
     cumm_var_explained = np.cumsum(explained_variance)
@@ -377,7 +374,11 @@ def augment_smiles(ids, smiles, targets, data_dir, name_file):
                     #         augmentations_targets.append(t)
 
         augmentations = list(augmentations)
-        print(len(augmentations), len(augmentations_id), len(augmentations_targets))
+        print(
+            len(augmentations),
+            len(augmentations_id),
+            len(augmentations_targets),
+        )
 
         data = {
             "Id": augmentations_id,
@@ -497,8 +498,8 @@ if __name__ == "__main__":
     # )
 
     # AUGMENTATION OF EACH DATASET SEPARATELY - creation of new .csv files
-    name_tr = 'split_train.csv'
-    name_val = 'split_valid.csv'
+    name_tr = "split_train.csv"
+    name_val = "split_valid.csv"
     ids_train, smiles_train, targets_train = load_train_data(
         os.path.join(data_dir, name_tr)
     )
@@ -508,7 +509,7 @@ if __name__ == "__main__":
         smiles_train,
         targets_train,
         data_dir,
-        '1-train.csv',
+        "1-train.csv",
     )
 
     ids_valid, smiles_valid, targets_valid = load_train_data(
@@ -519,7 +520,7 @@ if __name__ == "__main__":
         smiles_valid,
         targets_valid,
         data_dir,
-        '1-valid.csv',
+        "1-valid.csv",
     )
 
     print("TRAIN SPLIT SET")
