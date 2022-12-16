@@ -18,29 +18,47 @@ from conversion_smiles_utils import *
 # to check -> build poly
 
 
-def preprocessing(ids, smiles, data_dir, degree=1):
+def preprocessing(
+    ids,
+    smiles,
+    data_dir,
+    nan_tolerance=0.0,
+    standardization=True,
+    cat_del=True,
+    log=True,
+    fps=False,
+    degree=1,
+    pairs=False,
+):
     """
     Sequence of functions to transform the dataset
+    perc : minimum percentage of nan elements in the column to be eliminated
+    standardization: if True -> standardize continuous features
+    cat_del: if True -> eliminate categorical features from dataset
+    log: if True -> logarithm tranformazion on skeewed data
+    fps: if True -> include morgan fingerprints into the dataset
+    degree: maximal power degree for the data augmentation
+    pairs: if True -> include mixed product in the data augmentation
     """
 
     # introduce descriptors
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
 
     # we perform standardization only on qm descriptors!
-    dataset, columns_info, log_trans = nan_imputation(
-        qm_descriptors,
-        smiles,
-        0.0,
-        standardization=False,
-        cat_del=False,
-        log=False,
-        fps=True,
+    dataset, columns_info = nan_detection(
+        qm_descriptors, smiles, nan_tolerance=nan_tolerance, cat_del=cat_del
     )
-    # da modificare e portare prima delle fps
-    if degree > 1:
-        dataset = build_poly(
-            dataset, columns_info, degree, pairs=False
-        )  # included in transformations
+
+    dataset, log_trans = transformation(
+        dataset,
+        smiles,
+        columns_info,
+        standardization=standardization,
+        degree=degree,
+        pairs=pairs,
+        log=log,
+        fps=fps,
+    )
 
     return dataset, columns_info, log_trans
 
@@ -57,8 +75,7 @@ def build_poly(x, columns_info, degree, pairs=False):
     Returns:
         :return poly: numpy array of shape (N,d+1)
     """
-    # I have already removed nan columns
-    # columns_info = np.delete(columns_info, np.where(columns_info == 0)[0]) # already done in transformation
+    # already removed nan columns
 
     poly = np.ones((len(x), 1))
     for deg in range(1, degree + 1):
@@ -151,19 +168,9 @@ def transformation(
     return data, log_trans
 
 
-def nan_imputation(
-    data,
-    smiles,
-    nan_tolerance=0.5,
-    standardization=True,
-    cat_del=False,
-    degree=1,
-    pairs=False,
-    log=True,
-    fps=False,
-):
+def nan_detection(data, smiles, nan_tolerance=0.0, cat_del=True):
     """
-    Function that removes columns with too many nan values (depending on the tolerance) and standardizes
+    Function that detects columns with too many nan values (depending on the tolerance)
     the data substituting the median to the nan values.
     It doesn't touch the categorical features.
     :param fps:
@@ -203,23 +210,10 @@ def nan_imputation(
                 median = np.nanmedian(data[:, i])
                 # replace nan with median
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
-                # if standardization == True:
-                # standardization
-                # data[:, i], mean, std = standardize(data[:, i])
-                # standardization_data_train[i, :] = median, mean, std
 
     columns_info = np.array(columns_info)
-    data, log_trans = transformation(
-        data,
-        smiles,
-        columns_info,
-        standardization=standardization,
-        degree=degree,
-        pairs=pairs,
-        log=log,
-        fps=fps,
-    )
-    return data, columns_info, log_trans
+
+    return data, columns_info
 
 
 def check_categorical(column):

@@ -10,8 +10,6 @@ from utils import *
 from data_utils import *
 from conversion_smiles_utils import *
 
-# predictions_svm_class_constantlr_0.01_l1 submission (2) su leo->0.01283
-
 
 def SVMlearning(
     X: np.array,
@@ -21,7 +19,11 @@ def SVMlearning(
     seed: int = 13,
     sample_weights: List[float] = None,
 ) -> List[SGDClassifier]:
-    # by default the SGDClassifier fits a linear support vector machine, with L2-norm penalization
+
+    """
+    creation of the SVM model testing 5 splitting of the dataset
+    """
+    # weights per class
     label_weights = {
         0: label_weights[0],
         1: label_weights[1],
@@ -60,6 +62,9 @@ def SVMlearning(
 
 
 def predict_svm_ensemble(svms: List[SGDClassifier], X) -> np.array:
+    """
+    creation of the output with using previously built models
+    """
     predictions = []
 
     for svm in svms:
@@ -90,15 +95,27 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    # get data and transform smiles -> morgan fingerprint
+    # get data and transform smiles
+    print("loading data...\n")
     ids, smiles, targets = load_train_data(train_path)
 
-    # degree = (
-    #    2  # -> to be put in "preprocessing()" if you want power augmentation
-    # )
-    dataset, columns_info, log_trans = preprocessing(ids, smiles, data_dir)
-    train_data_size = targets.shape[0]
+    # DATASET TRANSFORMATION
+    start = time.time()
+    print("transformation...\n")
+    dataset, columns_info, log_trans = preprocessing(
+        ids,
+        smiles,
+        data_dir,
+        nan_tolerance=0.0,
+        standardization=True,
+        cat_del=True,
+        log=True,
+        fps=False,
+        degree=1,
+        pairs=False,
+    )
 
+    # we permute/shuffle our data first
     seed = 13
     np.random.seed(seed)
     p = np.random.permutation(targets.shape[0])
@@ -106,7 +123,7 @@ if __name__ == "__main__":
     targets = targets[p]
 
     # TEST SET
-
+    print("loading test set...\n")
     submission_ids, submission_smiles = load_test_data(test_path)
 
     # TEST SET TRANSFORMATION
@@ -117,14 +134,19 @@ if __name__ == "__main__":
 
     qm_descriptors_test, _ = transformation(
         qm_descriptors_test,
+        submission_smiles,
         columns_info,
         standardization=True,
         test=True,
         degree=1,
         pairs=False,
         log_trans=log_trans,
+        log=True,
+        fps=False,
     )
 
+    # application of the PCA
+    # print("PCA...\n")
     # dataset, qm_descriptors_test = PCA_application(
     #    dataset, qm_descriptors_test
     # )
@@ -132,6 +154,7 @@ if __name__ == "__main__":
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 
+    print("SVM...\n")
     svms = SVMlearning(
         dataset,
         targets,

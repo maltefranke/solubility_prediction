@@ -8,3 +8,9 @@ This repository contains the code for the prediction of solubility class of comp
 - High solubility: Nephelometry values lower than 50000
 - Medium solubility: Nephelometry values between 50000 and 100000
 - Low solubility: Nephelometry values higher than 100000
+
+# Overview
+
+### Code
+
+# Environment

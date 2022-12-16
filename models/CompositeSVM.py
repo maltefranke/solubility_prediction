@@ -8,12 +8,14 @@ from sklearn.svm import SVC, OneClassSVM
 from utils import *
 from data_utils import *
 
-
+# TO BE CHECKED!!!
 def composite_prediction(X, oc_svm: OneClassSVM, svm: SVC):
 
     # first, the oc svm predicts if a data point is class 2
     composite_predictions = oc_svm.predict(X)
-    composite_predictions = np.where(composite_predictions != 1, composite_predictions, 2)
+    composite_predictions = np.where(
+        composite_predictions != 1, composite_predictions, 2
+    )
 
     # then let the svm predict if its class 0 or 1
     not_class2_idx = np.argwhere(composite_predictions != 2).squeeze()
@@ -27,8 +29,9 @@ def composite_prediction(X, oc_svm: OneClassSVM, svm: SVC):
     return composite_predictions
 
 
-def composite_svm_learning(X: np.array, y: np.array, CV: int = 5, seed: int = 13) \
-        -> Tuple[List[OneClassSVM], List[SVC]]:
+def composite_svm_learning(
+    X: np.array, y: np.array, CV: int = 5, seed: int = 13
+) -> Tuple[List[OneClassSVM], List[SVC]]:
 
     oc_svms = []
     svms = []
@@ -67,7 +70,9 @@ def composite_svm_learning(X: np.array, y: np.array, CV: int = 5, seed: int = 13
     return oc_svms, svms
 
 
-def predict_composite_svm_ensemble(oc_svms: List[OneClassSVM], svms: List[SVC], X) -> np.array:
+def predict_composite_svm_ensemble(
+    oc_svms: List[OneClassSVM], svms: List[SVC], X
+) -> np.array:
     predictions = []
 
     for oc_svm, svm in zip(oc_svms, svms):
@@ -77,7 +82,10 @@ def predict_composite_svm_ensemble(oc_svms: List[OneClassSVM], svms: List[SVC], 
     predictions = np.concatenate(predictions, axis=1)
 
     # count the number of class predictions for each sample
-    num_predicted = [np.count_nonzero(predictions == i, axis=1).reshape((-1, 1)) for i in range(3)]
+    num_predicted = [
+        np.count_nonzero(predictions == i, axis=1).reshape((-1, 1))
+        for i in range(3)
+    ]
     num_predicted = np.concatenate(num_predicted, axis=1)
 
     # majority vote for final prediction
