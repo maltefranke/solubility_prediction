@@ -122,28 +122,28 @@ def transformation(
 
     # correct nans in test
 
-    if test == True:
+    if test:
         N, M = data.shape
         for i in range(M):
             if columns_info[i] == 2:
                 median = np.nanmedian(data[:, i])
                 data[:, i] = np.where(np.isnan(data[:, i]), median, data[:, i])
 
-    if log == True:
+    if log:
         data, log_trans = logarithm(data, columns_info, log_trans)
 
     # build poly
-    if degree > 1 or pairs == True:
+    if degree > 1 or pairs:
         data, columns_info = build_poly(data, columns_info, degree, pairs)
 
-    if standardization == True:
+    if standardization:
         data[
             :, np.where(columns_info == 2)[0]
         ] = StandardScaler().fit_transform(
             data[:, np.where(columns_info == 2)[0]]
         )
 
-    if fps == True:
+    if fps:
         # add morgan fingerprints
         all_fps = smiles_to_morgan_fp(smiles)
         data = np.concatenate((data, all_fps), axis=1)
@@ -166,6 +166,13 @@ def nan_imputation(
     Function that removes columns with too many nan values (depending on the tolerance) and standardizes
     the data substituting the median to the nan values.
     It doesn't touch the categorical features.
+    :param fps:
+    :param log:
+    :param pairs:
+    :param degree:
+    :param cat_del:
+    :param standardization:
+    :param smiles:
     :param nan_tolerance: percentage of nan we want to accept for each column
     :param data: list with only qm_descriptors
     :return:
@@ -186,7 +193,7 @@ def nan_imputation(
             if check_categorical(
                 data[:, i]
             ):  # if it is categorical, don't do anything or delete
-                if cat_del == True:
+                if cat_del:
                     columns_info.append(0)
                 else:
                     columns_info.append(1)
