@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from rdkit import Chem as Chem
+from rdkit.Chem import Draw
 import matplotlib.pyplot as plt
 from sklearn.metrics import cohen_kappa_score, confusion_matrix
 import umap
@@ -275,3 +277,19 @@ def draw_umap(
                 cmap="prism",
             )  # cmap="hsv"
             plt.title(title2 + ", test", fontsize=18)
+
+
+def draw_molecules(smiles, n=9):
+    """
+    Draw n molecules from the given dataset of smiles.
+    :param smiles: list of SMILES
+    :param n: number of molecules to draw
+    :return: None
+    """
+    rnd_mol = [random.randint(0, len(smiles)) for i in range(n)]
+    selected_mol = [Chem.MolFromSmiles(smiles[i]) for i in rnd_mol]
+    print(targets[rnd_mol])
+
+    # Plot
+    fig = Draw.MolsToGridImage(selected_mol, molsPerRow=3, subImgSize=(800, 800))
+    fig.save('picture_molecule.png')
