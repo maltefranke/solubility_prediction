@@ -8,11 +8,22 @@ from sklearn.svm import SVC
 from utils import *
 from data_utils import *
 
-# This is definitely too slow!!! DO NOT USE THIS
 
 def svc_learning(X: np.array, y: np.array, CV: int = 5, label_weights: List[float] = None, seed: int = 13,
-               sample_weights: List[float] = None) \
-        -> List[SVC]:
+               sample_weights: List[float] = None) -> List[SVC]:
+    """
+    Function to train a 5-model SVM classifier ensemble
+    Args:
+        X: features
+        y: target class
+        CV: number of cross-validation folds
+        label_weights: weighs the train labels
+        seed: seed for reproducibility
+        sample_weights: additional weights for each sample
+
+    Returns:
+        list of SVC, the SVM ensemble
+    """
 
     label_weights = {0: label_weights[0], 1: label_weights[1], 2: label_weights[2]}
 
@@ -43,7 +54,15 @@ def svc_learning(X: np.array, y: np.array, CV: int = 5, label_weights: List[floa
 
 
 def predict_svc_ensemble(svcs: List[SVC], X) -> np.array:
+    """
+    predict on features given an ensemble of SVM classifiers
+    Args:
+        svcs: list of SVCs, the SVM ensemble
+        X: features
 
+    Returns:
+        predictions on the features
+    """
     predictions = []
 
     for svc in svcs:
@@ -79,17 +98,8 @@ if __name__ == "__main__":
     targets, all_fps = up_down_sampling(targets, all_fps)
 
     # see how balanced the data is and assign weights
-    train_data_size = targets.shape[0]
+    weights = calculate_class_weights(targets)
 
-    num_low = np.count_nonzero(targets == 0)
-    num_medium = np.count_nonzero(targets == 1)
-    num_high = np.count_nonzero(targets == 2)
-
-    weights = [
-        1 - num_low / train_data_size,
-        1 - num_medium / train_data_size,
-        1 - num_high / train_data_size,
-    ]
     print(weights)
 
     sample_weights = [weights[i] for i in targets]
