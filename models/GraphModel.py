@@ -1,3 +1,4 @@
+from typing import Dict
 import chemprop
 import numpy as np
 import tempfile
@@ -8,7 +9,17 @@ from data_utils import *
 
 
 # Training
-def train_graph_model(data_path: str, ensemble_size=10, batch_size=256):
+def train_graph_model(data_path: str, ensemble_size=10, batch_size=256) -> Dict:
+    """
+    train a graph model. based on the chemprop package
+    Args:
+        data_path: path to the csv file containing the data
+        ensemble_size: size of the model ensemble
+        batch_size: size of the dataloader batches
+
+    Returns:
+        logs
+    """
     ids, smiles, targets = load_train_data(data_path)
 
     # write a class weight temp csv file
@@ -59,13 +70,19 @@ def train_graph_model(data_path: str, ensemble_size=10, batch_size=256):
     args = chemprop.args.TrainArgs().parse_args(arguments)
     mae, std = chemprop.train.cross_validate(args=args, train_func=chemprop.train.run_training)
     metrics_log = {"mae": mae, "std": std}
-    breakpoint()
     return metrics_log
 
 
 # Testing
-def predict_graph_model(data_path: str):
+def predict_graph_model(data_path: str) -> np.array:
+    """
+    predict with the trained graph model on data given by a path
+    Args:
+        data_path: path to the csv file containing the test data
 
+    Returns:
+        model predictions
+    """
     with tempfile.NamedTemporaryFile(mode='w', delete=False) as qm_features:
         npy_file = qm_features.name + ".npy"
         qm_descriptors = smiles_to_qm_descriptors(_, data_dir=os.path.dirname(data_path), type_="test")
@@ -92,8 +109,16 @@ def predict_graph_model(data_path: str):
     return predictions
 
 
-def graph_pipeline(data_dir: str, model_dir: str):
+def graph_pipeline(data_dir: str, model_dir: str) -> None:
+    """
+    Tie everything together: Get data paths, train model and make submission file
+    Args:
+        data_dir: path to the data directory
+        model_dir: path to the model directory
 
+    Returns:
+        None
+    """
     train_path = os.path.join(data_dir, "random_undersampling.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
@@ -101,7 +126,7 @@ def graph_pipeline(data_dir: str, model_dir: str):
 
     submission_path = os.path.join(model_dir, "graph_submission.csv")
     if os.path.exists(submission_path):
-        print("Prediction have already been made!")
+        print("Predictions have already been made!")
 
     else:
         # assume training has been done when the graph_dir exists

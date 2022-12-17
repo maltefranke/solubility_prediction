@@ -15,18 +15,18 @@ from schnetpack.src.schnetpack.data import ASEAtomsData, AtomsLoader, AtomsDataM
 from data_utils import *
 
 
-def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
-                        dataset: str = "train", shuffle: bool = False, batch_size: int = 512, num_workers: int = 8,
-                        pin_memory: bool = False) -> AtomsLoader:
+def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str, dataset: str = "train",
+                        batch_size: int = 512, num_workers: int = 8, pin_memory: bool = False) -> AtomsLoader:
     """
     function to prepare the schnet database
     Args:
-        smiles:
+        smiles: list of SMILES string
         targets: np.array of target values
-        working_dir:
+        working_dir: path to the working directory
         dataset: name to modify the output name of the database
-        shuffle:
-        batch_size:
+        batch_size: size of the dataloader batches
+        num_workers: number of workers in the dataloader
+        pin_memory: whether to limit memory use
     Returns:
         None
     """
@@ -37,7 +37,6 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
         atoms_list = []
         for atom_numbers, positions in zip(numbers, positions):
             atoms = Atoms(numbers=np.array(atom_numbers, dtype=int), positions=np.array(positions, dtype=float))
-            # atoms = Atoms(numbers=atom_numbers)
             atoms_list.append(atoms)
 
         targets = [{"solubility_class": np.array([i], dtype=int)} for i in targets]
@@ -60,7 +59,6 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
             pin_memory=pin_memory,  # set to false, when not using a GPU
             property_units={'solubility_class': ''},
             transforms=[trn.ASENeighborList(cutoff=5.)]
-            #transforms=[trn.ASENeighborList(cutoff=5.),trn.RemoveOffsets("solubility_class", remove_mean=False, remove_atomrefs=True), # trn.CastTo32() ],
         )
     data.prepare_data()
     data.setup()
@@ -71,7 +69,14 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str,
 
 
 def setup_schnet(class_weights: List[float]) -> spk.task.AtomisticTask:
+    """
+    Setup the training task
+    Args:
+        class_weights: weighs the classes. to cope with class imbalance
 
+    Returns:
+        task which can be run by pytorch-lightning Trainer
+    """
     cutoff = 5.
     n_atom_basis = 256
 
@@ -116,7 +121,19 @@ def setup_schnet(class_weights: List[float]) -> spk.task.AtomisticTask:
 
 
 def train_schnet(task: spk.task.AtomisticTask, train_loader: AtomsLoader, val_loader: AtomsLoader,
-                 working_dir: str, epochs: int = 50):
+                 working_dir: str, epochs: int = 50) -> None:
+    """
+    Function to do the training of SchNet
+    Args:
+        task: the SchNetpack task to run, defined in :func:'setup_schnet'
+        train_loader:
+        val_loader:
+        working_dir:
+        epochs: number of training epochs
+
+    Returns:
+        None
+    """
     logger = pl.loggers.TensorBoardLogger(save_dir=working_dir)
     callbacks = [
         spk.train.ModelCheckpoint(
@@ -171,6 +188,15 @@ def predict_schnet(smiles: List[str], working_dir: str) -> np.array:
 
 
 def schnet_pipeline(data_dir: str, model_dir: str) -> None:
+    """
+    Tie everything together: Get data, create dataloader, setup the task, run it and make submission file
+    Args:
+        data_dir: path to the data directory
+        model_dir: path to the model directory
+
+    Returns:
+
+    """
 
     train_path = os.path.join(data_dir, "augmented_split_train.csv")
     test_path = os.path.join(data_dir, "augmented_split_valid.csv")
