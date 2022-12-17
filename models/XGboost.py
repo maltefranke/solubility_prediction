@@ -56,12 +56,12 @@ def xgb_learning(
             tree_method="hist",
         )
 
-        eval_set = [(dataset, targets)]
+        eval_set = [(X_test_i, y_test_i)]
 
         xgb.fit(
             X_train_i,
             y_train_i,
-            early_stopping_rounds=5,
+            # early_stopping_rounds=5,
             eval_set=eval_set,
             sample_weight=sample_weights_i,
             verbose=True,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
     data_dir = os.path.join(
-        this_dir, "data"
+        this_dir, "solubility_prediction\data"
     )  # MODIFY depending on your folder!!
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
@@ -117,18 +117,19 @@ if __name__ == "__main__":
     # DATASET TRANSFORMATION
     start = time.time()
     print("transformation...\n")
-    dataset, columns_info, log_trans = preprocessing(
-        ids,
-        smiles,
-        data_dir,
-        nan_tolerance=0.0,
-        standardization=True,
-        cat_del=True,
-        log=True,
-        fps=False,
-        degree=1,
-        pairs=False,
-    )
+    dataset = smiles_to_morgan_fp(smiles)
+    # dataset, columns_info, log_trans = preprocessing(
+    #    ids,
+    #    smiles,
+    #    data_dir,
+    #    nan_tolerance=0.0,
+    #    standardization=False,
+    #    cat_del=False,
+    #    log=False,
+    #    fps=False,
+    #    degree=1,
+    #    pairs=False,
+    # )
 
     # we permute/shuffle our data first
     seed = 13
@@ -143,28 +144,30 @@ if __name__ == "__main__":
 
     # TEST SET TRANSFORMATION
     # descriptors
-    qm_descriptors_test = smiles_to_qm_descriptors(
-        submission_smiles, data_dir, "test"
-    )
-    qm_descriptors_test, _ = transformation(
-        qm_descriptors_test,
-        submission_smiles,
-        columns_info,
-        standardization=True,
-        test=True,
-        degree=1,
-        pairs=False,
-        log_trans=log_trans,
-        log=True,
-        fps=False,
-    )
+    qm_descriptors_test = smiles_to_morgan_fp(submission_smiles)
+
+    # qm_descriptors_test = smiles_to_qm_descriptors(
+    #    submission_smiles, data_dir, "test"
+    # )
+    # qm_descriptors_test, _ = transformation(
+    #    qm_descriptors_test,
+    #    submission_smiles,
+    #    columns_info,
+    #    standardization=False,
+    #    test=True,
+    #    degree=1,
+    #    pairs=False,
+    #    log_trans=log_trans,
+    #    log=False,
+    #    fps=False,
+    # )
 
     # application of the PCA
-    print("PCA...\n")
-    (
-        dataset,
-        qm_descriptors_test,
-    ) = PCA_application(dataset, qm_descriptors_test)
+    # print("PCA...\n")
+    # (
+    #    dataset,
+    #    qm_descriptors_test,
+    # ) = PCA_application(dataset, qm_descriptors_test)
 
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
@@ -186,6 +189,6 @@ if __name__ == "__main__":
 
     submission_file = os.path.join(
         this_dir,
-        "submission.csv",
+        "submission8.csv",
     )
     create_submission_file(submission_ids, final_predictions, submission_file)

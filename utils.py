@@ -13,7 +13,6 @@ import seaborn as sns
 from shapely.geometry import Point
 from shapely.ops import cascaded_union
 
-####  TO CHECK THE LAST 2 FUNCTIONS
 import umap.plot
 
 from data_utils import *
@@ -32,14 +31,13 @@ def quadratic_weighted_kappa(y_pred: np.array, y_true: np.array) -> float:
     Returns:
 
     """
-    # following https://www.kaggle.com/code/aroraaman/quadratic-kappa-metric-explained-in-5-simple-steps/notebook
     score = cohen_kappa_score(y_true, y_pred, weights="quadratic")
     return score
 
 
 def make_umap():
     """
-    plot of the umap of the qm_descriptors and of the morgan fingerprints
+    qm_descriptors and of the morgan fingerprints loading for umap
     """
 
     this_dir = os.getcwd()
@@ -72,18 +70,6 @@ def make_umap():
     # fingerprints
     fps = smiles_to_morgan_fp(smiles)
 
-    # p = np.random.permutation(len(y))
-    # y = y[p]
-    # X = X[p, :]
-
-    # division in classe
-    # class_indices = indices_by_class(y)
-    # class_0 = X[class_indices[0]]
-    # class_1 = X[class_indices[1]]
-    # class_2 = X[class_indices[2]]
-
-    # all_classes = np.concatenate([class_0, class_1, class_2], axis=0)
-
     # splitting into train and test
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.33, random_state=42
@@ -102,7 +88,6 @@ def make_umap():
     draw_umap(
         fps,
         y,
-        n_components=2,
         title1="Umap of fingerprints -classes 0 and 1-",
         title2="Umap of fingerprints ",
         split=True,
@@ -111,7 +96,6 @@ def make_umap():
     draw_umap(
         X,
         y,
-        n_components=2,
         title1="Umap of Molecular descr. -classes 0 and 1-",
         title2="Umap of Molecular descr. ",
         split=False,
@@ -119,31 +103,24 @@ def make_umap():
 
 
 def draw_umap(
-    data,
-    targets,
-    n_neighbors=10,
-    min_dist=0.2,
-    n_components=3,
-    metric="euclidean",
-    title1="",
-    title2="",
-    split=False,
+    data: np.array,
+    targets: np.array,
+    n_neighbors: int = 10,
+    min_dist: float = 0.2,
+    metric: str = "euclidean",
+    title1: str = "",
+    title2: str = "",
+    split: bool = False,
 ):
-    assert (
-        n_components == 2 or n_components == 3
-    ), f"n_components should 2 (2D) or 3 (3D): {n_components}"
-    # https://umap-learn.readthedocs.io/en/latest/parameters.html
-
-    colors = np.array(["red", "blue", "green"])
+    """creation of 2D UMAP and associated distribution plot"""
 
     fit = umap.UMAP(
         n_neighbors=n_neighbors,
         min_dist=min_dist,
-        n_components=n_components,
+        n_components=2,
         metric=metric,
     )
     u = fit.fit_transform(data)
-    # fig = plt.figure()
 
     if split == True:
         u, X_test, targets, y_test = train_test_split(
@@ -153,130 +130,61 @@ def draw_umap(
 
     indexes = np.where(targets != 2)[0]
 
-    if n_components == 2:
-        plt.figure(figsize=(7, 7))
-        ax = plt.axes()
-        ax.set_xlim(-10, 20)
-        ax.set_ylim(-10, 20)
-        fg = ax.scatter(
-            u[indexes, 0],
-            u[indexes, 1],
-            c=colors[targets[indexes]],
-            alpha=0.2,
-            cmap="prism",
-        )  # cmap="prism"
-        if split == True:
-            plt.title(title1 + ", train", fontsize=18)
-        else:
-            plt.title(title1, fontsize=18)
+    u1 = np.concatenate(
+        (
+            u[indexes, :],
+            np.resize(targets[indexes], (targets[indexes].shape[0], 1)),
+        ),
+        axis=1,
+    )
+    df = pd.DataFrame(u1, columns=["x", "y", "class"])
+    sns.jointplot(df, x="x", y="y", hue="class")
+    # if split == True:
+    #    plt.title(title1 + ", train", y=1.3, fontsize=20)
+    # else:
+    #    plt.title(title1, y=1.3, fontsize=20)
 
-        plt.figure(figsize=(7, 7))
-        ax = plt.axes()
-        ax.set_xlim(-10, 20)
-        ax.set_ylim(-10, 20)
-        fg = ax.scatter(
-            u[:, 0], u[:, 1], c=colors[targets], alpha=0.3, cmap="prism"
-        )  # cmap="hsv"
-        if split == True:
-            plt.title(title2 + ", train", fontsize=18)
-        else:
-            plt.title(title2, fontsize=18)
+    u2 = np.concatenate(
+        (
+            u,
+            np.resize(targets, (targets.shape[0], 1)),
+        ),
+        axis=1,
+    )
+    df = pd.DataFrame(u2, columns=["x", "y", "class"])
 
-        if split == True:
-            plt.figure(figsize=(7, 7))
-            ax = plt.axes()
-            ax.set_xlim(-10, 20)
-            ax.set_ylim(-10, 20)
-            fg = ax.scatter(
-                X_test[indexes_test, 0],
-                X_test[indexes_test, 1],
-                c=colors[y_test[indexes_test]],
-                alpha=0.3,
-                cmap="prism",
-            )  # cmap="hsv"
-            plt.title(title1 + ", test", fontsize=18)
+    sns.jointplot(df, x="x", y="y", hue="class")
+    # if split == True:
+    #    plt.title(title2 + ", train", y=1.3,fontsize=20)
+    # else:
+    #    plt.title(title2, y=1.3, fontsize=20)
 
-            plt.figure(figsize=(7, 7))
-            ax = plt.axes()
-            ax.set_xlim(-10, 20)
-            ax.set_ylim(-10, 20)
-            fg = ax.scatter(
-                X_test[:, 0],
-                X_test[:, 1],
-                c=colors[y_test],
-                alpha=0.3,
-                cmap="prism",
-            )  # cmap="hsv"
-            plt.title(title2 + ", test", fontsize=18)
-
-    if n_components == 3:
-        plt.figure(figsize=(7, 7))
-        ax = plt.axes(projection="3d")
-        ax.set_xlim3d(-10, 20)
-        ax.set_ylim3d(-10, 20)
-        ax.set_zlim3d(-10, 20)
-        fg = ax.scatter3D(
-            u[indexes, 0],
-            u[indexes, 1],
-            u[indexes, 2],
-            c=colors[targets[indexes]],
-            alpha=0.3,
-            cmap="prism",
+    if split == True:
+        u3 = np.concatenate(
+            (
+                X_test[indexes_test, :],
+                np.resize(
+                    y_test[indexes_test],
+                    (y_test[indexes_test].shape[0], 1),
+                ),
+            ),
+            axis=1,
         )
+        df = pd.DataFrame(u3, columns=["x", "y", "class"])
+        sns.jointplot(df, x="x", y="y", hue="class")
+        # plt.title(title1 + ", test", y=1.3,fontsize=20)
 
-        if split == True:
-            plt.title(title1 + ", train", fontsize=18)
-        else:
-            plt.title(title1, fontsize=18)
-
-        plt.figure(figsize=(7, 7))
-        ax = plt.axes(projection="3d")
-        ax.set_xlim3d(-10, 20)
-        ax.set_ylim3d(-10, 20)
-        ax.set_zlim3d(-10, 20)
-        fg = ax.scatter3D(
-            u[:, 0],
-            u[:, 1],
-            u[:, 2],
-            c=colors[targets],
-            alpha=0.3,
-            cmap="prism",
+        u4 = np.concatenate(
+            (
+                X_test,
+                np.resize(y_test, (y_test.shape[0], 1)),
+            ),
+            axis=1,
         )
-        if split == True:
-            plt.title(title2 + ", train", fontsize=18)
-        else:
-            plt.title(title2, fontsize=18)
+        df = pd.DataFrame(u4, columns=["x", "y", "class"])
 
-        if split == True:
-            plt.figure(figsize=(7, 7))
-            ax = plt.axes(projection="3d")
-            ax.set_xlim3d(-10, 20)
-            ax.set_ylim3d(-10, 20)
-            ax.set_zlim3d(-10, 20)
-            fg = ax.scatter3D(
-                X_test[indexes_test, 0],
-                X_test[indexes_test, 1],
-                X_test[indexes_test, 2],
-                c=colors[y_test[indexes_test]],
-                alpha=0.3,
-                cmap="prism",
-            )
-            plt.title(title1 + ", test", fontsize=18)
-
-            plt.figure(figsize=(7, 7))
-            ax = plt.axes(projection="3d")
-            ax.set_xlim3d(-10, 20)
-            ax.set_ylim3d(-10, 20)
-            ax.set_zlim3d(-10, 20)
-            fg = ax.scatter3D(
-                X_test[:, 0],
-                X_test[:, 1],
-                X_test[:, 2],
-                c=colors[y_test],
-                alpha=0.3,
-                cmap="prism",
-            )  # cmap="hsv"
-            plt.title(title2 + ", test", fontsize=18)
+        sns.jointplot(df, x="x", y="y", hue="class")
+        # plt.title(title2 + ", test", y=1.3, fontsize=20)
 
 
 def draw_molecules(smiles, n=9):
@@ -291,5 +199,7 @@ def draw_molecules(smiles, n=9):
     print(targets[rnd_mol])
 
     # Plot
-    fig = Draw.MolsToGridImage(selected_mol, molsPerRow=3, subImgSize=(800, 800))
-    fig.save('picture_molecule.png')
+    fig = Draw.MolsToGridImage(
+        selected_mol, molsPerRow=3, subImgSize=(800, 800)
+    )
+    fig.save("picture_molecule.png")
