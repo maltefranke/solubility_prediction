@@ -12,12 +12,17 @@ from sklearn.utils import resample
 from imblearn.over_sampling import SMOTE
 import h5py
 
+from conversion_smiles_utils import *
 
-def load_train_data(train_path: str):
+
+def load_train_data(train_path: str) -> Tuple[List[str], List[str], np.array]:
     """
     Load the data from the .csv file with the train dataset
-    :param train_path:
-    :return:
+    Args:
+        train_path: path to the csv file containing the data
+
+    Returns:
+        list of ids, list of SMILES, np.array of target values
     """
 
     df = pd.read_csv(train_path)
@@ -26,18 +31,18 @@ def load_train_data(train_path: str):
     targets = df["sol_category"].values.tolist()
     targets = np.array(targets)
 
-    if "Id" in df.columns:
-        ids = df["Id"].values.tolist()
-        return ids, smiles, targets
-    else:
-        return smiles, targets
+    ids = df["Id"].values.tolist()
+    return ids, smiles, targets
 
 
 def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
     """
-    Load the data from the .csv file with the test dataset
-    :param test_path:
-    :return:
+    Load the test data from the .csv file
+    Args:
+        test_path: path to the csv file containing the data
+
+    Returns:
+        list of ids, list of SMILES
     """
 
     df = pd.read_csv(test_path)
@@ -48,9 +53,7 @@ def load_test_data(test_path: str) -> Tuple[List[str], List[str]]:
     return ids, smiles
 
 
-def create_submission_file(
-    ids: List[str], y_pred: np.array, path: str
-) -> None:
+def create_submission_file(ids: List[str], y_pred: np.array, path: str) -> None:
     """
     Function to create the final submission file
     Args:
@@ -68,34 +71,35 @@ def create_submission_file(
             writer.writerow([id, pred])
 
 
-def calculate_class_weights(
-    targets: np.array, num_classes: int = 3
-) -> List[float]:
+def calculate_class_weights(y: np.array, num_classes: int = 3) -> List[float]:
     """
-    computation of the weights to eal with the umbalanceness of the dataset
-    """
+    Computation of the weights to deal with imbalance of the dataset
+    Args:
+        y: np.array of target values
+        num_classes: number of classes in the classification task
 
-    # see how balanced the data is and assign weights
-    train_data_size = targets.shape[0]
+    Returns:
+        list of class weights
+    """
+    train_data_size = y.shape[0]
 
     weights = [
-        1 - np.count_nonzero(targets == int(i)) / train_data_size
+        1 - np.count_nonzero(y == int(i)) / train_data_size
         for i in range(num_classes)
     ]
 
     return weights
 
 
-def up_down_sampling(y, X):
+def up_down_sampling(y: np.array, X: np.array) -> Tuple[np.array, np.array]:
     """
     Add copies of the observations of the minority classes and remove observations from the majority class
     Args:
-        y: classes values
+        y: np.array of target values
         X: observations
 
     Returns:
-        y_balanced
-        X_balanced
+        balanced y and X
     """
 
     # dividing the data in subsets depending on the class
@@ -129,16 +133,15 @@ def up_down_sampling(y, X):
     return y_balanced, X_balanced
 
 
-def smote_algorithm(y, X, seed: int):
+def smote_algorithm(y: np.array, X: np.array, seed: int) -> Tuple[np.array, np.array]:
     """
     Up-sample the minority class
     Args:
-        y: classes values
+        y: np.array of target values
         X: observations
-
+        seed: seed for reproducibility
     Returns:
-        y_resampled
-        X_resampled
+        resampled y and X
     """
     sm = SMOTE(random_state=seed)
     X_resampled, y_resampled = sm.fit_resample(X, y)
@@ -146,30 +149,36 @@ def smote_algorithm(y, X, seed: int):
     return y_resampled, X_resampled
 
 
-def indices_by_class(
-    targets: np.array, num_classes: int = 3
-) -> List[np.array]:
+def indices_by_class(y: np.array, num_classes: int = 3) -> List[np.array]:
     """
-    returns the indices divided following the 3 different solubility classes
+    get class indicees depending on given y
+    Args:
+        y: np.array of target values
+        num_classes: number of classes in the classification task
+
+    Returns:
+        returns the indices divided following the different solubility classes
     """
+
     class_indices = []
     for class_ in range(num_classes):
-        class_idx = np.where(targets == class_)[0]
+        class_idx = np.where(y == class_)[0]
         class_indices.append(class_idx)
-    # print('Call to the function indices_by_class returns: ')
-    # print(class_indices)
     return class_indices
 
 
-def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
+def split_by_class(y: np.array, CV: int = 5, num_classes: int = 3) -> List[Tuple[List[np.array], List[np.array]]]:
     """
 
-    :param targets:
-    :param CV:
-    :param num_classes:
-    :return:
+    Args:
+        y: np.array of target values
+        CV: number of cross-validation folds
+        num_classes: number of classes in the classification task
+
+    Returns:
+
     """
-    splitted_classes_indices = indices_by_class(targets, num_classes)
+    splitted_classes_indices = indices_by_class(y, num_classes)
 
     kfold = KFold(n_splits=CV)
 
@@ -198,12 +207,15 @@ def split_by_class(targets: np.array, CV: int = 5, num_classes: int = 3):
     return final_splits
 
 
-def create_subsample_train_csv(data_dir: str, features: np.array):
+def create_subsample_train_csv(data_dir: str, features: np.array) -> None:
     """
+    Creates a database based on the training data. Used for the GraphModel
+    Args:
+        data_dir: path to the data directory
+        features: np.array of corresponding features
 
-    :param data_dir:
-    :param features:
-    :return:
+    Returns:
+
     """
     path = os.path.join(data_dir, "random_undersampling.csv")
     train_path = os.path.join(data_dir, "train.csv")
@@ -248,49 +260,5 @@ def create_subsample_train_csv(data_dir: str, features: np.array):
         hf.create_dataset("descriptors", data=cutoff_features)
 
 
-if __name__ == "__main__":
-
-    """
-    this_dir = os.getcwd()
-
-    data_dir = os.path.join(this_dir, "data")
-    train_path = os.path.join(data_dir, "train.csv")
-    test_path = os.path.join(data_dir, "test.csv")
-
-    ids, smiles, targets = load_train_data(train_path)
-
-    from augmentation_utils import nan_imputation
-
-    qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
-    (
-        dataset,
-        columns_info,
-    ) = nan_imputation(qm_descriptors, 0.0, standardization=False)
-
-    submission_ids, submission_smiles = load_test_data(test_path)
-
-    # TEST SET TRANSFORMATION
-    # descriptors
-    qm_descriptors_test = smiles_to_qm_descriptors(
-        submission_smiles, data_dir, "test"
-    )
-
-    # UMAP
-
-    p = np.random.permutation(len(targets))
-    targets_shuffled = targets[p]
-    dataset_shuffled = dataset[p, :]
-    # make_umap(
-    #    dataset_shuffled[0 : int(math.modf(len(targets) * 0.6)[1]), :],
-    #    targets_shuffled[0 : int(math.modf(len(targets) * 0.6)[1])],
-    # )
-    # make_umap(dataset_shuffled, targets_shuffled)
-    submission_ids, submission_smiles = load_test_data(test_path)
-
-    make_umap(
-        dataset_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1, :],
-        targets_shuffled[int(math.modf(len(targets) * 0.6)[1]) : -1],
-    )
 
 
-    """
