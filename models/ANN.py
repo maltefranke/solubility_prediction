@@ -6,6 +6,9 @@ from sklearn.model_selection import KFold
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
+from data_utils import *
+from conversion_smiles_utils import *
+
 
 class ClassificationNeuralNetwork(torch.nn.Module):
     """
@@ -392,7 +395,6 @@ def ann_learning(
 
 def predict_ann_ensemble(
     X,
-    input_dim: int,
     model_checkpoints: list,
     output_dim: int = 3,
     hidden_dim: int = 300,
@@ -402,6 +404,8 @@ def predict_ann_ensemble(
         device = "cuda"
 
     X = torch.tensor(X).type(torch.FloatTensor).to(device)
+
+    input_dim = X.shape[-1]
 
     predictions = []
 
@@ -424,3 +428,29 @@ def predict_ann_ensemble(
     final_predictions = final_predictions.argmax(dim=1).cpu().numpy()
 
     return final_predictions
+
+
+if __name__ == "__main__":
+    this_dir = os.getcwd()
+    root_dir = os.path.dirname(this_dir)
+
+    data_dir = os.path.join(root_dir, "data")
+    train_path = os.path.join(data_dir, "train.csv")
+    test_path = os.path.join(data_dir, "test.csv")
+
+    ids, smiles, targets = load_train_data(train_path)
+    all_fps = smiles_to_morgan_fp(smiles)
+
+    label_weights = calculate_class_weights(targets)
+
+    model_checkpoints = ann_learning(all_fps, targets, ann_save_path=os.path.join(this_dir, "ANNResults"),
+                                     label_weights=label_weights)
+
+    submission_ids, submission_smiles = load_test_data(test_path)
+
+    submission_fps = smiles_to_morgan_fp(submission_smiles)
+
+    predictions = predict_ann_ensemble(submission_fps, model_checkpoints)
+
+    submission_file = os.path.join(root_dir, "submissions", "predictions.csv")
+    create_submission_file(submission_ids, predictions, submission_file)
