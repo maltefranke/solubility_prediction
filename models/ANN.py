@@ -452,5 +452,5 @@ if __name__ == "__main__":
 
     predictions = predict_ann_ensemble(submission_fps, model_checkpoints)
 
-    submission_file = os.path.join(root_dir, "submissions", "predictions.csv")
+    submission_file = os.path.join(root_dir, "submissions", "ANN_predictions.csv")
     create_submission_file(submission_ids, predictions, submission_file)

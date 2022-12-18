@@ -106,17 +106,6 @@ if __name__ == "__main__":
     ids, smiles, targets = load_train_data(train_path)
     all_fps = smiles_to_morgan_fp(smiles)
 
-    """class0_idx = np.argwhere(targets == 0)
-    class1_idx = np.argwhere(targets == 1)
-    class2_idx = np.argwhere(targets == 2)
-
-    class2_idx = class2_idx[:class1_idx.shape[0]]
-
-    all_idx = np.concatenate([class0_idx, class1_idx, class2_idx])
-
-    all_fps = all_fps[all_idx, :].squeeze()
-    targets = targets[all_idx].squeeze()"""
-
     seed = 13
     np.random.seed(seed)
 
@@ -125,19 +114,7 @@ if __name__ == "__main__":
     all_fps = all_fps[p]
     targets = targets[p]
 
-    # see how balanced the data is and assign weights
-    train_data_size = targets.shape[0]
-
-    num_low = np.count_nonzero(targets == 0)
-    num_medium = np.count_nonzero(targets == 1)
-    num_high = np.count_nonzero(targets == 2)
-
-    weights = [
-        1 - num_low / train_data_size,
-        1 - num_medium / train_data_size,
-        1 - num_high / train_data_size,
-    ]
-    print(weights)
+    weights = calculate_class_weights(targets)
 
     sample_weights = [weights[i] for i in targets]
 
@@ -145,9 +122,8 @@ if __name__ == "__main__":
 
     submission_ids, submission_smiles = load_test_data(test_path)
     X = smiles_to_morgan_fp(submission_smiles)
-    input_dim = X.shape[-1]
 
     predictions = predict_composite_svm_ensemble(oc_svms, svms, X)
 
-    submission_file = os.path.join(this_dir, "predictions.csv")
+    submission_file = os.path.join(this_dir, "CompositeSVM_predictions.csv")
     create_submission_file(submission_ids, predictions, submission_file)
