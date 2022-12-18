@@ -480,26 +480,24 @@ if __name__ == "__main__":
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
-    # # CREATION AUGMENTED DATASET WITH IDs
-    # ids, smiles, targets = load_train_data(train_path)
-    # aug_id, aug_smiles, aug_targets = augment_smiles(
-    #     ids, smiles, targets, data_dir, "augmented_ALLtrain.csv"
-    # )
-    #
-    # print("************ AUGMENTED ALL TRAIN SET ************")
-    # print("Tot datapoints = ", aug_targets.shape[0])
-    # print("Class 0 = ", sum(np.where(aug_targets == 0, 1, 0)))
-    # print("Class 1 = ", sum(np.where(aug_targets == 1, 1, 0)))
-    # print("Class 2 = ", sum(np.where(aug_targets == 2, 1, 0)))
-    #
-    # # CREATION SPLIT DATASETS - new .csv files
-    # name_tr, name_val = create_split_csv(
-    #     data_dir, "train.csv", downsampling_class2=False, p=0.6
-    # )
+    # CREATION AUGMENTED DATASET WITH IDs
+    ids, smiles, targets = load_train_data(train_path)
+    aug_id, aug_smiles, aug_targets = augment_smiles(
+        ids, smiles, targets, data_dir, "augmented_ALLtrain.csv"
+    )
+
+    print("************ AUGMENTED ALL TRAIN SET ************")
+    print("Tot datapoints = ", aug_targets.shape[0])
+    print("Class 0 = ", sum(np.where(aug_targets == 0, 1, 0)))
+    print("Class 1 = ", sum(np.where(aug_targets == 1, 1, 0)))
+    print("Class 2 = ", sum(np.where(aug_targets == 2, 1, 0)))
+
+    # CREATION SPLIT DATASETS - new .csv files
+    name_tr, name_val = create_split_csv(
+        data_dir, "train.csv", downsampling_class2=False, p=0.6
+    )
 
     # AUGMENTATION OF EACH DATASET SEPARATELY - creation of new .csv files
-    name_tr = "split_train.csv"
-    name_val = "split_valid.csv"
     ids_train, smiles_train, targets_train = load_train_data(
         os.path.join(data_dir, name_tr)
     )
@@ -509,7 +507,7 @@ if __name__ == "__main__":
         smiles_train,
         targets_train,
         data_dir,
-        "1-train.csv",
+        "augmented" + name_tr,
     )
 
     ids_valid, smiles_valid, targets_valid = load_train_data(
@@ -520,7 +518,7 @@ if __name__ == "__main__":
         smiles_valid,
         targets_valid,
         data_dir,
-        "1-valid.csv",
+        "augmented" + name_val,
     )
 
     print("TRAIN SPLIT SET")
@@ -548,7 +546,7 @@ if __name__ == "__main__":
     print("Class 1 = ", sum(np.where(aug_targets_valid == 1, 1, 0)))
     print("Class 2 = ", sum(np.where(aug_targets_valid == 2, 1, 0)))
 
-    """
+
     ################### RE-DO EVERYTHING BY DOWNSAMPLING CLASS 2 ###################
 
     # CREATION SPLIT DATASETS ALLOWING DOWNSAMPLING - new .csv files
@@ -591,4 +589,4 @@ if __name__ == "__main__":
     print("Class 0 = ", sum(np.where(aug_targets_valid_down == 0, 1, 0)))
     print("Class 1 = ", sum(np.where(aug_targets_valid_down == 1, 1, 0)))
     print("Class 2 = ", sum(np.where(aug_targets_valid_down == 2, 1, 0)))
-    """
+
