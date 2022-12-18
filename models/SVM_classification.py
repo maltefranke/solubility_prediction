@@ -3,35 +3,36 @@ import csv
 from typing import Tuple, List
 import math
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import make_scorer
 from sklearn.model_selection import RandomizedSearchCV
 import time
 from augmentation_utils import *
 from utils import *
 from data_utils import *
 from conversion_smiles_utils import *
-from sklearn.metrics import make_scorer
 
 
-def rf_learning(
+def SVMlearning(
     X: np.array,
     y: np.array,
     CV: int = 5,
     label_weights: List[float] = None,
     seed: int = 13,
     sample_weights: List[float] = None,
-) -> List[RandomForestClassifier]:
+) -> List[SGDClassifier]:
 
     """
-    creation of the Random Forest model testing 5 splitting of the dataset
+    creation of the SVM model testing 5 splitting of the dataset
     """
+    # weights per class
     label_weights = {
         0: label_weights[0],
         1: label_weights[1],
         2: label_weights[2],
     }
 
-    rfs = []
+    svms = []
 
     kfold = KFold(n_splits=CV, shuffle=True)
 
@@ -44,33 +45,32 @@ def rf_learning(
         if sample_weights is not None:
             sample_weights_i = np.array(sample_weights)[train_idx]
 
-        rf = RandomForestClassifier(
-            n_estimators=110,
-            max_depth=20,
-            criterion="entropy",
-            random_state=seed,
+        svm = SGDClassifier(
+            penalty="l1",
+            learning_rate="constant",
+            eta0=0.01,
             class_weight=label_weights,
         )
 
-        rf.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
+        svm.fit(X_train_i, y_train_i, sample_weight=sample_weights_i)
 
-        y_pred = rf.predict(X_test_i)
+        y_pred = svm.predict(X_test_i)
         kappa = quadratic_weighted_kappa(y_pred, y_test_i)
         print("Kappa = ", kappa)
 
-        rfs.append(rf)
+        svms.append(svm)
 
-    return rfs
+    return svms
 
 
-def predict_rf_ensemble(rfs: List[RandomForestClassifier], X) -> np.array:
+def predict_svm_ensemble(svms: List[SGDClassifier], X) -> np.array:
     """
     creation of the output with using previously built models
     """
     predictions = []
 
-    for rf in rfs:
-        model_predictions = rf.predict(X)
+    for svm in svms:
+        model_predictions = svm.predict(X)
         predictions.append(model_predictions.reshape((-1, 1)))
 
     predictions = np.concatenate(predictions, axis=1)
@@ -88,30 +88,36 @@ def predict_rf_ensemble(rfs: List[RandomForestClassifier], X) -> np.array:
     return final_predictions
 
 
-def rf_cross_validation(
+def svm_cross_validation(
     X: np.array,
     y: np.array,
     CV: int = 5,
+    label_weights: List[float] = None,
     seed: int = 13,
     sample_weights: List[float] = None,
 ):
-    print("Random Forest random_CV...'\n'")
-    # Number of trees in random forest
-    n_estimators = [int(x) for x in np.linspace(start=20, stop=200, num=5)]
-    # Number of features to consider at every split
-    max_features = ["None", "sqrt"]
-    # Maximum number of levels in tree
-    max_depth = [int(x) for x in np.linspace(5, 50, num=3)]
-    forest = RandomForestClassifier(criterion="entropy", n_jobs=-1)
+    print("SVM random_CV...'\n'")
+    label_weights = {
+        0: label_weights[0],
+        1: label_weights[1],
+        2: label_weights[2],
+    }
+
+    learning_rate = ["constant", "optimal", "invscaling"]
+    eta0 = [0.1, 0.05, 0.01]
+    penalty = ["l1", "l2"]
     # Create the random grid
     random_grid = {
-        "n_estimators": n_estimators,
-        "max_features": max_features,
-        "max_depth": max_depth,
+        "learning_rate": learning_rate,
+        "eta0": eta0,
+        "penalty": penalty,
     }
+
+    clf = SGDClassifier(class_weight=label_weights)
+
     kappa_scorer = make_scorer(quadratic_weighted_kappa)
-    rf_random = RandomizedSearchCV(
-        estimator=forest,
+    gs = RandomizedSearchCV(
+        clf,
         param_distributions=random_grid,
         n_iter=10,
         cv=5,
@@ -120,23 +126,23 @@ def rf_cross_validation(
         n_jobs=-1,
         scoring=kappa_scorer,
     )
-    # Fit the random search model
-    rf_random.fit(X, y, sample_weight=sample_weights)
+    # -----------------------------------------------------
+    # Train model
+    gs.fit(X, y, sample_weight=sample_weights)
 
     print("results...")
-    print(rf_random.best_score_)
-    print(rf_random.cv_results_)
+    print(gs.best_score_)
+    print(gs.cv_results_)
     print("---")
-    print(rf_random.best_params_)
+    print(gs.best_params_)
     print("---")
 
 
 if __name__ == "__main__":
-
     this_dir = os.path.dirname(os.getcwd())
 
     data_dir = os.path.join(
-        this_dir, "data"
+        this_dir, "solubility_prediction\data"
     )  # MODIFY depending on your folder!!
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
@@ -200,19 +206,19 @@ if __name__ == "__main__":
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
 
-    # random cross validation
     r_cv = False
     if r_cv:
-        rf_cross_validation(
+        svm_cross_validation(
             dataset,
             targets,
             CV=5,
+            label_weights=weights,
             sample_weights=sample_weights,
             seed=seed,
         )
 
-    print("Random Forest...\n")
-    rfs = rf_learning(
+    print("SVM...\n")
+    svms = SVMlearning(
         dataset,
         targets,
         CV=5,
@@ -221,7 +227,7 @@ if __name__ == "__main__":
         seed=seed,
     )
 
-    final_predictions = predict_rf_ensemble(rfs, qm_descriptors_test)
+    final_predictions = predict_svm_ensemble(svms, qm_descriptors_test)
 
-    submission_file = os.path.join(this_dir, "random_for_fps.csv")
+    submission_file = os.path.join(this_dir, "SVM_fps.csv")
     create_submission_file(submission_ids, final_predictions, submission_file)
