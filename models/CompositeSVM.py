@@ -8,7 +8,7 @@ from sklearn.svm import SVC, OneClassSVM
 from utils import *
 from data_utils import *
 
-# TO BE CHECKED!!!
+
 def composite_prediction(X, oc_svm: OneClassSVM, svm: SVC):
 
     # first, the oc svm predicts if a data point is class 2
