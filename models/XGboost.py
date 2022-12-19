@@ -48,8 +48,8 @@ def xgb_learning(
             sample_weights_i = np.array(sample_weights)[train_idx]
 
         xgb = xgboost.XGBClassifier(
-            objective="multi:softmax",  # " multi:softprob"
-            # eval_metric="auc",  #
+            objective="multi:softmax",  # " multi:softprob" if eval_metric ="auc"
+            # eval_metric="auc", # logloss is the default eval_metric 
             gamma=0,
             learning_rate=0.1,
             max_delta_step=0,
@@ -109,7 +109,7 @@ def cross_validation(
 ):
     """
     XGBoost cross validation
-    ATTENTION! it uses GPU
+    ATTENTION! It uses GPU
     """
 
     param_grid = {
