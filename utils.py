@@ -72,11 +72,11 @@ def make_umap():
 
     # splitting into train and test
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.33, random_state=42
+        X, y, test_size=0.2, random_state=42
     )
 
     fps_train, fps_test, fps_y_train, fps_y_test = train_test_split(
-        fps, y, test_size=0.33, random_state=42
+        fps, y, test_size=0.2, random_state=42
     )
 
     indexes_d = np.where(y != 2)[0]
