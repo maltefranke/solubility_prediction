@@ -17,17 +17,17 @@ from conversion_smiles_utils import *
 
 
 def preprocessing(
-    ids,
-    smiles,
-    data_dir,
-    nan_tolerance=0.0,
-    standardization=True,
-    cat_del=True,
-    log=True,
-    fps=False,
-    degree=1,
-    pairs=False,
-):
+    ids: List[str],
+    smiles: List[str],
+    data_dir: str,
+    nan_tolerance: float=0.0,
+    standardization: bool=True,
+    cat_del: bool=True,
+    log: bool=True,
+    fps: bool=False,
+    degree: int=1,
+    pairs: bool=False,
+) -> Tuple[np.array, np.array, List[int]]:
     """
     Sequence of functions to transform the dataset
     perc : minimum percentage of nan elements in the column to be eliminated
@@ -61,17 +61,10 @@ def preprocessing(
     return dataset, columns_info, log_trans
 
 
-def build_poly(x, columns_info, degree, pairs=False):
+def build_poly(x: np.array, columns_info: np.array, degree: int, pairs: bool=False) -> np.array:
     """Polynomial basis functions for input data x, for j=0 up to j=degree.
     Optionally can add square or cube roots of x as additional features,
     or the basis of products between the features.
-    Args:
-        :param x: numpy array of shape (N,), N is the number of samples
-        :param degree: integer
-        :param pairs: boolean
-        :param columns_info:
-    Returns:
-        :return poly: numpy array of shape (N,d+1)
     """
     # already removed nan columns
 
@@ -98,7 +91,7 @@ def build_poly(x, columns_info, degree, pairs=False):
     return poly, columns_info
 
 
-def logarithm(dataset, columns_info, log_trans=None):
+def logarithm(dataset:np.array, columns_info:np.array, log_trans:bool=None) -> Tuple[np.array, List[int]]:
     skewness = []
     to_transform = []
 
@@ -119,17 +112,17 @@ def logarithm(dataset, columns_info, log_trans=None):
 
 
 def transformation(
-    data,
-    smiles,
-    columns_info,
-    standardization=True,
-    test=False,
-    degree=1,
-    pairs=False,
-    log_trans=None,
-    log=True,
-    fps=False,
-):
+    data: np.array,
+    smiles: List[str],
+    columns_info: np.array,
+    standardization: bool=True,
+    test: bool =False,
+    degree: int =1,
+    pairs: bool =False,
+    log_trans: bool =None,
+    log: bool=True,
+    fps: bool =False,
+) -> Tuple[np.array, List[int]]:
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
     # now eliminated both in test and training
@@ -166,21 +159,11 @@ def transformation(
     return data, log_trans
 
 
-def nan_detection(data, smiles, nan_tolerance=0.0, cat_del=True):
+def nan_detection(data: np.array, smiles:List[str], nan_tolerance: float=0.0, cat_del:bool=True)-> Tuple[np.array,np.array]:
     """
     Function that detects columns with too many nan values (depending on the tolerance)
     the data substituting the median to the nan values.
     It doesn't touch the categorical features.
-    :param fps:
-    :param log:
-    :param pairs:
-    :param degree:
-    :param cat_del:
-    :param standardization:
-    :param smiles:
-    :param nan_tolerance: percentage of nan we want to accept for each column
-    :param data: list with only qm_descriptors
-    :return:
     """
 
     N, M = data.shape
@@ -214,11 +197,10 @@ def nan_detection(data, smiles, nan_tolerance=0.0, cat_del=True):
     return data, columns_info
 
 
-def check_categorical(column):
+def check_categorical(column: np.array) -> bool :
     """
     Function that checks if a column contains categorical feature or not (ignoring the nan values)
     :param column: column where to check if the feature contained is categorical or not
-    :return: Bool
     """
     # removing nan values and substituting them with 0
     column_removed = np.where(np.isnan(column), 0, column)
@@ -272,7 +254,7 @@ def PCA_application(
     )
 
 
-def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
+def randomize_smiles(smiles: List[str], random_type: str="rotated", isomericSmiles:bool =True):
     """
     From: https://github.com/undeadpixel/reinvent-randomized and https://github.com/GLambard/SMILES-X
     Returns a random SMILES given a SMILES of a molecule.
@@ -311,7 +293,7 @@ def randomize_smiles(smiles, random_type="rotated", isomericSmiles=True):
     raise ValueError("Type '{}' is not valid".format(random_type))
 
 
-def augment_smiles(ids, smiles, targets, data_dir, name_file):
+def augment_smiles(ids:List[str], smiles:List[str], targets:np.array, data_dir:str, name_file:str):
     """
     Addition of the rotations of a molecule depending on the class it belongs to.
     :param ids: indices of the dataset we want to augment
@@ -401,7 +383,7 @@ def augment_smiles(ids, smiles, targets, data_dir, name_file):
     return final_id, final_smiles, final_targets
 
 
-def create_split_csv(data_dir, file_name, downsampling_class2=False, p=0.6):
+def create_split_csv(data_dir: str, file_name:str, downsampling_class2:bool=False, p:float=0.6):
     """
     It creates 2 .csv files containing a random split of the given dataset into train (70%) and
     validation (30%) set.
