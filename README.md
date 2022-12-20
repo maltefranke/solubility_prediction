@@ -10,6 +10,9 @@ This repository contains the code for the prediction of solubility class of comp
 - Low solubility: Nephelometry values higher than 100000
 
 The data included in this repository was taken from the Kaggle challenge [1st EUOS/SLAS Joint Challenge: Compound Solubility](https://www.kaggle.com/competitions/euos-slas/overview).
+Some of the approaches used in this work require the transformation from SMILES strings to another machine-readable representation.
+While all of the representations can be produced with our code, translating to molecular descriptors and Schnet-databases takes a long time and was only done once. 
+These files are too large for git, and we encourage the users to contact us if interested, so that we can share the pre-computed datasets.
 
 # Overview
 ```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset<br> 
