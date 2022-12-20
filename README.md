@@ -16,7 +16,6 @@ This repository contains the code for the prediction of solubility class of comp
 ```schnetpak```- copy of the schnetpack repository, modified to work for multi-class classification<br>
 - ```ChemBERTa\``` - directory with ChemBERTa model code and results
 - ```GraphModels\``` - directory with GNN results
-- ```SchNet models\``` - directory for SchNet results and database
 - ```ANN.py``` - artificial neural network workflow
 - ```GraphModel.py``` - GNN model workflow
 - ```SchNet.py``` - SchNet model workflow
