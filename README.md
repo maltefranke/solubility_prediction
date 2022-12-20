@@ -1,4 +1,4 @@
-# Compound Solubility Prediction
+# Solubility classification of molecules
 
 EPFL Machine Learning Course, Autumn 2022 - Class Project 2
 
