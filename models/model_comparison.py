@@ -71,5 +71,5 @@ if __name__ == "__main__":
 
     ids, X = comparison(x_xgboost, x_chem, x_schnet)
 
-    submission_file = os.path.join(submission_dir, "comparison_model.csv")
+    submission_file = os.path.join(submission_dir, "ensemble_model.csv")
     create_submission_file(ids, X, submission_file)

@@ -19,7 +19,7 @@ These files are too large for git, and we encourage the users to contact us if i
 ```models/``` - collection of models tested<br>
 ```submissions/``` - collection of some of the most relevant submissions<br>
 ```schnetpak```- copy of the schnetpack repository, modified to work for multi-class classification<br>
-- ```ChemBERTa/``` - directory with ChemBERTa model code and results
+- ```ChemBERTa/``` - directory with ChemBERTa model code
 - ```GraphModels/``` - directory with GNN results
 - ```ANN.py``` - artificial neural network workflow
 - ```GraphModel.py``` - GNN model workflow
@@ -34,7 +34,7 @@ These files are too large for git, and we encourage the users to contact us if i
 - ```augmentation_utils.py``` - collection of the functions used to process and transform the data, as well as perform feature engineering
 - ```conversion_smiles_utils.py``` - creation of molecular representations from SMILES 
 - ```data_utils.py``` - functions to import dataset and deal with imbalance
-- ```similarity_scaffolds.py``` 
+- ```similarity_scaffolds.py``` - functions to compute the number of unique scaffolds in the dataset based on Tanimoto similarity
 - ```utils.py``` - Cohen's Kappa and Umap
 
 # Environment

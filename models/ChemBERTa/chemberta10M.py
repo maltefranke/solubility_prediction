@@ -161,7 +161,7 @@ class ChemBERTa(pl.LightningModule):
         all_outs = pd.concat(outputs)
         print(all_outs)
         all_outs.columns = ["Id", "pred"]
-        all_outs.to_csv(f"chemberta_{time()}_.csv", index=False)
+        all_outs.to_csv(f"Chemberta_.csv", index=False)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(),
