@@ -36,9 +36,6 @@ def train_graph_model(data_path: str, ensemble_size=10, batch_size=256) -> Dict:
         descriptor_file = os.path.join(os.path.dirname(data_path), "random_undersampling_descriptors.h5")
         with h5py.File(descriptor_file, "r") as hf:
             qm_descriptors = hf["descriptors"][:]
-        qm_descriptors, mean, std = standardize(qm_descriptors)
-        # qm_descriptors, columns_info, standardization_data = nan_imputation(qm_descriptors, 0.5)
-        # print(qm_descriptors.shape)
         np.save(npy_file, qm_descriptors, allow_pickle=True)
 
 
@@ -85,7 +82,9 @@ def predict_graph_model(data_path: str) -> np.array:
     """
     with tempfile.NamedTemporaryFile(mode='w', delete=False) as qm_features:
         npy_file = qm_features.name + ".npy"
-        qm_descriptors = smiles_to_qm_descriptors(_, data_dir=os.path.dirname(data_path), type_="test")
+        # we create a dummy input because we only need to load the data that has already been produced
+        dummy = [""]
+        qm_descriptors = smiles_to_qm_descriptors(dummy, data_dir=os.path.dirname(data_path), type_="test")
         np.save(npy_file, qm_descriptors, allow_pickle=True)
 
     arguments = [
@@ -143,15 +142,20 @@ def graph_pipeline(data_dir: str, model_dir: str) -> None:
 
 
 if __name__ == "__main__":
-
     this_dir = os.path.dirname(os.getcwd())
 
     data_dir = os.path.join(this_dir, "data")
-    model_dir = os.getcwd()
-    smiles = 0
+    train_path = os.path.join(data_dir, "train.csv")
+    test_path = os.path.join(data_dir, "test.csv")
+
+    # get data and transform smiles -> morgan fingerprint
+    ids, smiles, targets = load_train_data(train_path)
     qm_descriptors = smiles_to_qm_descriptors(smiles, data_dir)
+
+    submission_ids, submission_smiles = load_test_data(test_path)
+    test_descriptors = smiles_to_qm_descriptors(submission_smiles, data_dir, type_="test")
 
     create_subsample_train_csv(data_dir, qm_descriptors)
 
-    graph_pipeline(data_dir, model_dir)
+    graph_pipeline(data_dir, this_dir)
 

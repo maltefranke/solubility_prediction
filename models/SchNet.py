@@ -28,7 +28,7 @@ def prepare_schnet_data(smiles: List[str], targets: np.array, working_dir: str, 
         num_workers: number of workers in the dataloader
         pin_memory: whether to limit memory use
     Returns:
-        None
+        AtomLoader
     """
     dataset_path = os.path.join(working_dir, f'./SchNet_{dataset}.db')
 
@@ -125,7 +125,7 @@ def train_schnet(task: spk.task.AtomisticTask, train_loader: AtomsLoader, val_lo
     """
     Function to do the training of SchNet
     Args:
-        task: the SchNetpack task to run, defined in :func:'setup_schnet'
+        task: the schnetpack task to run, defined in :func:'setup_schnet'
         train_loader:
         val_loader:
         working_dir:
