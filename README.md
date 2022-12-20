@@ -12,6 +12,7 @@ This repository contains the code for the prediction of solubility class of comp
 # Overview
 ```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset 
 ```models/``` - collection of models tested
+```submissions/``` - collection of some of the most relevant submissions 
 - ```ChemBERTa\```
 - ```GraphModels\```
 - ```SchNet models\```
@@ -22,7 +23,6 @@ This repository contains the code for the prediction of solubility class of comp
 - ```SVM.py``` - function which performs SVM multiclass Classification with sklearn.svm.SVC
 - ```SVM_classification.py``` - function which performs SVM multiclass Classification with sklearn.linear_model.SGDClassifier
 - ```XGboost.py``` - function which performs default XGBoost multiclass Classification
-```submissions/``` - collection of some of the most relevant submissions 
 
 ### Code
 - ```model_comparison.py``` - function to create ensemble model starting from "submissions" files
