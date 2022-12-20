@@ -2,21 +2,21 @@ import pandas as pd
 import os
 import numpy as np
 import statistics
-
+from typing import Tuple
 from data_utils import load_train_data, load_test_data, create_submission_file
 
 
-def comparison(x1, x2, x3):
+def comparison(x1:np.array, x2:np.array, x3:np.array)-> Tuple[np.array,np.array]:
     """
     Creates a .csv file with the predictions based on the predictions of three different models:
-    XGBoost, ChemBERTa, SchNet by choosing, for each molecule, the minority class if predicted by one model.
+    XGBoost, ChemBERTa, SchNet by choosing, for each molecule, the minority class if predicted by one model, the most frequent class otherwise .
 
     Args:
-        x1:
-        x2:
-        x3:
+        x1: XGBoost
+        x2: ChemBERTa
+        x3: SchNet
 
-    Returns:
+    Returns: ensemble_model
 
     """
 
@@ -26,30 +26,15 @@ def comparison(x1, x2, x3):
         # if the 3 values are different, it takes the first one -> strongest method as the 1st
         result[i] = statistics.mode([x1[i, 1], x2[i, 1], x3[i, 1]])
 
-        # if result[i] == 2 and (
-        #    x1[i, 1] != 2 or x2[i, 1] != 2 or x3[i, 1] != 2
-        # ):
-        #    if x1[i, 1] != 2:
-        #        result[i] = x1[i, 1]
-        #    elif x2[i, 1] != 2:
-        #        result[i] = x2[i, 1]
-        #    else:
-        #        result[i] = x3[i, 1]
-
         if result[i] == 2 and (
             x1[i, 1] != 2 or x2[i, 1] != 2 or x3[i, 1] != 2
         ):
             if x1[i, 1] != 2:
                 result[i] = x1[i, 1]
-            elif x2[i, 1] == 1:  # Chemberta
-                result[i] = 1
-            elif x3[i, 1] == 0:  # Schnet
-                result[i] = 0
-
-        # if result[i] == 2 and (
-        #    x1[i, 1] == 1 or x2[i, 1] == 1 or x3[i, 1] == 1
-        # ):
-        #    result[i] = 1
+            elif x2[i, 1] != 2:
+               result[i] = x2[i, 1]
+            else:
+               result[i] = x3[i, 1]
 
     return x1[:, 0], result
 
@@ -61,7 +46,7 @@ if __name__ == "__main__":
 
     # XGBOOST
     filename_xgboost = os.path.join(
-        data_dir, "xg_boost_predictions_descriptors_weights_nonan.csv"
+        data_dir, "XGBoost_best.csv"
     )
 
     df1 = pd.read_csv(filename_xgboost)
