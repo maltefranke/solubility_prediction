@@ -37,5 +37,9 @@ The data included in this repository was taken from the Kaggle challenge [1st EU
 # Environment
 - To install the environment, run the following command:
 ```
-conda env create -f environment.yml
+conda env create -f environment.yml -n [your_env_name]
+```
+- and activate it via
+```
+conda activate [your_env_name]
 ```
