@@ -16,19 +16,19 @@ These files are too large for git, and we encourage the users to contact us if i
 
 # Overview
 ```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset<br> 
-```models/``` - collection of models tested<br>
 ```submissions/``` - collection of some of the most relevant submissions<br>
 ```schnetpak```- copy of the schnetpack repository, modified to work for multi-class classification<br>
+```models/``` - collection of models tested<br>
 - ```ChemBERTa/``` - directory with ChemBERTa model code
 - ```GraphModels/``` - directory with GNN results
 - ```ANN.py``` - artificial neural network workflow
 - ```GraphModel.py``` - GNN model workflow
-- ```model_comparison.py``` - function to create ensemble model starting from "submissions" files
 - ```SchNet.py``` - SchNet model workflow
 - ```RandomForest.py``` - function which performs Random Forest multiclass Classification
 - ```SVM.py``` - function which performs SVM multiclass Classification with sklearn.svm.SVC
 - ```SVM_classification.py``` - function which performs SVM multiclass Classification with sklearn.linear_model.SGDClassifier
 - ```XGboost.py``` - function which performs default XGBoost multiclass Classification
+- ```ensemble_model.py``` - function to create ensemble model starting from "submissions" files
 
 ### Code
 - ```augmentation_utils.py``` - collection of the functions used to process and transform the data, as well as perform feature engineering
