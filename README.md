@@ -27,9 +27,9 @@ This repository contains the code for the prediction of solubility class of comp
 ```submissions/``` - collection of some of the most relevant submissions 
 
 ### Code
-- ```Model_comparison.py``` - function to create ensemble model starting from "submissions" files
+- ```model_comparison.py``` - function to create ensemble model starting from "submissions" files
 - ```augmentation_utils.py``` - collection of the functions used to process and transform the data, as well as perform feature engineering
-- ```conversion_smiles_utils.py``` -  
+- ```conversion_smiles_utils.py``` - creation of molecular representations from SMILES 
 - ```data_utils.py``` - functions to import dataset and deal with imbalance
 - ```generate_split.py```
 - ```similarity_scaffolds.py``` 
