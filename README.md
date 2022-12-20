@@ -9,13 +9,15 @@ This repository contains the code for the prediction of solubility class of comp
 - Medium solubility: Nephelometry values between 50000 and 100000
 - Low solubility: Nephelometry values higher than 100000
 
+The data included in this repository was taken from the Kaggle challenge [1st EUOS/SLAS Joint Challenge: Compound Solubility](https://www.kaggle.com/competitions/euos-slas/overview).
+
 # Overview
 ```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset<br> 
 ```models/``` - collection of models tested<br>
 ```submissions/``` - collection of some of the most relevant submissions<br>
 ```schnetpak```- copy of the schnetpack repository, modified to work for multi-class classification<br>
-- ```ChemBERTa\``` - directory with ChemBERTa model code and results
-- ```GraphModels\``` - directory with GNN results
+- ```ChemBERTa/``` - directory with ChemBERTa model code and results
+- ```GraphModels/``` - directory with GNN results
 - ```ANN.py``` - artificial neural network workflow
 - ```GraphModel.py``` - GNN model workflow
 - ```model_comparison.py``` - function to create ensemble model starting from "submissions" files
@@ -33,3 +35,7 @@ This repository contains the code for the prediction of solubility class of comp
 - ```utils.py``` - Cohen's Kappa and Umap
 
 # Environment
+- To install the environment, run the following command:
+```
+conda env create -f environment.yml
+```
