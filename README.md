@@ -12,18 +12,16 @@ This repository contains the code for the prediction of solubility class of comp
 # Overview
 ```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset 
 ```models/``` - collection of models tested
-- ```ANN.py``` neural network
-- ```GraphModel.py```
+- ```ChemBERTa\```
+- ```GraphModels\```
+- ```SchNet models\```
+- ```ANN.py``` - artificial neural network
+- ```GraphModel.py``` 
 - ```SchNet.py```
-- ```RandomForest.py```
-- ```SVM.py```
-- ```CompositeSVM.py```
-- ```XGboost.py```
-- ```random_forest_rcv.py```
-- ```SVM_Classification_rcv.py```
-- ```Xgboost_cv.py```
-- ```molnet_dataloader.py```
-- 
+- ```RandomForest.py``` - function which performs Random Forest multiclass Classification
+- ```SVM.py``` - function which performs SVM multiclass Classification with sklearn.svm.SVC
+- ```SVM_classification.py``` - function which performs SVM multiclass Classification with sklearn.linear_model.SGDClassifier
+- ```XGboost.py``` - function which performs default XGBoost multiclass Classification
 ```submissions/``` - collection of some of the most relevant submissions 
 
 ### Code
