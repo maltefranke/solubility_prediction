@@ -30,13 +30,20 @@ def preprocessing(
 ) -> Tuple[np.array, np.array, List[int]]:
     """
     Sequence of functions to transform the dataset
-    perc : minimum percentage of nan elements in the column to be eliminated
-    standardization: if True -> standardize continuous features
-    cat_del: if True -> eliminate categorical features from dataset
-    log: if True -> logarithm tranformazion on skeewed data
-    fps: if True -> include morgan fingerprints into the dataset
-    degree: maximal power degree for the data augmentation
-    pairs: if True -> include mixed product in the data augmentation
+
+    Args:
+        perc : minimum percentage of nan elements in the column to be eliminated
+        standardization: if True -> standardize continuous features
+        cat_del: if True -> eliminate categorical features from dataset
+        log: if True -> logarithm tranformazion on skeewed data
+        fps: if True -> include morgan fingerprints into the dataset
+        degree: maximal power degree for the data augmentation
+        pairs: if True -> include mixed product in the data augmentation
+
+    Returns:
+        dataset
+        columns_info
+        log_trans
     """
 
     # introduce descriptors
@@ -61,10 +68,20 @@ def preprocessing(
     return dataset, columns_info, log_trans
 
 
-def build_poly(x: np.array, columns_info: np.array, degree: int, pairs: bool=False) -> np.array:
+def build_poly(x: np.array, columns_info: np.array, degree: int, pairs: bool=False):
     """Polynomial basis functions for input data x, for j=0 up to j=degree.
     Optionally can add square or cube roots of x as additional features,
     or the basis of products between the features.
+
+    Args:
+        x:
+        columns_info:
+        degree:
+        pairs:
+
+    Returns:
+        poly:
+        columns_info:
     """
     # already removed nan columns
 
@@ -92,6 +109,17 @@ def build_poly(x: np.array, columns_info: np.array, degree: int, pairs: bool=Fal
 
 
 def logarithm(dataset:np.array, columns_info:np.array, log_trans:bool=None) -> Tuple[np.array, List[int]]:
+    """
+
+    Args:
+        dataset:
+        columns_info:
+        log_trans:
+
+    Returns:
+        dataset:
+        to_transform:
+    """
     skewness = []
     to_transform = []
 
@@ -123,6 +151,24 @@ def transformation(
     log: bool=True,
     fps: bool =False,
 ) -> Tuple[np.array, List[int]]:
+    """
+
+    Args:
+        data:
+        smiles:
+        columns_info:
+        standardization:
+        test:
+        degree:
+        pairs:
+        log_trans:
+        log:
+        fps:
+
+    Returns:
+        data:
+        log_trans:
+    """
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
     # now eliminated both in test and training
@@ -164,6 +210,16 @@ def nan_detection(data: np.array, smiles:List[str], nan_tolerance: float=0.0, ca
     Function that detects columns with too many nan values (depending on the tolerance)
     the data substituting the median to the nan values.
     It doesn't touch the categorical features.
+
+    Args:
+        data:
+        smiles:
+        nan_tolerance:
+        cat_del:
+
+    Returns:
+        data:
+        columns_info:
     """
 
     N, M = data.shape
@@ -197,10 +253,15 @@ def nan_detection(data: np.array, smiles:List[str], nan_tolerance: float=0.0, ca
     return data, columns_info
 
 
-def check_categorical(column: np.array) -> bool :
+def check_categorical(column: np.array) -> bool:
     """
     Function that checks if a column contains categorical feature or not (ignoring the nan values)
-    :param column: column where to check if the feature contained is categorical or not
+
+    Args:
+        column: column where to check if the feature contained is categorical or not
+
+    Returns:
+        Bool
     """
     # removing nan values and substituting them with 0
     column_removed = np.where(np.isnan(column), 0, column)
@@ -258,10 +319,13 @@ def randomize_smiles(smiles: List[str], random_type: str="rotated", isomericSmil
     """
     From: https://github.com/undeadpixel/reinvent-randomized and https://github.com/GLambard/SMILES-X
     Returns a random SMILES given a SMILES of a molecule.
-    :param smiles: list of SMILES
-    :param random_type: The type (unrestricted, restricted, rotated) of randomization performed.
-    :param isomericSmiles: Bool
-    :return : A random SMILES string of the same molecule or None if the molecule is invalid.
+
+    Args:
+        smiles: list of SMILES
+        random_type: The type (unrestricted, restricted, rotated) of randomization performed.
+        isomericSmiles: Bool
+    Returns:
+        A random SMILES string of the same molecule or None if the molecule is invalid.
     """
     mol = Chem.MolFromSmiles(smiles)
     if not mol:
@@ -296,12 +360,17 @@ def randomize_smiles(smiles: List[str], random_type: str="rotated", isomericSmil
 def augment_smiles(ids:List[str], smiles:List[str], targets:np.array, data_dir:str, name_file:str):
     """
     Addition of the rotations of a molecule depending on the class it belongs to.
-    :param ids: indices of the dataset we want to augment
-    :param smiles: of the dataset we want to augment
-    :param targets: of the dataset we want to augment
-    :param data_dir: where we want to save the new file
-    :param name_file: name of the file we want to save (augmented smiles)
-    :return: augmented_smiles, augmented_targets
+
+    Args:
+        ids: indices of the dataset we want to augment
+        smiles: of the dataset we want to augment
+        targets: of the dataset we want to augment
+        data_dir: where we want to save the new file
+        name_file: name of the file we want to save (augmented smiles)
+    Return:
+        final_id: list of the Ids of the augemented dataset
+        final_smiles: list of the SMILES of the augemented dataset
+        final_targets: list of the targets of the augemented dataset
     """
     augmentations_path = os.path.join(data_dir, name_file)
     if not os.path.exists(augmentations_path):
@@ -387,12 +456,16 @@ def create_split_csv(data_dir: str, file_name:str, downsampling_class2:bool=Fals
     """
     It creates 2 .csv files containing a random split of the given dataset into train (70%) and
     validation (30%) set.
-    :param downsampling_class2: Bool (True if we want to downsample class 2)
-    :param data_dir: path to the directory with the data
-    :param file_name: name of the file we want to create
-    :param p: percentage of datapoints in class 2 to keep
-    :return name_train_file:
-    :return name_valid_file:
+
+    Args:
+        downsampling_class2: Bool (True if we want to downsample class 2)
+        data_dir: path to the directory with the data
+        file_name: name of the file we want to create
+        p: percentage of datapoints in class 2 to keep
+
+    Returns:
+        name_train_file
+        name_valid_file
     """
     data_path = os.path.join(data_dir, file_name)
     df = pd.read_csv(data_path)

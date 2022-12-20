@@ -11,8 +11,11 @@ from data_utils import load_train_data, load_test_data
 def get_scaffolds(smiles):
     """
     Calculates the scaffold of a list of molecules through the Murcko definition
-    :param smiles: list of SMILES
-    :return: list of respective scaffolds
+
+    Args:
+        smiles: list of SMILES
+    Returns:
+        scaffolds_list: list of respective scaffolds
     """
     scaffold_generator = rdkit.Chem.Scaffolds.MurckoScaffold
 
@@ -27,11 +30,14 @@ def get_scaffolds(smiles):
 def diversity_scores(smiles1, smiles2, threshold=0.9, no_threshold=False):
     """
     Calculate the similarity between two lists of SMILES
-    :param smiles1: list of SMILES
-    :param smiles2: list of SMILES
-    :param threshold: scalar value to decide if two SMILES are similar or not
-    :param no_threshold: Bool
-    :return: np.array of similarity scores
+
+    Args:
+        smiles1: list of SMILES
+        smiles2: list of SMILES
+        threshold: scalar value to decide if two SMILES are similar or not
+        no_threshold: Bool
+    Returns:
+        scores: np.array of similarity scores
     """
     mols1 = []
     for smile in smiles1:
@@ -61,9 +67,12 @@ def diversity_scores(smiles1, smiles2, threshold=0.9, no_threshold=False):
 def __compute_diversity(mol, fps):
     """
     Calculate the similarity score for a molecule and a list of fingerprints by using Tanimoto similarity
-    :param mol: Mol object (a molecule)
-    :param fps: List of fingerprints to compare the molecule to
-    :return: mean of the similarity score between the molecule and all the fingerprints
+
+    Args:
+        mol: Mol object (a molecule)
+        fps: List of fingerprints to compare the molecule to
+    Returns:
+        score: mean of the similarity score between the molecule and all the fingerprints
     """
     ref_fps = Chem.rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, 3, nBits=2048)
     # comparing a single molecule to all the others in the second group
@@ -77,11 +86,14 @@ def __compute_diversity(mol, fps):
 def diversity_scores_singlepair(smiles1, smiles2, threshold=0.9, no_threshold=False):
     """
     Calculate the similarity between two SMILES
-    :param smiles1: a SMILES
-    :param smiles2: a SMILES
-    :param threshold: scalar to determine if they are similar or not
-    :param no_threshold: Bool
-    :return: similarity score
+
+    Args:
+        smiles1: a SMILES
+        smiles2: a SMILES
+        threshold: scalar to determine if they are similar or not
+        no_threshold: Bool
+    Return:
+        score: similarity score
     """
     mol1 = Chem.MolFromSmiles(smiles1)
     mol2 = Chem.MolFromSmiles(smiles2)
@@ -95,9 +107,12 @@ def diversity_scores_singlepair(smiles1, smiles2, threshold=0.9, no_threshold=Fa
 def __compute_diversity_singlepair(mol, fp):
     """
     Calculate the similarity score for a molecule and a fingerprint
-    :param mol: Mol object
-    :param fp: a single fingerprint
-    :return: scalar Tanimoto similarity
+
+    Args:
+        mol: Mol object
+        fp: a single fingerprint
+    Returns:
+        dist: scalar Tanimoto similarity
     """
     ref_fp = Chem.rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, 3, nBits=2048)
     # comparing a single molecule to all the others in the second group
@@ -107,6 +122,26 @@ def __compute_diversity_singlepair(mol, fp):
 
 
 class Scaffold:
+    """
+    Class to define a unique scaffold as object
+
+    Attributes:
+        smiles: SMILES of the scaffold
+        num_mol: number of molecules with that scaffold
+        indices: list with the Ids of the molecules with this scaffold
+        num_0:number of molecules of class 0
+        num_1:number of molecules of class 1
+        num_2:number of molecules of class 2
+
+    Methods:
+        __add__: add a new molecule to the Scaffold object
+        get_smile: returns the SMILES of the scaffold
+        get_nmol: returns the number of molecules
+        get_indices: returns the list with the Ids of the molecules
+        get_class0: return the number of molecules that belongs to class 0
+        get_class1: return the number of molecules that belongs to class 1
+        get_class2: return the number of molecules that belongs to class 2
+    """
     def __init__(self, smiles, ind, target):
         self.smiles = smiles
         self.num_mol = 1
@@ -123,9 +158,6 @@ class Scaffold:
             self.num_0 = 0
             self.num_1 = 0
             self.num_2 = 1
-
-    def __len__(self):
-        return self.num_mol
 
     def __add__(self, ind, target):
         self.num_mol += 1
@@ -160,11 +192,14 @@ def group_scaffolds(ids, scaffolds, targets, path):
     """
     Creation of a dictionary (and production of a .csv file) that contains all the unique sccaffolds of the train set,
     and the respective data
-    :param ids: list of Ids of the molecules
-    :param scaffolds: list of SMILES of the scaffolds
-    :param targets: list of targets
-    :param path: destination path where to save the .csv file
-    :return: dictionary with all the unique scaffolds, the number of molecules with that same scaffold,
+
+    Args:
+        ids: list of Ids of the molecules
+        scaffolds: list of SMILES of the scaffolds
+        targets: list of targets
+        path: destination path where to save the .csv file
+    Returns:
+        dictionary with all the unique scaffolds, the number of molecules with that same scaffold,
              their ids, the number of them that belong to class 0, 1 and 2
     """
     # Creating a dictionary with all the scaffolds
@@ -218,6 +253,20 @@ def group_scaffolds(ids, scaffolds, targets, path):
 
 # Scaffolds test
 class ScaffoldTest:
+    """
+    Class to define a unique scaffold as object
+
+    Attributes:
+        smiles: SMILES of the scaffold
+        num_mol: number of molecules with that scaffold
+        indices: list with the Ids of the molecules with this scaffold
+
+    Methods:
+        __add__: add a new molecule to the Scaffold object
+        get_smile: returns the SMILES of the scaffold
+        get_nmol: returns the number of molecules
+        get_indices: returns the list with the Ids of the molecules
+    """
     def __init__(self, smiles, ind):
         self.smiles = smiles
         self.num_mol = 1
@@ -244,10 +293,13 @@ def group_scaffolds_test(ids, scaffolds, path):
     """
     Creation of a dictionary (and production of a .csv file) that contains all the unique sccaffolds of the TEST set,
     and the respective data
-    :param ids: list of Ids of the molecules
-    :param scaffolds: list of SMILES of the scaffolds
-    :param path: destination path where to save the .csv file
-    :return: dictionary with all the unique scaffolds, the number of molecules with that same scaffold,
+
+    Args:
+        ids: list of Ids of the molecules
+        scaffolds: list of SMILES of the scaffolds
+        path: destination path where to save the .csv file
+    Returns:
+        dictionary with all the unique scaffolds, the number of molecules with that same scaffold,
              their ids
     """
     # Creating a dictionary with all the scaffolds
@@ -297,9 +349,12 @@ def group_scaffolds_test(ids, scaffolds, path):
 def comparison_scaffolds(dict_scaffolds, dict_scaffolds_test):
     """
     Check if there are the same scaffolds in train and test sets
-    :param dict_scaffolds: dictionary with unique scaffolds in the train set
-    :param dict_scaffolds_test: dictionary with unique scaffolds in the test set
-    :return: number of similar scaffolds
+
+    Args:
+        dict_scaffolds: dictionary with unique scaffolds in the train set
+        dict_scaffolds_test: dictionary with unique scaffolds in the test set
+    Returns:
+        number of similar scaffolds
     """
     count = 0
     for item_test in dict_scaffolds_test:
