@@ -10,9 +10,9 @@ This repository contains the code for the prediction of solubility class of comp
 - Low solubility: Nephelometry values higher than 100000
 
 # Overview
-```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset:- 
-```models/``` - collection of models tested:-
-```submissions/``` - collection of some of the most relevant submissions:-
+```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset<br> 
+```models/``` - collection of models tested<br>
+```submissions/``` - collection of some of the most relevant submissions<br>
 - ```ChemBERTa\```
 - ```GraphModels\```
 - ```SchNet models\```
