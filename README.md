@@ -18,6 +18,7 @@ This repository contains the code for the prediction of solubility class of comp
 - ```GraphModels\``` - directory with GNN results
 - ```ANN.py``` - artificial neural network workflow
 - ```GraphModel.py``` - GNN model workflow
+- ```model_comparison.py``` - function to create ensemble model starting from "submissions" files
 - ```SchNet.py``` - SchNet model workflow
 - ```RandomForest.py``` - function which performs Random Forest multiclass Classification
 - ```SVM.py``` - function which performs SVM multiclass Classification with sklearn.svm.SVC
@@ -25,7 +26,6 @@ This repository contains the code for the prediction of solubility class of comp
 - ```XGboost.py``` - function which performs default XGBoost multiclass Classification
 
 ### Code
-- ```model_comparison.py``` - function to create ensemble model starting from "submissions" files
 - ```augmentation_utils.py``` - collection of the functions used to process and transform the data, as well as perform feature engineering
 - ```conversion_smiles_utils.py``` - creation of molecular representations from SMILES 
 - ```data_utils.py``` - functions to import dataset and deal with imbalance
