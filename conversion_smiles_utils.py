@@ -17,9 +17,13 @@ import h5py
 def smiles_to_morgan_fp(smiles: List[str]) -> np.array:
     """
     Creation of morgan_fingerprints starting from the smiles of the molecules
-    :param smiles:
-    :return: array with Morgan fingerprints
+    Args:
+        smiles: List of SMILES strings
+
+    Returns:
+        array with Morgan fingerprints
     """
+
     fp_generator = rdFingerprintGenerator.GetMorganGenerator()
     all_fps = []
     for molecule in smiles:
@@ -38,11 +42,15 @@ def smiles_to_qm_descriptors(
     """
     Creation or loading of the dataset containing features which denote physical/chemical quantities
     of the molecules
-    :param smiles:
-    :param data_dir:
-    :param type_:
-    :return:
+    Args:
+        smiles: List of SMILES strings
+        data_dir: path to the data directory
+        type_: type of dataset. "train" or "test"
+
+    Returns:
+        array with mordred molecule descriptors
     """
+
     # paths to the datasets
     if type_ == "train":
         qm_descriptor_file = os.path.join(
