@@ -142,9 +142,7 @@ def cross_validation(
 if __name__ == "__main__":
     this_dir = os.path.dirname(os.getcwd())
 
-    data_dir = os.path.join(
-        this_dir, "solubility_prediction\data"
-    )  # MODIFY depending on your folder!!
+    data_dir = os.path.join(this_dir, "data")
     train_path = os.path.join(data_dir, "train.csv")
     test_path = os.path.join(data_dir, "test.csv")
 
