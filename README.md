@@ -13,6 +13,7 @@ This repository contains the code for the prediction of solubility class of comp
 ```data/``` - train and test set from Kaggle are placed here. Moreover, there are some subdivisions of the dataset<br> 
 ```models/``` - collection of models tested<br>
 ```submissions/``` - collection of some of the most relevant submissions<br>
+```schnetpak```<br>
 - ```ChemBERTa\```
 - ```GraphModels\```
 - ```SchNet models\```
