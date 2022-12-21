@@ -41,9 +41,9 @@ def preprocessing(
         pairs: if True -> include mixed product in the data augmentation
 
     Returns:
-        dataset
-        columns_info
-        log_trans
+        dataset: transformed dataset
+        columns_info: array that contains 0 if the col is removed, 1 if it is categorical, 2 if they have been standardized
+        log_trans: list of columns where the logarithm trasformation has been applied
     """
 
     # introduce descriptors
@@ -68,20 +68,19 @@ def preprocessing(
     return dataset, columns_info, log_trans
 
 
-def build_poly(x: np.array, columns_info: np.array, degree: int, pairs: bool=False):
+def build_poly(x: np.array, columns_info: np.array, degree: int, pairs: bool=False)->Tuple[np.array,np.array]:
     """Polynomial basis functions for input data x, for j=0 up to j=degree.
-    Optionally can add square or cube roots of x as additional features,
-    or the basis of products between the features.
+    Optionally can add the products between the features.
 
     Args:
-        x:
-        columns_info:
-        degree:
-        pairs:
+        x: dataset
+        columns_info: list that contains 0 if the col is removed, 1 if it is categorical, 2 if it needs to be standardized
+        degree: maximal degree of augmentation
+        pairs: True ->  products between the features
 
     Returns:
-        poly:
-        columns_info:
+        poly: augmented dataset 
+        columns_info: array that contains 0 if the col is removed, 1 if it is categorical, 2 if it needs to be standardized
     """
     # already removed nan columns
 
@@ -108,22 +107,23 @@ def build_poly(x: np.array, columns_info: np.array, degree: int, pairs: bool=Fal
     return poly, columns_info
 
 
-def logarithm(dataset:np.array, columns_info:np.array, log_trans:bool=None) -> Tuple[np.array, List[int]]:
+def logarithm(dataset:np.array, columns_info:np.array, log_trans:List[int]=None) -> Tuple[np.array, List[int]]:
     """
 
     Args:
-        dataset:
-        columns_info:
-        log_trans:
+        dataset: dataset to transform
+        columns_info: array that contains 0 if the col is removed, 1 if it is categorical, 2 if it needs to be standardized
+        log_trans: List of features to transform. If None -> create log_transf
+                   used as None for the training set, as List for the test set, so that it is possible to transform the same features
 
     Returns:
-        dataset:
-        to_transform:
+        dataset: transformed dataset
+        to_transform: list which contains the columns to transform
     """
     skewness = []
     to_transform = []
 
-    if not log_trans:  # so that I transform the same columns in the test set
+    if not log_trans:  # so that it is possible to transform the same columns in the test set
         for i in range(dataset.shape[1]):
             if (
                 columns_info[i] == 2
@@ -147,27 +147,27 @@ def transformation(
     test: bool =False,
     degree: int =1,
     pairs: bool =False,
-    log_trans: bool =None,
+    log_trans: List[int] =None,
     log: bool=True,
     fps: bool =False,
 ) -> Tuple[np.array, List[int]]:
     """
 
     Args:
-        data:
-        smiles:
-        columns_info:
-        standardization:
-        test:
-        degree:
-        pairs:
-        log_trans:
-        log:
-        fps:
+        data: dataset to be tranformed
+        smiles: list of the SMILES of the molecules in data
+        columns_info: 
+        standardization: array that contains 0 if the col is removed, 1 if it is categorical, 2 if it needs to be standardized
+        test: True -> test set
+        degree: maximal degree of augmentation
+        pairs: pairs: True ->  products between the features
+        log_trans: List of indexes of features to transform with logarithm if log==True
+        log: True -> implement log transform
+        fps: True -> include morgan fp in the dataset
 
     Returns:
-        data:
-        log_trans:
+        data: transformed dataset
+        log_trans: List of indexes of features transformed with logarithm if log==True
     """
 
     data = np.delete(data, np.where(columns_info == 0)[0], axis=1)
@@ -212,20 +212,20 @@ def nan_detection(data: np.array, smiles:List[str], nan_tolerance: float=0.0, ca
     It doesn't touch the categorical features.
 
     Args:
-        data:
-        smiles:
-        nan_tolerance:
-        cat_del:
+        data: dataset
+        smiles: list of the SMILES of the molecules in data
+        nan_tolerance: maximal percentage of NaN elements allowed  
+        cat_del: True -> delete all the categorical columns
 
     Returns:
-        data:
-        columns_info:
+        data: dataset
+        columns_info: array that contains 0 if the col is removed, 1 if it is categorical, 2 if it needs to be standardized
     """
 
     N, M = data.shape
 
     columns_info = []
-    # list that contains 0 if the col is removed, 1 if it is categorical, # 2 if it needs to be standardized
+    # array that contains 0 if the col is removed, 1 if it is categorical, # 2 if it needs to be standardized
 
     for i in range(M):
         nan_percentage = len(np.where(np.isnan(data[:, i]))[0]) / N
@@ -261,7 +261,8 @@ def check_categorical(column: np.array) -> bool:
         column: column where to check if the feature contained is categorical or not
 
     Returns:
-        Bool
+        Bool: True -> categorical 
+              False -> not categorical  
     """
     # removing nan values and substituting them with 0
     column_removed = np.where(np.isnan(column), 0, column)
@@ -279,8 +280,8 @@ def PCA_application(
 ) -> Tuple[np.array, np.array]:
     """
 
-    :param dataset:
-    :param dataset_test:
+    :param dataset: dataset where to implement PCA
+    :param dataset_test: test_set where to implement PCA
     :return pca_train_data: transformation of dataset after PCA
     :return pca_output_data: transformation of dataset_test after PCA
     """
@@ -290,7 +291,6 @@ def PCA_application(
     X_output = pd.DataFrame(dataset_test)
 
     pca = PCA(n_components=X_train.shape[1])
-    pca_data = pca.fit_transform(X_train)
 
     explained_variance = pca.explained_variance_ratio_
     cumm_var_explained = np.cumsum(explained_variance)
@@ -302,7 +302,7 @@ def PCA_application(
     plt.show()
 
     cum = cumm_var_explained
-    var = pca.explained_variance_
+    # var = pca.explained_variance_
     index = np.where(cum >= 0.975)[0][0]
 
     pca = PCA(n_components=index + 1)
@@ -452,7 +452,7 @@ def augment_smiles(ids:List[str], smiles:List[str], targets:np.array, data_dir:s
     return final_id, final_smiles, final_targets
 
 
-def create_split_csv(data_dir: str, file_name:str, downsampling_class2:bool=False, p:float=0.6):
+def create_split_csv(data_dir: str, file_name:str, downsampling_class2:bool=False, p:float=0.6)-> Tuple[str,str]:
     """
     It creates 2 .csv files containing a random split of the given dataset into train (70%) and
     validation (30%) set.
