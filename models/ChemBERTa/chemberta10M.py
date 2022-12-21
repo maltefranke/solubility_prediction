@@ -6,7 +6,6 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from sklearn.metrics import cohen_kappa_score
-from time import time
 
 from transformers import AutoTokenizer, RobertaForSequenceClassification
 from torch.utils.data import Dataset
@@ -105,7 +104,7 @@ class ChemBERTa(pl.LightningModule):
         self.learning_rate = learning_rate
 
         # Define PyTorch model
-        self.pretrained = "DeepChem/ChemBERTa-10M-MTR"
+        self.pretrained = "DeepChem/ChemBERTa-10M-MTR" #DeepChem/ChemBERTa-77M-MTR
         self.tokenizer = (AutoTokenizer.
                           from_pretrained(
                               self.pretrained
@@ -161,7 +160,7 @@ class ChemBERTa(pl.LightningModule):
         all_outs = pd.concat(outputs)
         print(all_outs)
         all_outs.columns = ["Id", "pred"]
-        all_outs.to_csv(f"Chemberta_.csv", index=False)
+        all_outs.to_csv(f"Chemberta_train.csv", index=False)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(),

@@ -29,14 +29,9 @@ def main(size,
     # Load model checkpoint
     ckpt = torch.load(f"models/checkpoint/{model_name}")
 
-    # Infer num_layers
-    last_bias = list(ckpt["state_dict"].keys())[-1]
-    # num_layers = int(float(re.sub(r"model.(.*).bias","\\1", last_bias))) - 1
-
     model = ChemBERTa(
         size=size,
         num_classes=num_classes,
-        # num_layers=num_layers,
         data_dir=data_dir,
         weights=False
         )
@@ -73,7 +68,7 @@ def main(size,
             test_ids += list(p_id)
 
         test_df = pd.DataFrame({"Id": test_ids, "pred": test_preds})
-        test_df.to_csv(f"submission_robertaTEST_weights_k_{valid_kappa}.csv",
+        test_df.to_csv(f"Chemberta.csv",
                        index=False)
 
 
