@@ -42,30 +42,28 @@ def comparison(x1:np.array, x2:np.array, x3:np.array)-> Tuple[np.array,np.array]
 if __name__ == "__main__":
 
     this_dir = os.path.dirname(os.getcwd())
-    data_dir = os.path.join(this_dir, "../data")
+    submissions_dir = os.path.join(this_dir, "submissions")
 
     # XGBOOST
-    filename_xgboost = os.path.join(
-        data_dir, "XGBoost_best.csv"
-    )
+    filename_xgboost = os.path.join(submissions_dir, "XGBoost_best.csv")
 
     df1 = pd.read_csv(filename_xgboost)
 
     x_xgboost = df1[["Id", "Pred"]].values
 
     # CHEMBERTA
-    filename_chemberta = os.path.join(data_dir, "Chemberta.csv")
+    filename_chemberta = os.path.join(submissions_dir, "Chemberta.csv")
     df2 = pd.read_csv(filename_chemberta)
 
     x_chem = df2[["Id", "Pred"]].values
 
     # SCHNET
-    filename_schnet = os.path.join(data_dir, "SchNet.csv")
+    filename_schnet = os.path.join(submissions_dir, "SchNet.csv")
     df3 = pd.read_csv(filename_schnet)
 
     x_schnet = df3[["Id", "Pred"]].values
 
     ids, X = comparison(x_xgboost, x_chem, x_schnet)
 
-    submission_file = os.path.join(this_dir, "../submissions/ensemble_model.csv")
+    submission_file = os.path.join(submissions_dir, "ensemble_model.csv")
     create_submission_file(ids, X, submission_file)
