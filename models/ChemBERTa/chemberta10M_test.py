@@ -21,7 +21,7 @@ def main(size,
     Train and evaluate model
     """
     seed = 0
-    seed_everything(seed, workers = True)
+    seed_everything(seed, workers=True)
 
     def kappa(y, ypred):
         return cohen_kappa_score(y, ypred, weights="quadratic")

@@ -81,17 +81,15 @@ class ChemBERTa(pl.LightningModule):
 
         # Define loss function:
         if weights:
-            print("*************************************************************")
-            print("*************** training with weighted loss *****************")
-            print("*************************************************************")
-            self.Loss = nn.CrossEntropyLoss(weight=torch.Tensor([0.01, 0.4, 0.7]),
+            print("*** training with weighted loss ***")
+            self.Loss = nn.CrossEntropyLoss(weight=torch.Tensor([0.9711, 0.9599, 0.068]),
                                             reduction='mean')
         else:
-            print("*** training WITHOUT weights")
+            print("*** training WITHOUT weights ***")
             self.Loss = nn.CrossEntropyLoss(reduction='mean')
 
         # Data loading variables
-        self.num_workers = 4*torch.cuda.device_count()
+        self.num_workers = 4*torch.cuda.device_count() # 8
         self.batch_size = batch_size
 
         # Data paths
@@ -221,7 +219,7 @@ def main(size,
          data_dir,
          learning_rate,
          batch_size,
-         weights
+         weights=True
          ):
 
     """
@@ -238,7 +236,7 @@ def main(size,
         data_dir=data_dir,
         learning_rate=learning_rate,
         batch_size=batch_size,
-        weights=weights
+        weights=True
     )
 
     wandb_logger = WandbLogger()

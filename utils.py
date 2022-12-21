@@ -13,7 +13,7 @@ import seaborn as sns
 from shapely.geometry import Point
 from shapely.ops import cascaded_union
 
-import umap.plot
+import umap
 
 from data_utils import *
 
@@ -196,7 +196,6 @@ def draw_molecules(smiles, n=9):
     """
     rnd_mol = [random.randint(0, len(smiles)) for i in range(n)]
     selected_mol = [Chem.MolFromSmiles(smiles[i]) for i in rnd_mol]
-    print(targets[rnd_mol])
 
     # Plot
     fig = Draw.MolsToGridImage(

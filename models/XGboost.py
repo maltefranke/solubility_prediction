@@ -1,19 +1,15 @@
 import os
-import csv
 import numpy as np
-from typing import Tuple, List
-import math
+from typing import List
 import xgboost
 import time
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import cohen_kappa_score, make_scorer
+from sklearn.metrics import make_scorer
 
-import matplotlib.pyplot as plt
-from augmentation_utils import *
-from utils import *
-from data_utils import *
-from conversion_smiles_utils import *
+from augmentation_utils import PCA_application, transformation, preprocessing
+from utils import quadratic_weighted_kappa
+from data_utils import load_train_data, load_test_data, create_submission_file, calculate_class_weights, KFold
+from conversion_smiles_utils import smiles_to_qm_descriptors
 
 
 def xgb_learning(
@@ -197,11 +193,11 @@ if __name__ == "__main__":
     )
 
     # application of the PCA
-    # print("PCA...\n")
-    # (
-    #    dataset,
-    #    qm_descriptors_test,
-    # ) = PCA_application(dataset, qm_descriptors_test)
+    print("PCA...\n")
+    (
+       dataset,
+       qm_descriptors_test,
+    ) = PCA_application(dataset, qm_descriptors_test)
 
     weights = calculate_class_weights(targets)
     sample_weights = [weights[i] for i in targets]
