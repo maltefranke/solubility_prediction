@@ -4,7 +4,7 @@ EPFL Machine Learning Course, Autumn 2022 - Class Project 2
 
 Team members: Malte Franke, Laura Mismetti, Giacomo Mossinelli
 
-This repository contains the code for the prediction of solubility class of compounds. In particular are distinguished compounds with:
+This repository contains the code for the prediction of solubility class of compounds. In particular, compounds are distinguished by the following:
 - High solubility: Nephelometry values lower than 50000
 - Medium solubility: Nephelometry values between 50000 and 100000
 - Low solubility: Nephelometry values higher than 100000
@@ -46,3 +46,17 @@ and activate it via
 ```
 conda activate [your_env_name]
 ```
+
+# Executing the code
+If you want to execute our code, please activate the previously installed environment first. 
+You can then simply run a model by executing the corresponding .py file.
+If you want to run the RF model for example, run
+```
+cd models/
+python RandomForest.py
+```
+
+# Acknowledgement
+We want to thank Andres M. Bran and Prof. Philippe Schwaller from LIAC, EPFL, for providing incredible feedback, support and guidance in this project. 
+We have certainly learned a lot about applying ML methods to chemistry, the issues that arise, and possible methods on how to tackle them. 
+This knowledge will help us in future projects, and we are very grateful for this exciting experience!
