@@ -57,6 +57,6 @@ python RandomForest.py
 ```
 
 # Acknowledgement
-We want to thank Andres M. Bran and Prof. Philippe Schwaller from LIAC, EPFL, for providing incredible feedback, support and guidance in this project. 
+We want to thank Andres M. Bran, Jeff Guo and Prof. Philippe Schwaller from LIAC, EPFL, for providing incredible feedback, support and guidance in this project. 
 We have certainly learned a lot about applying ML methods to chemistry, the issues that arise, and possible methods on how to tackle them. 
 This knowledge will help us in future projects, and we are very grateful for this exciting experience!
